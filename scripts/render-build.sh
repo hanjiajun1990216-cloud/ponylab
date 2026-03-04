@@ -10,11 +10,11 @@ echo "--- Step 1: Install pnpm ---"
 npm install -g pnpm@9
 echo "pnpm: $(pnpm --version)"
 
-# 2. Install dependencies with hoisted node_modules (flat layout like npm)
-# .npmrc has node-linker=hoisted which creates a flat node_modules without
-# pnpm's .pnpm symlink store, allowing prisma to resolve @prisma/client.
+# 2. Install ALL dependencies (including devDependencies needed for build)
+# NODE_ENV=production makes pnpm skip devDeps, but we need @nestjs/cli, turbo, etc.
+# .npmrc has node-linker=hoisted for flat layout (fixes prisma resolution).
 echo "--- Step 2: Install dependencies ---"
-pnpm install
+NODE_ENV=development pnpm install
 echo "Dependencies installed."
 
 # Debug: verify @prisma/client is a real directory (not symlink)
