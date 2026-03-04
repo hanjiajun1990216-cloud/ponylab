@@ -1,0 +1,504 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth & Users ───
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  firstName     String    @map("first_name")
+  lastName      String    @map("last_name")
+  avatar        String?
+  role          UserRole  @default(RESEARCHER)
+  isActive      Boolean   @default(true) @map("is_active")
+  lastLoginAt   DateTime? @map("last_login_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  teamMembers   TeamMember[]
+  experiments   Experiment[]
+  tasks         Task[]
+  samples       Sample[]
+  sampleEvents  SampleEvent[]
+  protocols     Protocol[]
+  bookings      Booking[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
+  files         FileAttachment[]
+  inventoryLogs InventoryLog[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  PI
+  RESEARCHER
+  TECHNICIAN
+  VIEWER
+}
+
+// ─── Teams ───
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  members     TeamMember[]
+  projects    Project[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String         @id @default(cuid())
+  teamId    String         @map("team_id")
+  userId    String         @map("user_id")
+  role      TeamMemberRole @default(MEMBER)
+  joinedAt  DateTime       @default(now()) @map("joined_at")
+
+  team      Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+enum TeamMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+// ─── Projects ───
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  status      ProjectStatus @default(ACTIVE)
+  teamId      String        @map("team_id")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  team        Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  experiments Experiment[]
+
+  @@map("projects")
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+}
+
+// ─── Experiments (ELN Core) ───
+
+model Experiment {
+  id          String           @id @default(cuid())
+  title       String
+  content     Json?            // TipTap JSON document
+  status      ExperimentStatus @default(DRAFT)
+  projectId   String           @map("project_id")
+  authorId    String           @map("author_id")
+  lockedAt    DateTime?        @map("locked_at")
+  signedAt    DateTime?        @map("signed_at")
+  signedBy    String?          @map("signed_by")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author      User             @relation(fields: [authorId], references: [id])
+  tasks       Task[]
+  results     Result[]
+  samples     Sample[]
+  files       FileAttachment[]
+  tags        ExperimentTag[]
+
+  @@index([projectId])
+  @@index([authorId])
+  @@map("experiments")
+}
+
+enum ExperimentStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  SIGNED
+  ARCHIVED
+}
+
+model ExperimentTag {
+  id           String     @id @default(cuid())
+  experimentId String     @map("experiment_id")
+  tag          String
+
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+
+  @@unique([experimentId, tag])
+  @@index([tag])
+  @@map("experiment_tags")
+}
+
+// ─── Tasks ───
+
+model Task {
+  id           String     @id @default(cuid())
+  title        String
+  description  String?
+  status       TaskStatus @default(TODO)
+  priority     Int        @default(0)
+  dueDate      DateTime?  @map("due_date")
+  experimentId String     @map("experiment_id")
+  assigneeId   String?    @map("assignee_id")
+  completedAt  DateTime?  @map("completed_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  assignee     User?      @relation(fields: [assigneeId], references: [id])
+
+  @@index([experimentId])
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+// ─── Results ───
+
+model Result {
+  id           String     @id @default(cuid())
+  experimentId String     @map("experiment_id")
+  type         ResultType
+  title        String
+  data         Json       // Structured result data
+  unit         String?
+  notes        String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  files        FileAttachment[]
+
+  @@index([experimentId])
+  @@map("results")
+}
+
+enum ResultType {
+  TEXT
+  TABLE
+  IMAGE
+  CHART
+  FILE
+  MEASUREMENT
+}
+
+// ─── Samples ───
+
+model Sample {
+  id              String        @id @default(cuid())
+  name            String
+  sampleType      String        @map("sample_type")
+  barcode         String?       @unique
+  status          SampleStatus  @default(AVAILABLE)
+  metadata        Json?
+  storageId       String?       @map("storage_id")
+  storagePosition String?       @map("storage_position")
+  experimentId    String?       @map("experiment_id")
+  createdById     String        @map("created_by_id")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  storage         StorageLocation? @relation(fields: [storageId], references: [id])
+  experiment      Experiment?      @relation(fields: [experimentId], references: [id])
+  createdBy       User             @relation(fields: [createdById], references: [id])
+  events          SampleEvent[]
+
+  @@index([sampleType])
+  @@index([barcode])
+  @@map("samples")
+}
+
+enum SampleStatus {
+  AVAILABLE
+  IN_USE
+  CONSUMED
+  DISPOSED
+  LOST
+}
+
+model SampleEvent {
+  id        String          @id @default(cuid())
+  sampleId  String          @map("sample_id")
+  type      SampleEventType
+  note      String?
+  userId    String          @map("user_id")
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  sample    Sample          @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [id])
+
+  @@index([sampleId])
+  @@map("sample_events")
+}
+
+enum SampleEventType {
+  CREATED
+  CHECKED_OUT
+  CHECKED_IN
+  CONSUMED
+  DISPOSED
+  MOVED
+  SPLIT
+  NOTE
+}
+
+// ─── Storage ───
+
+model StorageLocation {
+  id          String           @id @default(cuid())
+  name        String
+  type        StorageType
+  parentId    String?          @map("parent_id")
+  temperature Float?
+  capacity    Int?
+  gridRows    Int?             @map("grid_rows")
+  gridCols    Int?             @map("grid_cols")
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  parent      StorageLocation? @relation("StorageHierarchy", fields: [parentId], references: [id])
+  children    StorageLocation[] @relation("StorageHierarchy")
+  samples     Sample[]
+
+  @@map("storage_locations")
+}
+
+enum StorageType {
+  ROOM
+  FREEZER
+  REFRIGERATOR
+  SHELF
+  RACK
+  BOX
+  DRAWER
+  CABINET
+}
+
+// ─── Inventory ───
+
+model InventoryItem {
+  id            String   @id @default(cuid())
+  name          String
+  category      String
+  sku           String?  @unique
+  quantity      Float    @default(0)
+  unit          String
+  minQuantity   Float?   @map("min_quantity")
+  supplier      String?
+  catalogNumber String?  @map("catalog_number")
+  expiryDate    DateTime? @map("expiry_date")
+  storageId     String?  @map("storage_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  logs          InventoryLog[]
+
+  @@index([category])
+  @@map("inventory_items")
+}
+
+model InventoryLog {
+  id             String   @id @default(cuid())
+  itemId         String   @map("item_id")
+  action         String   // IN, OUT, ADJUST
+  quantityBefore Float    @map("quantity_before")
+  quantityAfter  Float    @map("quantity_after")
+  reason         String?
+  userId         String   @map("user_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  item           InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user           User          @relation(fields: [userId], references: [id])
+
+  @@index([itemId])
+  @@map("inventory_logs")
+}
+
+// ─── Protocols / SOPs ───
+
+model Protocol {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  category    String?
+  authorId    String            @map("author_id")
+  isPublished Boolean           @default(false) @map("is_published")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  author      User              @relation(fields: [authorId], references: [id])
+  versions    ProtocolVersion[]
+
+  @@index([category])
+  @@map("protocols")
+}
+
+model ProtocolVersion {
+  id          String   @id @default(cuid())
+  protocolId  String   @map("protocol_id")
+  version     Int
+  content     Json     // Structured protocol steps
+  changelog   String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+
+  @@unique([protocolId, version])
+  @@map("protocol_versions")
+}
+
+// ─── Instruments ───
+
+model Instrument {
+  id            String              @id @default(cuid())
+  name          String
+  manufacturer  String?
+  model         String?
+  serialNumber  String?             @unique @map("serial_number")
+  location      String?
+  status        InstrumentStatus    @default(AVAILABLE)
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  bookings      Booking[]
+  maintenance   MaintenanceRecord[]
+
+  @@map("instruments")
+}
+
+enum InstrumentStatus {
+  AVAILABLE
+  IN_USE
+  MAINTENANCE
+  OUT_OF_ORDER
+  RETIRED
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  instrumentId String        @map("instrument_id")
+  userId       String        @map("user_id")
+  title        String
+  startTime    DateTime      @map("start_time")
+  endTime      DateTime      @map("end_time")
+  status       BookingStatus @default(CONFIRMED)
+  notes        String?
+  createdAt    DateTime      @default(now()) @map("created_at")
+
+  instrument   Instrument    @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id])
+
+  @@index([instrumentId, startTime, endTime])
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+model MaintenanceRecord {
+  id           String     @id @default(cuid())
+  instrumentId String     @map("instrument_id")
+  type         String     // ROUTINE, REPAIR, CALIBRATION
+  description  String
+  performedAt  DateTime   @map("performed_at")
+  nextDueDate  DateTime?  @map("next_due_date")
+  cost         Float?
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  instrument   Instrument @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+
+  @@index([instrumentId])
+  @@map("maintenance_records")
+}
+
+// ─── Audit Trail (APPEND-ONLY) ───
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  action     String   // CREATE, UPDATE, DELETE, SIGN, EXPORT, LOGIN, etc.
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  oldValue   Json?    @map("old_value")
+  newValue   Json?    @map("new_value")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ─── Notifications ───
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  type      String   // TASK_ASSIGNED, EXPERIMENT_SIGNED, INVENTORY_LOW, etc.
+  title     String
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  link      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+// ─── File Attachments ───
+
+model FileAttachment {
+  id           String      @id @default(cuid())
+  filename     String
+  originalName String      @map("original_name")
+  mimeType     String      @map("mime_type")
+  size         Int
+  storagePath  String      @map("storage_path")
+  experimentId String?     @map("experiment_id")
+  resultId     String?     @map("result_id")
+  uploadedById String      @map("uploaded_by_id")
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  experiment   Experiment? @relation(fields: [experimentId], references: [id])
+  result       Result?     @relation(fields: [resultId], references: [id])
+  uploadedBy   User        @relation(fields: [uploadedById], references: [id])
+
+  @@index([experimentId])
+  @@map("file_attachments")
+}
