@@ -15,18 +15,36 @@ echo "--- Step 2: Install dependencies ---"
 pnpm install
 echo "Dependencies installed."
 
-# 3. Generate Prisma client
-# prisma CLI runs from .pnpm store and cannot resolve @prisma/client.
-# We use a Node.js --require preload to patch module resolution.
-echo "--- Step 3: Generate Prisma client ---"
-PROJECT_ROOT="$(pwd)" \
-PRISMA_GENERATE_SKIP_AUTOINSTALL=true \
-NODE_OPTIONS="--require $(pwd)/scripts/prisma-resolve-patch.js" \
-  npx prisma generate --schema=packages/database/prisma/schema.prisma
+# 3. Make @prisma/client resolvable from the schema directory
+# Prisma resolves @prisma/client from the schema file's location, NOT from CWD
+# or the prisma binary. In pnpm workspace, packages/database/ may not have its
+# own node_modules/@prisma/client. We copy it there so prisma can find it.
+echo "--- Step 3: Setup @prisma/client for schema resolution ---"
+SCHEMA_DIR="packages/database"
+CLIENT_SRC=$(node -e "console.log(require.resolve('@prisma/client/package.json').replace('/package.json',''))")
+echo "Source @prisma/client: $CLIENT_SRC"
+
+# Debug: check what exists
+echo "Root node_modules/@prisma/:"
+ls -la node_modules/@prisma/ 2>/dev/null || echo "  (not found)"
+echo "Schema-level node_modules/@prisma/:"
+ls -la "$SCHEMA_DIR/node_modules/@prisma/" 2>/dev/null || echo "  (not found)"
+
+if [ ! -d "$SCHEMA_DIR/node_modules/@prisma/client" ]; then
+  mkdir -p "$SCHEMA_DIR/node_modules/@prisma"
+  cp -rL "$CLIENT_SRC" "$SCHEMA_DIR/node_modules/@prisma/client"
+  echo "Copied @prisma/client to $SCHEMA_DIR/node_modules/@prisma/client"
+else
+  echo "@prisma/client already exists at schema level"
+fi
+
+# 4. Generate Prisma client
+echo "--- Step 4: Generate Prisma client ---"
+PRISMA_GENERATE_SKIP_AUTOINSTALL=true npx prisma generate --schema=$SCHEMA_DIR/prisma/schema.prisma
 echo "Prisma client generated."
 
-# 4. Build API (and all its dependencies)
-echo "--- Step 4: Build API ---"
+# 5. Build API (and all its dependencies)
+echo "--- Step 5: Build API ---"
 pnpm exec turbo build --filter=@ponylab/api...
 
 echo "=== Build Complete ==="
