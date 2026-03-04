@@ -5,7 +5,7 @@ services:
     region: oregon
     plan: free
     nodeVersion: "22.22.0"
-    buildCommand: npm install -g pnpm@9 && pnpm install --frozen-lockfile && pnpm exec prisma generate --schema=packages/database/prisma/schema.prisma && pnpm exec turbo build --filter=@ponylab/api...
+    buildCommand: bash scripts/render-build.sh
     startCommand: node apps/api/dist/main.js
     healthCheckPath: /api/health
     envVars:
