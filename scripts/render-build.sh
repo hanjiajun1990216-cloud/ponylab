@@ -30,17 +30,16 @@ ls -la node_modules/@prisma/ 2>/dev/null || echo "  (not found)"
 echo "Schema-level node_modules/@prisma/:"
 ls -la "$SCHEMA_DIR/node_modules/@prisma/" 2>/dev/null || echo "  (not found)"
 
-if [ ! -d "$SCHEMA_DIR/node_modules/@prisma/client" ]; then
-  mkdir -p "$SCHEMA_DIR/node_modules/@prisma"
-  cp -rL "$CLIENT_SRC" "$SCHEMA_DIR/node_modules/@prisma/client"
-  echo "Copied @prisma/client to $SCHEMA_DIR/node_modules/@prisma/client"
-else
-  echo "@prisma/client already exists at schema level"
-fi
+# Force remove any existing symlink (pnpm creates symlinks that prisma can't follow)
+rm -rf "$SCHEMA_DIR/node_modules/@prisma/client"
+mkdir -p "$SCHEMA_DIR/node_modules/@prisma"
+cp -rL "$CLIENT_SRC" "$SCHEMA_DIR/node_modules/@prisma/client"
+echo "Force-copied @prisma/client (real files) to $SCHEMA_DIR/node_modules/@prisma/client"
+ls -la "$SCHEMA_DIR/node_modules/@prisma/" 2>/dev/null || echo "  (verify failed)"
 
 # 4. Generate Prisma client
 echo "--- Step 4: Generate Prisma client ---"
-PRISMA_GENERATE_SKIP_AUTOINSTALL=true npx prisma generate --schema=$SCHEMA_DIR/prisma/schema.prisma
+PRISMA_GENERATE_SKIP_AUTOINSTALL=true pnpm exec prisma generate --schema=$SCHEMA_DIR/prisma/schema.prisma
 echo "Prisma client generated."
 
 # 5. Build API (and all its dependencies)
