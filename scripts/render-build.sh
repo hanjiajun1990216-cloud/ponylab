@@ -25,11 +25,12 @@ echo "node_modules/.pnpm exists? $([ -d node_modules/.pnpm ] && echo YES || echo
 
 # 3. Generate Prisma client
 echo "--- Step 3: Generate Prisma client ---"
-pnpm exec prisma generate --schema=packages/database/prisma/schema.prisma
+npx prisma generate --schema=packages/database/prisma/schema.prisma
 echo "Prisma client generated."
 
 # 4. Build API (and all its dependencies)
 echo "--- Step 4: Build API ---"
-pnpm exec turbo build --filter=@ponylab/api...
+# Use npx as fallback since pnpm exec may not find turbo with node-linker=hoisted
+npx turbo build --filter=@ponylab/api...
 
 echo "=== Build Complete ==="
