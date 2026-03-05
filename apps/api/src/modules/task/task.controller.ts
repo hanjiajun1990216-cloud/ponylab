@@ -11,10 +11,12 @@ import {
 import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { TaskService } from "./task.service";
+import { PermissionGuard } from "../../common/guards/permission.guard";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 @ApiTags("Tasks")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller("tasks")
 export class TaskController {
   constructor(private taskService: TaskService) {}
@@ -34,6 +36,7 @@ export class TaskController {
   }
 
   @Post()
+  @RequirePermission("project:create")
   @ApiOperation({ summary: "Create a new task" })
   async create(
     @Body()
@@ -58,6 +61,7 @@ export class TaskController {
   }
 
   @Patch(":id")
+  @RequirePermission("project:create")
   @ApiOperation({
     summary: "Update task (status, assignee, description, etc.)",
   })
@@ -90,6 +94,7 @@ export class TaskController {
   }
 
   @Post(":id/dependencies")
+  @RequirePermission("project:create")
   @ApiOperation({ summary: "Add task dependency (DAG edge)" })
   async addDependency(
     @Param("id") taskId: string,
@@ -99,6 +104,7 @@ export class TaskController {
   }
 
   @Delete(":id/dependencies/:upstreamId")
+  @RequirePermission("project:create")
   @ApiOperation({ summary: "Remove task dependency" })
   async removeDependency(
     @Param("id") taskId: string,

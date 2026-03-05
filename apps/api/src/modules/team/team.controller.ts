@@ -13,10 +13,12 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { TeamService } from "./team.service";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { PermissionGuard } from "../../common/guards/permission.guard";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 @ApiTags("Teams")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller("teams")
 export class TeamController {
   constructor(private teamService: TeamService) {}
@@ -42,6 +44,7 @@ export class TeamController {
   }
 
   @Patch(":id")
+  @RequirePermission("team:manage")
   @ApiOperation({ summary: "Update team info (name, description, visibility)" })
   async update(
     @Param("id") id: string,
@@ -63,6 +66,7 @@ export class TeamController {
   }
 
   @Post(":id/members/:userId")
+  @RequirePermission("team:manage")
   @ApiOperation({ summary: "Add member to team" })
   async addMember(
     @Param("id") teamId: string,
@@ -77,6 +81,7 @@ export class TeamController {
   }
 
   @Delete(":id/members/:userId")
+  @RequirePermission("team:manage")
   @ApiOperation({ summary: "Remove member from team" })
   async removeMember(
     @Param("id") teamId: string,

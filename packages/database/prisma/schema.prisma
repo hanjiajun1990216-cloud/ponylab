@@ -46,6 +46,7 @@ model User {
   comments             Comment[]
   announcements        Announcement[]
   experimentTemplates  ExperimentTemplate[]
+  experimentSnapshots  ExperimentSnapshot[]   @relation("ExperimentSnapshots")
   protocolExecutions   ProtocolExecutionStep[] @relation("StepExecutor")
   notificationPrefs    NotificationPreference[]
   taskInventoryUsages  TaskInventoryUsage[]
@@ -293,6 +294,7 @@ model Experiment {
   samples     Sample[]
   files       FileAttachment[]
   tags        ExperimentTag[]
+  snapshots   ExperimentSnapshot[]
 
   @@index([projectId])
   @@index([authorId])
@@ -320,6 +322,23 @@ model ExperimentTag {
   @@unique([experimentId, tag])
   @@index([tag])
   @@map("experiment_tags")
+}
+
+model ExperimentSnapshot {
+  id           String     @id @default(cuid())
+  experimentId String     @map("experiment_id")
+  version      Int
+  title        String
+  content      Json?
+  status       String
+  userId       String     @map("user_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  user         User       @relation("ExperimentSnapshots", fields: [userId], references: [id])
+
+  @@index([experimentId])
+  @@map("experiment_snapshots")
 }
 
 model ExperimentTemplate {

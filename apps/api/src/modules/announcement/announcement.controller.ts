@@ -13,10 +13,12 @@ import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { AnnouncementService } from "./announcement.service";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { PermissionGuard } from "../../common/guards/permission.guard";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 @ApiTags("Announcements")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller("announcements")
 export class AnnouncementController {
   constructor(private announcementService: AnnouncementService) {}
@@ -32,6 +34,7 @@ export class AnnouncementController {
   }
 
   @Post()
+  @RequirePermission("announcement:manage")
   @ApiOperation({ summary: "Create an announcement" })
   async create(
     @Body()
@@ -50,6 +53,7 @@ export class AnnouncementController {
   }
 
   @Patch(":id")
+  @RequirePermission("announcement:manage")
   @ApiOperation({ summary: "Update announcement (pin/unpin)" })
   async update(
     @Param("id") id: string,
@@ -65,6 +69,7 @@ export class AnnouncementController {
   }
 
   @Delete(":id")
+  @RequirePermission("announcement:manage")
   @ApiOperation({ summary: "Delete an announcement" })
   async delete(@Param("id") id: string) {
     return this.announcementService.delete(id);

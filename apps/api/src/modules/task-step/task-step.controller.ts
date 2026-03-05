@@ -11,15 +11,18 @@ import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { TaskStepService } from "./task-step.service";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { PermissionGuard } from "../../common/guards/permission.guard";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 @ApiTags("Task Steps")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller("tasks/:taskId/steps")
 export class TaskStepController {
   constructor(private taskStepService: TaskStepService) {}
 
   @Post()
+  @RequirePermission("project:create")
   @ApiOperation({ summary: "Create a task step" })
   async create(
     @Param("taskId") taskId: string,
@@ -36,6 +39,7 @@ export class TaskStepController {
   }
 
   @Patch(":stepId")
+  @RequirePermission("project:create")
   @ApiOperation({ summary: "Update task step (status, content, assignee)" })
   async update(
     @Param("taskId") taskId: string,
@@ -55,6 +59,7 @@ export class TaskStepController {
   }
 
   @Delete(":stepId")
+  @RequirePermission("project:create")
   @ApiOperation({ summary: "Delete a task step" })
   async delete(
     @Param("taskId") taskId: string,
@@ -64,6 +69,7 @@ export class TaskStepController {
   }
 
   @Post("reorder")
+  @RequirePermission("project:create")
   @ApiOperation({ summary: "Reorder task steps" })
   async reorder(
     @Param("taskId") taskId: string,
