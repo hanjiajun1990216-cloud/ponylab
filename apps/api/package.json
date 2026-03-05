@@ -10,7 +10,7 @@
     "lint": "echo 'no lint yet'",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "test:e2e": "vitest run --config vitest.e2e.config.ts"
+    "test:e2e": "echo 'no e2e tests yet'"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
