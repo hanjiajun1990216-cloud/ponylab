@@ -22,22 +22,40 @@ model User {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  teamMembers   TeamMember[]
-  experiments   Experiment[]
-  tasks         Task[]
-  samples       Sample[]
-  sampleEvents  SampleEvent[]
-  protocols     Protocol[]
-  bookings      Booking[]
-  auditLogs     AuditLog[]
-  notifications Notification[]
-  files         FileAttachment[]
-  inventoryLogs InventoryLog[]
+  teamMembers          TeamMember[]
+  experiments          Experiment[]
+  assignedTasks        Task[]               @relation("TaskAssignee")
+  taskLeads            Task[]               @relation("TaskLead")
+  samples              Sample[]
+  sampleEvents         SampleEvent[]
+  protocols            Protocol[]
+  bookings             Booking[]
+  auditLogs            AuditLog[]
+  notifications        Notification[]
+  files                FileAttachment[]
+  inventoryLogs        InventoryLog[]
+  sentInvitations      TeamInvitation[]     @relation("InvitationInviter")
+  applications         TeamApplication[]    @relation("Applicant")
+  reviewedApplications TeamApplication[]    @relation("Reviewer")
+  functionalRoles      FunctionalRole[]
+  directionLeads       Direction[]
+  projectLeads         Project[]            @relation("ProjectLead")
+  taskStepCompletions  TaskStep[]           @relation("StepCompleter")
+  taskStepAssignees    TaskStep[]           @relation("StepAssignee")
+  taskParticipants     TaskParticipant[]
+  comments             Comment[]
+  announcements        Announcement[]
+  experimentTemplates  ExperimentTemplate[]
+  protocolExecutions   ProtocolExecutionStep[] @relation("StepExecutor")
+  notificationPrefs    NotificationPreference[]
+  taskInventoryUsages  TaskInventoryUsage[]
+  userColor            String?              @map("user_color") // fixed calendar color
 
   @@map("users")
 }
 
 enum UserRole {
+  SUPER_ADMIN
   ADMIN
   PI
   RESEARCHER
@@ -48,16 +66,31 @@ enum UserRole {
 // ─── Teams ───
 
 model Team {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           String         @id @default(cuid())
+  name         String
+  description  String?
+  avatar       String?
+  visibility   TeamVisibility @default(CLOSED)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
 
-  members     TeamMember[]
-  projects    Project[]
+  members      TeamMember[]
+  projects     Project[]
+  directions   Direction[]
+  invitations  TeamInvitation[]
+  applications TeamApplication[]
+  roles        FunctionalRole[]
+  announcements Announcement[]
+  inventoryColumns InventoryColumn[]
+  inventoryItems   InventoryItem[]
 
   @@map("teams")
+}
+
+enum TeamVisibility {
+  OPEN
+  CLOSED
+  PRIVATE
 }
 
 model TeamMember {
@@ -77,8 +110,126 @@ model TeamMember {
 enum TeamMemberRole {
   OWNER
   ADMIN
+  PROJECT_LEAD
   MEMBER
-  VIEWER
+  GUEST
+}
+
+// ─── Team Invitations ───
+
+model TeamInvitation {
+  id           String           @id @default(cuid())
+  teamId       String           @map("team_id")
+  inviterId    String           @map("inviter_id")
+  type         InvitationType
+  email        String?
+  token        String           @unique
+  code         String?          @unique
+  role         TeamMemberRole   @default(MEMBER)
+  status       InvitationStatus @default(PENDING)
+  maxUses      Int?             @map("max_uses")
+  usedCount    Int              @default(0) @map("used_count")
+  expiresAt    DateTime         @map("expires_at")
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  team         Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  inviter      User             @relation("InvitationInviter", fields: [inviterId], references: [id])
+
+  @@index([teamId])
+  @@map("team_invitations")
+}
+
+enum InvitationType {
+  EMAIL
+  LINK
+  CODE
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+// ─── Team Applications ───
+
+model TeamApplication {
+  id           String            @id @default(cuid())
+  teamId       String            @map("team_id")
+  userId       String            @map("user_id")
+  reason       String?
+  status       ApplicationStatus @default(PENDING)
+  reviewerId   String?           @map("reviewer_id")
+  reviewNote   String?           @map("review_note")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  reviewedAt   DateTime?         @map("reviewed_at")
+
+  team         Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user         User              @relation("Applicant", fields: [userId], references: [id])
+  reviewer     User?             @relation("Reviewer", fields: [reviewerId], references: [id])
+
+  @@unique([teamId, userId])
+  @@index([teamId, status])
+  @@map("team_applications")
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ─── Functional Roles ───
+
+model FunctionalRole {
+  id           String             @id @default(cuid())
+  userId       String             @map("user_id")
+  teamId       String?            @map("team_id")
+  role         FunctionalRoleType
+  assignedBy   String             @map("assigned_by")
+  createdAt    DateTime           @default(now()) @map("created_at")
+
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team         Team?              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId, role])
+  @@map("functional_roles")
+}
+
+enum FunctionalRoleType {
+  INSTRUMENT_ADMIN
+  INVENTORY_ADMIN
+  ELN_WITNESS
+}
+
+// ─── Research Directions ───
+
+model Direction {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  leadId      String          @map("lead_id")
+  teamId      String          @map("team_id")
+  status      DirectionStatus @default(ACTIVE)
+  color       String?
+  sortOrder   Int             @default(0) @map("sort_order")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  lead        User            @relation(fields: [leadId], references: [id])
+  team        Team            @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  projects    Project[]
+
+  @@index([teamId])
+  @@map("directions")
+}
+
+enum DirectionStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
 }
 
 // ─── Projects ───
@@ -89,12 +240,23 @@ model Project {
   description String?
   status      ProjectStatus @default(ACTIVE)
   teamId      String        @map("team_id")
+  directionId String?       @map("direction_id")
+  leadId      String?       @map("lead_id")
+  startDate   DateTime?     @map("start_date")
+  endDate     DateTime?     @map("end_date")
+  priority    Int           @default(0)
   createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
 
   team        Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  direction   Direction?    @relation(fields: [directionId], references: [id])
+  lead        User?         @relation("ProjectLead", fields: [leadId], references: [id])
   experiments Experiment[]
+  tasks       Task[]
+  comments    Comment[]
 
+  @@index([teamId])
+  @@index([directionId])
   @@map("projects")
 }
 
@@ -109,19 +271,24 @@ enum ProjectStatus {
 model Experiment {
   id          String           @id @default(cuid())
   title       String
-  content     Json?            // TipTap JSON document
+  content     Json?
   status      ExperimentStatus @default(DRAFT)
   projectId   String           @map("project_id")
   authorId    String           @map("author_id")
+  templateId  String?          @map("template_id")
   lockedAt    DateTime?        @map("locked_at")
   signedAt    DateTime?        @map("signed_at")
   signedBy    String?          @map("signed_by")
+  witnessedAt DateTime?        @map("witnessed_at")
+  witnessedBy String?          @map("witnessed_by")
+  rejectedAt  DateTime?        @map("rejected_at")
+  rejectReason String?         @map("reject_reason")
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime         @updatedAt @map("updated_at")
 
   project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   author      User             @relation(fields: [authorId], references: [id])
-  tasks       Task[]
+  tasks       Task[]           @relation("ExperimentTasks")
   results     Result[]
   samples     Sample[]
   files       FileAttachment[]
@@ -136,7 +303,10 @@ enum ExperimentStatus {
   DRAFT
   IN_PROGRESS
   COMPLETED
+  SUBMITTED
   SIGNED
+  WITNESSED
+  REJECTED
   ARCHIVED
 }
 
@@ -152,6 +322,24 @@ model ExperimentTag {
   @@map("experiment_tags")
 }
 
+model ExperimentTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  content     Json
+  category    String?
+  authorId    String   @map("author_id")
+  teamId      String?  @map("team_id")
+  isPublic    Boolean  @default(false) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  author      User     @relation(fields: [authorId], references: [id])
+
+  @@index([teamId])
+  @@map("experiment_templates")
+}
+
 // ─── Tasks ───
 
 model Task {
@@ -161,15 +349,33 @@ model Task {
   status       TaskStatus @default(TODO)
   priority     Int        @default(0)
   dueDate      DateTime?  @map("due_date")
-  experimentId String     @map("experiment_id")
+  projectId    String?    @map("project_id")
+  experimentId String?    @map("experiment_id")
   assigneeId   String?    @map("assignee_id")
+  leadId       String?    @map("lead_id")
+  protocolId   String?    @map("protocol_id")
+  isMilestone  Boolean    @default(false) @map("is_milestone")
+  posX         Float?     @map("pos_x")
+  posY         Float?     @map("pos_y")
+  sortOrder    Int        @default(0) @map("sort_order")
+  color        String?
   completedAt  DateTime?  @map("completed_at")
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
 
-  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
-  assignee     User?      @relation(fields: [assigneeId], references: [id])
+  project      Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  experiment   Experiment? @relation("ExperimentTasks", fields: [experimentId], references: [id], onDelete: Cascade)
+  assignee     User?      @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  lead         User?      @relation("TaskLead", fields: [leadId], references: [id])
+  steps        TaskStep[]
+  participants TaskParticipant[]
+  comments     Comment[]
+  dependsOn    TaskDependency[] @relation("DependentTask")
+  dependedBy   TaskDependency[] @relation("UpstreamTask")
+  inventoryUsages TaskInventoryUsage[]
+  protocolExecution ProtocolExecution?
 
+  @@index([projectId])
   @@index([experimentId])
   @@map("tasks")
 }
@@ -181,6 +387,77 @@ enum TaskStatus {
   CANCELLED
 }
 
+model TaskStep {
+  id          String     @id @default(cuid())
+  taskId      String     @map("task_id")
+  title       String
+  description String?
+  status      StepStatus @default(PENDING)
+  sortOrder   Int        @default(0) @map("sort_order")
+  assigneeId  String?    @map("assignee_id")
+  dueDate     DateTime?  @map("due_date")
+  completedAt DateTime?  @map("completed_at")
+  completedBy String?    @map("completed_by")
+  notes       String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  task        Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  assignee    User?      @relation("StepAssignee", fields: [assigneeId], references: [id])
+  completer   User?      @relation("StepCompleter", fields: [completedBy], references: [id])
+
+  @@index([taskId])
+  @@map("task_steps")
+}
+
+enum StepStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+model TaskParticipant {
+  id        String   @id @default(cuid())
+  taskId    String   @map("task_id")
+  userId    String   @map("user_id")
+  addedAt   DateTime @default(now()) @map("added_at")
+
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@map("task_participants")
+}
+
+model TaskDependency {
+  id              String @id @default(cuid())
+  dependentTaskId String @map("dependent_task_id")
+  upstreamTaskId  String @map("upstream_task_id")
+
+  dependentTask   Task   @relation("DependentTask", fields: [dependentTaskId], references: [id], onDelete: Cascade)
+  upstreamTask    Task   @relation("UpstreamTask", fields: [upstreamTaskId], references: [id], onDelete: Cascade)
+
+  @@unique([dependentTaskId, upstreamTaskId])
+  @@map("task_dependencies")
+}
+
+model TaskInventoryUsage {
+  id              String        @id @default(cuid())
+  taskId          String        @map("task_id")
+  inventoryItemId String        @map("inventory_item_id")
+  quantity        Float
+  unit            String
+  usedAt          DateTime      @default(now()) @map("used_at")
+  userId          String        @map("user_id")
+
+  task            Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  item            InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  user            User          @relation(fields: [userId], references: [id])
+
+  @@index([taskId])
+  @@map("task_inventory_usages")
+}
+
 // ─── Results ───
 
 model Result {
@@ -188,7 +465,7 @@ model Result {
   experimentId String     @map("experiment_id")
   type         ResultType
   title        String
-  data         Json       // Structured result data
+  data         Json
   unit         String?
   notes        String?
   createdAt    DateTime   @default(now()) @map("created_at")
@@ -314,19 +591,23 @@ model InventoryItem {
   catalogNumber String?  @map("catalog_number")
   expiryDate    DateTime? @map("expiry_date")
   storageId     String?  @map("storage_id")
+  teamId        String?  @map("team_id")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
+  team          Team?    @relation(fields: [teamId], references: [id])
   logs          InventoryLog[]
+  taskUsages    TaskInventoryUsage[]
 
   @@index([category])
+  @@index([teamId])
   @@map("inventory_items")
 }
 
 model InventoryLog {
   id             String   @id @default(cuid())
   itemId         String   @map("item_id")
-  action         String   // IN, OUT, ADJUST
+  action         String
   quantityBefore Float    @map("quantity_before")
   quantityAfter  Float    @map("quantity_after")
   reason         String?
@@ -340,6 +621,32 @@ model InventoryLog {
   @@map("inventory_logs")
 }
 
+model InventoryColumn {
+  id              String     @id @default(cuid())
+  teamId          String     @map("team_id")
+  name            String
+  type            ColumnType
+  options         Json?
+  isRequired      Boolean    @default(false) @map("is_required")
+  sortOrder       Int        @default(0) @map("sort_order")
+  createdAt       DateTime   @default(now()) @map("created_at")
+
+  team            Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@map("inventory_columns")
+}
+
+enum ColumnType {
+  TEXT
+  NUMBER
+  DATE
+  DROPDOWN
+  FILE
+  BARCODE
+  URL
+}
+
 // ─── Protocols / SOPs ───
 
 model Protocol {
@@ -348,14 +655,17 @@ model Protocol {
   description String?
   category    String?
   authorId    String            @map("author_id")
+  teamId      String?           @map("team_id")
   isPublished Boolean           @default(false) @map("is_published")
   createdAt   DateTime          @default(now()) @map("created_at")
   updatedAt   DateTime          @updatedAt @map("updated_at")
 
   author      User              @relation(fields: [authorId], references: [id])
   versions    ProtocolVersion[]
+  executions  ProtocolExecution[]
 
   @@index([category])
+  @@index([teamId])
   @@map("protocols")
 }
 
@@ -363,7 +673,7 @@ model ProtocolVersion {
   id          String   @id @default(cuid())
   protocolId  String   @map("protocol_id")
   version     Int
-  content     Json     // Structured protocol steps
+  content     Json
   changelog   String?
   createdAt   DateTime @default(now()) @map("created_at")
 
@@ -371,6 +681,39 @@ model ProtocolVersion {
 
   @@unique([protocolId, version])
   @@map("protocol_versions")
+}
+
+model ProtocolExecution {
+  id           String   @id @default(cuid())
+  taskId       String   @unique @map("task_id")
+  protocolId   String   @map("protocol_id")
+  versionId    String   @map("version_id")
+  startedAt    DateTime @default(now()) @map("started_at")
+  completedAt  DateTime? @map("completed_at")
+
+  task         Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  protocol     Protocol @relation(fields: [protocolId], references: [id])
+  steps        ProtocolExecutionStep[]
+
+  @@map("protocol_executions")
+}
+
+model ProtocolExecutionStep {
+  id           String     @id @default(cuid())
+  executionId  String     @map("execution_id")
+  stepIndex    Int        @map("step_index")
+  status       StepStatus @default(PENDING)
+  executedBy   String?    @map("executed_by")
+  executedAt   DateTime?  @map("executed_at")
+  notes        String?
+  deviations   String?
+  attachments  Json?
+
+  execution    ProtocolExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  executor     User?             @relation("StepExecutor", fields: [executedBy], references: [id])
+
+  @@index([executionId])
+  @@map("protocol_execution_steps")
 }
 
 // ─── Instruments ───
@@ -383,11 +726,16 @@ model Instrument {
   serialNumber  String?             @unique @map("serial_number")
   location      String?
   status        InstrumentStatus    @default(AVAILABLE)
+  description   String?
+  imageUrl      String?             @map("image_url")
+  requiresApproval Boolean          @default(false) @map("requires_approval")
   createdAt     DateTime            @default(now()) @map("created_at")
   updatedAt     DateTime            @updatedAt @map("updated_at")
 
   bookings      Booking[]
   maintenance   MaintenanceRecord[]
+  comments      Comment[]
+  announcements Announcement[]
 
   @@map("instruments")
 }
@@ -419,6 +767,7 @@ model Booking {
 }
 
 enum BookingStatus {
+  PENDING
   CONFIRMED
   CANCELLED
   COMPLETED
@@ -428,8 +777,9 @@ enum BookingStatus {
 model MaintenanceRecord {
   id           String     @id @default(cuid())
   instrumentId String     @map("instrument_id")
-  type         String     // ROUTINE, REPAIR, CALIBRATION
+  type         String
   description  String
+  performedBy  String?    @map("performed_by")
   performedAt  DateTime   @map("performed_at")
   nextDueDate  DateTime?  @map("next_due_date")
   cost         Float?
@@ -441,12 +791,70 @@ model MaintenanceRecord {
   @@map("maintenance_records")
 }
 
+// ─── Comments (Polymorphic) ───
+
+model Comment {
+  id           String   @id @default(cuid())
+  content      String
+  authorId     String   @map("author_id")
+  parentId     String?  @map("parent_id")
+  // polymorphic: one of these will be set
+  projectId    String?  @map("project_id")
+  taskId       String?  @map("task_id")
+  instrumentId String?  @map("instrument_id")
+  isPinned     Boolean  @default(false) @map("is_pinned")
+  label        String?  // question, suggestion, share, maintenance, resolved
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  author       User       @relation(fields: [authorId], references: [id])
+  parent       Comment?   @relation("CommentThread", fields: [parentId], references: [id])
+  replies      Comment[]  @relation("CommentThread")
+  project      Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task         Task?      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  instrument   Instrument? @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([taskId])
+  @@index([instrumentId])
+  @@map("comments")
+}
+
+// ─── Announcements ───
+
+model Announcement {
+  id             String            @id @default(cuid())
+  scope          AnnouncementScope
+  authorId       String            @map("author_id")
+  title          String
+  content        String
+  isPinned       Boolean           @default(false) @map("is_pinned")
+  expiresAt      DateTime?         @map("expires_at")
+  teamId         String?           @map("team_id")
+  instrumentId   String?           @map("instrument_id")
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  author         User              @relation(fields: [authorId], references: [id])
+  team           Team?             @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  instrument     Instrument?       @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+
+  @@index([scope, teamId])
+  @@index([scope, instrumentId])
+  @@map("announcements")
+}
+
+enum AnnouncementScope {
+  INSTRUMENT
+  INVENTORY
+  TEAM
+}
+
 // ─── Audit Trail (APPEND-ONLY) ───
 
 model AuditLog {
   id         String   @id @default(cuid())
   userId     String   @map("user_id")
-  action     String   // CREATE, UPDATE, DELETE, SIGN, EXPORT, LOGIN, etc.
+  action     String
   entityType String   @map("entity_type")
   entityId   String   @map("entity_id")
   oldValue   Json?    @map("old_value")
@@ -468,17 +876,33 @@ model AuditLog {
 model Notification {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
-  type      String   // TASK_ASSIGNED, EXPERIMENT_SIGNED, INVENTORY_LOW, etc.
+  type      String
   title     String
   message   String
   isRead    Boolean  @default(false) @map("is_read")
   link      String?
+  metadata  Json?
   createdAt DateTime @default(now()) @map("created_at")
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isRead])
+  @@index([userId, createdAt])
   @@map("notifications")
+}
+
+model NotificationPreference {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  type      String   // notification type
+  email     Boolean  @default(true)
+  inApp     Boolean  @default(true) @map("in_app")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@map("notification_preferences")
 }
 
 // ─── File Attachments ───

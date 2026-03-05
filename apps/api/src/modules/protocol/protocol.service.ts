@@ -5,7 +5,15 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 export class ProtocolService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: { name: string; description?: string; category?: string; content: any }, userId: string) {
+  async create(
+    data: {
+      name: string;
+      description?: string;
+      category?: string;
+      content: any;
+    },
+    userId: string,
+  ) {
     return this.prisma.protocol.create({
       data: {
         name: data.name,

@@ -13,7 +13,11 @@ export class HealthController {
       await this.prisma.$queryRaw`SELECT 1`;
       return { status: "ok", database: "connected", timestamp: new Date() };
     } catch {
-      return { status: "error", database: "disconnected", timestamp: new Date() };
+      return {
+        status: "error",
+        database: "disconnected",
+        timestamp: new Date(),
+      };
     }
   }
 }

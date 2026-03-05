@@ -46,3 +46,4 @@ npm-debug.log*
 # Misc
 *.tgz
 .cache/
+.vercel

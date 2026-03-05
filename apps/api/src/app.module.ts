@@ -13,6 +13,14 @@ import { InstrumentModule } from "./modules/instrument/instrument.module";
 import { AuditModule } from "./modules/audit/audit.module";
 import { FileModule } from "./modules/file/file.module";
 import { HealthModule } from "./modules/health/health.module";
+import { DirectionModule } from "./modules/direction/direction.module";
+import { InvitationModule } from "./modules/invitation/invitation.module";
+import { ApplicationModule } from "./modules/application/application.module";
+import { CommentModule } from "./modules/comment/comment.module";
+import { AnnouncementModule } from "./modules/announcement/announcement.module";
+import { NotificationModule } from "./modules/notification/notification.module";
+import { TaskStepModule } from "./modules/task-step/task-step.module";
+import { TaskModule } from "./modules/task/task.module";
 
 @Module({
   imports: [
@@ -30,6 +38,15 @@ import { HealthModule } from "./modules/health/health.module";
     AuditModule,
     FileModule,
     HealthModule,
+    // New modules
+    DirectionModule,
+    InvitationModule,
+    ApplicationModule,
+    CommentModule,
+    AnnouncementModule,
+    NotificationModule,
+    TaskStepModule,
+    TaskModule,
   ],
 })
 export class AppModule {}

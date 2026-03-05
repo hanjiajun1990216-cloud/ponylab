@@ -46,18 +46,59 @@ export class InstrumentController {
   @ApiOperation({ summary: "Book instrument (with conflict detection)" })
   async createBooking(
     @Param("id") instrumentId: string,
-    @Body() body: { title: string; startTime: string; endTime: string; notes?: string },
+    @Body()
+    body: { title: string; startTime: string; endTime: string; notes?: string },
     @CurrentUser("id") userId: string,
   ) {
-    return this.instrumentService.createBooking({ ...body, instrumentId, userId });
+    return this.instrumentService.createBooking({
+      ...body,
+      instrumentId,
+      userId,
+    });
   }
 
   @Post(":id/maintenance")
   @ApiOperation({ summary: "Add maintenance record" })
   async addMaintenance(
     @Param("id") instrumentId: string,
-    @Body() body: { type: string; description: string; performedAt: string; nextDueDate?: string; cost?: number },
+    @Body()
+    body: {
+      type: string;
+      description: string;
+      performedAt: string;
+      nextDueDate?: string;
+      cost?: number;
+    },
   ) {
     return this.instrumentService.addMaintenance(instrumentId, body);
+  }
+
+  @Get(":id/calendar")
+  @ApiOperation({ summary: "Get instrument calendar data with bookings" })
+  async getCalendar(
+    @Param("id") id: string,
+    @Query("start") start: string,
+    @Query("end") end: string,
+  ) {
+    return this.instrumentService.getCalendar(id, start, end);
+  }
+
+  @Post(":id/check-availability")
+  @ApiOperation({ summary: "Check instrument availability for a time slot" })
+  async checkAvailability(
+    @Param("id") id: string,
+    @Body()
+    body: {
+      startTime: string;
+      endTime: string;
+      excludeBookingId?: string;
+    },
+  ) {
+    return this.instrumentService.checkAvailability(
+      id,
+      body.startTime,
+      body.endTime,
+      body.excludeBookingId,
+    );
   }
 }

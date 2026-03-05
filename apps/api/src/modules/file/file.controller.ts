@@ -23,7 +23,14 @@ export class FileController {
   @Post()
   @ApiOperation({ summary: "Register uploaded file" })
   async create(
-    @Body() body: { originalName: string; mimeType: string; size: number; experimentId?: string; resultId?: string },
+    @Body()
+    body: {
+      originalName: string;
+      mimeType: string;
+      size: number;
+      experimentId?: string;
+      resultId?: string;
+    },
     @CurrentUser("id") userId: string,
   ) {
     return this.fileService.create(body, userId);

@@ -25,7 +25,15 @@ export class SampleController {
   @Post()
   @ApiOperation({ summary: "Create a new sample" })
   async create(
-    @Body() body: { name: string; sampleType: string; barcode?: string; metadata?: any; storageId?: string; experimentId?: string },
+    @Body()
+    body: {
+      name: string;
+      sampleType: string;
+      barcode?: string;
+      metadata?: any;
+      storageId?: string;
+      experimentId?: string;
+    },
     @CurrentUser("id") userId: string,
   ) {
     return this.sampleService.create(body, userId);
@@ -39,7 +47,10 @@ export class SampleController {
     @Query("sampleType") sampleType?: string,
     @Query("status") status?: string,
   ) {
-    return this.sampleService.findAll(page, Math.min(limit, 100), { sampleType, status });
+    return this.sampleService.findAll(page, Math.min(limit, 100), {
+      sampleType,
+      status,
+    });
   }
 
   @Get(":id")
