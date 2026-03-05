@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
 @Injectable()
@@ -43,9 +43,24 @@ export class AuditService {
     };
   }
 
+  /**
+   * BUG-006 fix: entity query must explicitly validate and apply both
+   * entityType + entityId filters to prevent full-table scan when
+   * parameters are missing or empty strings.
+   */
   async findByEntity(entityType: string, entityId: string) {
+    if (!entityType || !entityType.trim()) {
+      throw new BadRequestException("entityType is required");
+    }
+    if (!entityId || !entityId.trim()) {
+      throw new BadRequestException("entityId is required");
+    }
+
     return this.prisma.auditLog.findMany({
-      where: { entityType, entityId },
+      where: {
+        entityType: entityType.trim(),
+        entityId: entityId.trim(),
+      },
       include: {
         user: { select: { id: true, firstName: true, lastName: true } },
       },

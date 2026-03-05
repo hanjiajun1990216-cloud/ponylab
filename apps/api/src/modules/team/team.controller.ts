@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Delete,
   Param,
   Body,
@@ -30,9 +31,9 @@ export class TeamController {
   }
 
   @Get()
-  @ApiOperation({ summary: "List teams for current user" })
-  async findAll(@CurrentUser("id") userId: string) {
-    return this.teamService.findAll(userId);
+  @ApiOperation({ summary: "List teams for current user (SUPER_ADMIN sees all)" })
+  async findAll(@CurrentUser() user: { id: string; role: string }) {
+    return this.teamService.findAll(user.id, user.role);
   }
 
   @Get(":id")
@@ -41,13 +42,35 @@ export class TeamController {
     return this.teamService.findById(id);
   }
 
+  @Patch(":id")
+  @ApiOperation({ summary: "Update team info (name, description, visibility)" })
+  async update(
+    @Param("id") id: string,
+    @Body()
+    body: {
+      name?: string;
+      description?: string;
+      visibility?: string;
+      avatar?: string;
+    },
+  ) {
+    return this.teamService.update(id, body);
+  }
+
+  @Get(":id/members")
+  @ApiOperation({ summary: "Get team member list with roles" })
+  async getMembers(@Param("id") id: string) {
+    return this.teamService.getMembers(id);
+  }
+
   @Post(":id/members/:userId")
   @ApiOperation({ summary: "Add member to team" })
   async addMember(
     @Param("id") teamId: string,
     @Param("userId") userId: string,
+    @Body() body: { role?: string },
   ) {
-    return this.teamService.addMember(teamId, userId);
+    return this.teamService.addMember(teamId, userId, (body.role as any) ?? "MEMBER");
   }
 
   @Delete(":id/members/:userId")

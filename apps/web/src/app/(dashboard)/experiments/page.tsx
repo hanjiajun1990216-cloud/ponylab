@@ -3,10 +3,27 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { FlaskConical, Plus, Filter, CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/Badge";
+import { Avatar } from "@/components/Avatar";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { Modal } from "@/components/Modal";
+
+const ALL_STATUSES = ["DRAFT", "IN_PROGRESS", "COMPLETED", "SIGNED", "ARCHIVED"];
+
+const statusLabel: Record<string, string> = {
+  DRAFT: "草稿",
+  IN_PROGRESS: "进行中",
+  COMPLETED: "已完成",
+  SIGNED: "已签署",
+  ARCHIVED: "已归档",
+};
 
 export default function ExperimentsPage() {
   const queryClient = useQueryClient();
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("");
   const [showCreate, setShowCreate] = useState(false);
   const [newTitle, setNewTitle] = useState("");
 
@@ -26,7 +43,7 @@ export default function ExperimentsPage() {
   const projectId = selectedProject || projects?.data?.[0]?.id;
 
   const { data: experiments, isLoading } = useQuery({
-    queryKey: ["experiments", projectId],
+    queryKey: ["experiments", projectId, statusFilter],
     queryFn: () => api.getExperimentsByProject(projectId!),
     enabled: !!projectId,
   });
@@ -41,42 +58,48 @@ export default function ExperimentsPage() {
     },
   });
 
-  const statusColors: Record<string, string> = {
-    DRAFT: "bg-gray-100 text-gray-700",
-    IN_PROGRESS: "bg-blue-100 text-blue-700",
-    COMPLETED: "bg-green-100 text-green-700",
-    SIGNED: "bg-purple-100 text-purple-700",
-    ARCHIVED: "bg-yellow-100 text-yellow-700",
-  };
+  // Filter by status client-side
+  const filteredExperiments = statusFilter
+    ? experiments?.data?.filter((e: any) => e.status === statusFilter)
+    : experiments?.data;
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Experiments</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Manage your lab experiments and records
-          </p>
+          <h1 className="text-2xl font-bold text-slate-900">实验记录</h1>
+          <p className="mt-1 text-sm text-gray-600">管理实验记录和数据</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
           disabled={!projectId}
         >
-          + New Experiment
+          <Plus className="h-4 w-4" />
+          新建记录
         </button>
       </div>
 
-      {/* Project Filter */}
+      {/* Project Filter Tabs */}
       {projects?.data && projects.data.length > 0 && (
-        <div className="mb-4 flex gap-2">
+        <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+          <button
+            onClick={() => setSelectedProject(null)}
+            className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              !selectedProject
+                ? "bg-blue-100 text-blue-700"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            全部项目
+          </button>
           {projects.data.map((p: any) => (
             <button
               key={p.id}
               onClick={() => setSelectedProject(p.id)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                projectId === p.id
-                  ? "bg-primary-100 text-primary-700"
+              className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                selectedProject === p.id
+                  ? "bg-blue-100 text-blue-700"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
@@ -86,74 +109,75 @@ export default function ExperimentsPage() {
         </div>
       )}
 
-      {/* Create Modal */}
-      {showCreate && (
-        <div className="mb-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              createMutation.mutate(newTitle);
-            }}
-            className="flex gap-3"
+      {/* Status Filter */}
+      <div className="mb-4 flex items-center gap-2">
+        <Filter className="h-4 w-4 text-gray-400" />
+        <div className="flex gap-1">
+          <button
+            onClick={() => setStatusFilter("")}
+            className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
+              !statusFilter ? "bg-slate-800 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
           >
-            <input
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Experiment title..."
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none"
-              autoFocus
-            />
+            全部
+          </button>
+          {ALL_STATUSES.map((s) => (
             <button
-              type="submit"
-              disabled={!newTitle.trim() || createMutation.isPending}
-              className="rounded-lg bg-primary-600 px-4 py-2 text-sm text-white hover:bg-primary-700 disabled:opacity-50"
+              key={s}
+              onClick={() => setStatusFilter(s === statusFilter ? "" : s)}
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                statusFilter === s ? "bg-slate-800 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
             >
-              Create
+              {statusLabel[s]}
             </button>
-            <button
-              type="button"
-              onClick={() => setShowCreate(false)}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-          </form>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Experiments List */}
       {isLoading ? (
-        <div className="py-12 text-center text-gray-500">Loading...</div>
-      ) : experiments?.data?.length > 0 ? (
+        <LoadingSpinner fullPage />
+      ) : filteredExperiments?.length > 0 ? (
         <div className="space-y-3">
-          {experiments.data.map((exp: any) => (
+          {filteredExperiments.map((exp: any) => (
             <div
               key={exp.id}
               className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
             >
               <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-semibold text-gray-900">{exp.title}</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    by {exp.author?.firstName} {exp.author?.lastName} ·{" "}
-                    {new Date(exp.updatedAt).toLocaleDateString()}
-                  </p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-slate-900">{exp.title}</h3>
+                    {exp.status === "SIGNED" && (
+                      <CheckCircle2 className="h-4 w-4 text-purple-500" />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    {exp.author && (
+                      <div className="flex items-center gap-1">
+                        <Avatar
+                          firstName={exp.author.firstName}
+                          lastName={exp.author.lastName}
+                          userId={exp.author.id}
+                          size="sm"
+                        />
+                        <span>{exp.author.firstName} {exp.author.lastName}</span>
+                      </div>
+                    )}
+                    <span>·</span>
+                    <span>更新于 {new Date(exp.updatedAt).toLocaleDateString("zh-CN")}</span>
+                  </div>
                 </div>
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    statusColors[exp.status] || "bg-gray-100"
-                  }`}
-                >
-                  {exp.status}
-                </span>
+                <Badge label={statusLabel[exp.status] || exp.status} status={exp.status} />
               </div>
-              <div className="mt-3 flex gap-4 text-xs text-gray-500">
-                <span>{exp._count?.tasks || 0} tasks</span>
-                <span>{exp._count?.results || 0} results</span>
-                <span>{exp._count?.files || 0} files</span>
+              <div className="mt-3 flex gap-4 text-xs text-gray-400">
+                <span>{exp._count?.tasks || 0} 个任务</span>
+                <span>{exp._count?.results || 0} 个结果</span>
+                <span>{exp._count?.files || 0} 个文件</span>
               </div>
               {exp.tags?.length > 0 && (
-                <div className="mt-2 flex gap-1">
+                <div className="mt-2 flex flex-wrap gap-1">
                   {exp.tags.map((t: any) => (
                     <span
                       key={t.id}
@@ -168,13 +192,45 @@ export default function ExperimentsPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-          <div className="text-4xl mb-3">🧪</div>
-          <p className="text-gray-500">
-            No experiments yet. Create your first experiment to get started.
-          </p>
-        </div>
+        <EmptyState
+          icon={FlaskConical}
+          title="暂无实验记录"
+          description={statusFilter ? `没有状态为"${statusLabel[statusFilter]}"的记录` : "创建第一个实验记录"}
+          action={!statusFilter ? { label: "新建记录", onClick: () => setShowCreate(true) } : undefined}
+        />
       )}
+
+      {/* Create Modal */}
+      <Modal open={showCreate} onClose={() => { setShowCreate(false); setNewTitle(""); }} title="新建实验记录">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">标题 *</label>
+            <input
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              placeholder="实验标题..."
+              autoFocus
+              onKeyDown={(e) => { if (e.key === "Enter" && newTitle.trim()) createMutation.mutate(newTitle); }}
+            />
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => { setShowCreate(false); setNewTitle(""); }}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              取消
+            </button>
+            <button
+              onClick={() => newTitle.trim() && createMutation.mutate(newTitle)}
+              disabled={!newTitle.trim() || createMutation.isPending}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {createMutation.isPending ? "创建中..." : "创建"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

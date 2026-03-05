@@ -60,4 +60,33 @@ export class InstrumentController {
   ) {
     return this.instrumentService.addMaintenance(instrumentId, body);
   }
+
+  @Get(":id/calendar")
+  @ApiOperation({ summary: "Get instrument calendar data with bookings" })
+  async getCalendar(
+    @Param("id") id: string,
+    @Query("start") start: string,
+    @Query("end") end: string,
+  ) {
+    return this.instrumentService.getCalendar(id, start, end);
+  }
+
+  @Post(":id/check-availability")
+  @ApiOperation({ summary: "Check instrument availability for a time slot" })
+  async checkAvailability(
+    @Param("id") id: string,
+    @Body()
+    body: {
+      startTime: string;
+      endTime: string;
+      excludeBookingId?: string;
+    },
+  ) {
+    return this.instrumentService.checkAvailability(
+      id,
+      body.startTime,
+      body.endTime,
+      body.excludeBookingId,
+    );
+  }
 }

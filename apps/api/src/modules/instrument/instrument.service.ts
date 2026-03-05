@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from "@nestjs/common";
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
 @Injectable()
@@ -103,5 +103,77 @@ export class InstrumentService {
         cost: data.cost,
       },
     });
+  }
+
+  async getCalendar(instrumentId: string, start: string, end: string) {
+    const instrument = await this.prisma.instrument.findUnique({
+      where: { id: instrumentId },
+    });
+    if (!instrument) throw new NotFoundException("Instrument not found");
+
+    const bookings = await this.prisma.booking.findMany({
+      where: {
+        instrumentId,
+        startTime: { gte: new Date(start) },
+        endTime: { lte: new Date(end) },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            userColor: true,
+          },
+        },
+      },
+      orderBy: { startTime: "asc" },
+    });
+
+    return bookings.map((b) => ({
+      id: b.id,
+      title: b.title,
+      start: b.startTime,
+      end: b.endTime,
+      status: b.status,
+      notes: b.notes,
+      user: b.user,
+      color: b.user.userColor,
+    }));
+  }
+
+  async checkAvailability(
+    instrumentId: string,
+    startTime: string,
+    endTime: string,
+    excludeBookingId?: string,
+  ) {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    const conflict = await this.prisma.booking.findFirst({
+      where: {
+        instrumentId,
+        status: "CONFIRMED",
+        id: excludeBookingId ? { not: excludeBookingId } : undefined,
+        OR: [{ startTime: { lt: end }, endTime: { gt: start } }],
+      },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+
+    return {
+      available: !conflict,
+      conflict: conflict
+        ? {
+            id: conflict.id,
+            title: conflict.title,
+            startTime: conflict.startTime,
+            endTime: conflict.endTime,
+            user: conflict.user,
+          }
+        : null,
+    };
   }
 }
