@@ -21,6 +21,7 @@ import { AnnouncementModule } from "./modules/announcement/announcement.module";
 import { NotificationModule } from "./modules/notification/notification.module";
 import { TaskStepModule } from "./modules/task-step/task-step.module";
 import { TaskModule } from "./modules/task/task.module";
+import { ExportModule } from "./modules/export/export.module";
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { TaskModule } from "./modules/task/task.module";
     NotificationModule,
     TaskStepModule,
     TaskModule,
+    ExportModule,
   ],
 })
 export class AppModule {}

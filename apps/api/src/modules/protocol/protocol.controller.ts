@@ -13,15 +13,18 @@ import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { ProtocolService } from "./protocol.service";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { PermissionGuard } from "../../common/guards/permission.guard";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 @ApiTags("Protocols")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller("protocols")
 export class ProtocolController {
   constructor(private protocolService: ProtocolService) {}
 
   @Post()
+  @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Create a new protocol" })
   async create(
     @Body()
@@ -53,6 +56,7 @@ export class ProtocolController {
   }
 
   @Post(":id/versions")
+  @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Create new protocol version" })
   async createVersion(
     @Param("id") id: string,
@@ -62,6 +66,7 @@ export class ProtocolController {
   }
 
   @Post(":id/publish")
+  @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Publish protocol" })
   async publish(@Param("id") id: string) {
     return this.protocolService.publish(id);

@@ -13,10 +13,11 @@ import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { CommentService } from "./comment.service";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { PermissionGuard } from "../../common/guards/permission.guard";
 
 @ApiTags("Comments")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller("comments")
 export class CommentController {
   constructor(private commentService: CommentService) {}

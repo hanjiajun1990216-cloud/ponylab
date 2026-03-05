@@ -13,15 +13,18 @@ import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { InventoryService } from "./inventory.service";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { PermissionGuard } from "../../common/guards/permission.guard";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 @ApiTags("Inventory")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller("inventory")
 export class InventoryController {
   constructor(private inventoryService: InventoryService) {}
 
   @Post()
+  @RequirePermission("inventory:admin")
   @ApiOperation({ summary: "Create inventory item" })
   async create(@Body() body: any) {
     return this.inventoryService.create(body);
@@ -52,6 +55,7 @@ export class InventoryController {
   }
 
   @Post(":id/adjust")
+  @RequirePermission("inventory:admin")
   @ApiOperation({ summary: "Adjust inventory quantity" })
   async adjust(
     @Param("id") id: string,

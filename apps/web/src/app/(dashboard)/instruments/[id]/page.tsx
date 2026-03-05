@@ -85,11 +85,8 @@ function CalendarTab({ instrumentId }: { instrumentId: string }) {
   });
 
   const createBooking = useMutation({
-    mutationFn: (data: {
-      startTime: string;
-      endTime: string;
-      purpose?: string;
-    }) => api.createBooking({ instrumentId, ...data }),
+    mutationFn: (data: { startTime: string; endTime: string; title: string }) =>
+      api.createBooking({ instrumentId, ...data }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["instrument-bookings", instrumentId],
@@ -198,7 +195,7 @@ function CalendarTab({ instrumentId }: { instrumentId: string }) {
                   createBooking.mutate({
                     startTime: selectedSlot.start.toISOString(),
                     endTime: selectedSlot.end.toISOString(),
-                    purpose: purpose || undefined,
+                    title: purpose || "预约使用",
                   });
                 }
               }}

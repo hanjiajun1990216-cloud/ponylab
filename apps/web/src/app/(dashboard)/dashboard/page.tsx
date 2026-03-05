@@ -64,9 +64,9 @@ export default function DashboardPage() {
     enabled: !!firstTeam?.id,
   });
 
-  const { data: inventory } = useQuery({
-    queryKey: ["inventory-low"],
-    queryFn: () => api.getInventory(1),
+  const { data: lowStockData, isLoading: lowStockLoading } = useQuery({
+    queryKey: ["inventory-low-stock"],
+    queryFn: () => api.getLowStockItems(),
   });
 
   const { data: instruments } = useQuery({
@@ -86,11 +86,7 @@ export default function DashboardPage() {
 
   // Compute stats
   const projectList = projects?.data || [];
-  const lowStockItems =
-    inventory?.data?.filter(
-      (item: any) =>
-        item.minQuantity != null && item.quantity <= item.minQuantity,
-    ) || [];
+  const lowStockItems = lowStockData || [];
 
   const activeProjects = projectList.filter(
     (p: any) => p.status === "ACTIVE" || p.status === "IN_PROGRESS",
@@ -130,7 +126,7 @@ export default function DashboardPage() {
           value={lowStockItems.length}
           icon={AlertTriangle}
           color="bg-orange-500"
-          isLoading={!inventory}
+          isLoading={lowStockLoading}
         />
         <StatCard
           title="可用仪器"
@@ -286,7 +282,7 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          {!inventory ? (
+          {lowStockLoading ? (
             <LoadingSpinner size="sm" />
           ) : lowStockItems.length > 0 ? (
             <div className="space-y-2">

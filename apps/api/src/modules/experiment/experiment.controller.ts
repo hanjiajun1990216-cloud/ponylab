@@ -17,15 +17,18 @@ import { ExperimentService } from "./experiment.service";
 import { CreateExperimentDto } from "./dto/create-experiment.dto";
 import { UpdateExperimentDto } from "./dto/update-experiment.dto";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { PermissionGuard } from "../../common/guards/permission.guard";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 @ApiTags("Experiments")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller("experiments")
 export class ExperimentController {
   constructor(private experimentService: ExperimentService) {}
 
   @Post()
+  @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Create a new experiment" })
   async create(
     @Body() dto: CreateExperimentDto,
@@ -48,6 +51,12 @@ export class ExperimentController {
     );
   }
 
+  @Get(":id/history")
+  @ApiOperation({ summary: "Get experiment version history" })
+  async getHistory(@Param("id") id: string) {
+    return this.experimentService.getHistory(id);
+  }
+
   @Get(":id")
   @ApiOperation({ summary: "Get experiment details" })
   async findById(@Param("id") id: string) {
@@ -55,6 +64,7 @@ export class ExperimentController {
   }
 
   @Patch(":id")
+  @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Update experiment" })
   async update(
     @Param("id") id: string,
@@ -65,12 +75,14 @@ export class ExperimentController {
   }
 
   @Post(":id/sign")
+  @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Sign experiment (immutable after signing)" })
   async sign(@Param("id") id: string, @CurrentUser("id") userId: string) {
     return this.experimentService.sign(id, userId);
   }
 
   @Delete(":id")
+  @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Delete experiment" })
   async delete(@Param("id") id: string, @CurrentUser("id") userId: string) {
     return this.experimentService.delete(id, userId);

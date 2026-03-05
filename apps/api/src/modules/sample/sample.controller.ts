@@ -14,15 +14,18 @@ import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { SampleService } from "./sample.service";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { PermissionGuard } from "../../common/guards/permission.guard";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 @ApiTags("Samples")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller("samples")
 export class SampleController {
   constructor(private sampleService: SampleService) {}
 
   @Post()
+  @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Create a new sample" })
   async create(
     @Body()
@@ -70,6 +73,7 @@ export class SampleController {
   }
 
   @Patch(":id/status")
+  @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Update sample status" })
   async updateStatus(
     @Param("id") id: string,

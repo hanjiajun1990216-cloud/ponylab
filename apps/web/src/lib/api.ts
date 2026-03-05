@@ -381,6 +381,10 @@ class ApiClient {
     return this.fetch<any>(`/inventory?${params}`);
   }
 
+  getLowStockItems() {
+    return this.fetch<any[]>("/inventory/low-stock");
+  }
+
   adjustInventory(
     id: string,
     data: { action: string; amount: number; reason?: string },
@@ -423,7 +427,7 @@ class ApiClient {
     instrumentId: string;
     startTime: string;
     endTime: string;
-    purpose?: string;
+    title: string;
   }) {
     return this.fetch<any>("/instruments/bookings", {
       method: "POST",

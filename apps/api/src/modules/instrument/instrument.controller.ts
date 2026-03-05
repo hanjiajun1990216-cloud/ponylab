@@ -13,15 +13,18 @@ import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { InstrumentService } from "./instrument.service";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { PermissionGuard } from "../../common/guards/permission.guard";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 @ApiTags("Instruments")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller("instruments")
 export class InstrumentController {
   constructor(private instrumentService: InstrumentService) {}
 
   @Post()
+  @RequirePermission("instrument:admin")
   @ApiOperation({ summary: "Register a new instrument" })
   async create(@Body() body: any) {
     return this.instrumentService.create(body);
@@ -43,6 +46,7 @@ export class InstrumentController {
   }
 
   @Post(":id/bookings")
+  @RequirePermission("instrument:admin")
   @ApiOperation({ summary: "Book instrument (with conflict detection)" })
   async createBooking(
     @Param("id") instrumentId: string,
@@ -58,6 +62,7 @@ export class InstrumentController {
   }
 
   @Post(":id/maintenance")
+  @RequirePermission("instrument:admin")
   @ApiOperation({ summary: "Add maintenance record" })
   async addMaintenance(
     @Param("id") instrumentId: string,

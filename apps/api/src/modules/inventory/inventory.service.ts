@@ -136,6 +136,28 @@ export class InventoryService {
       }),
     ]);
 
+    // Low stock alert
+    if (item.minQuantity != null && quantityAfter <= item.minQuantity) {
+      // Find team members to notify (if teamId is set)
+      if (item.teamId) {
+        const members = await this.prisma.teamMember.findMany({
+          where: { teamId: item.teamId },
+          select: { userId: true },
+        });
+        for (const member of members) {
+          await this.prisma.notification.create({
+            data: {
+              userId: member.userId,
+              type: "LOW_STOCK_ALERT",
+              title: `低库存预警: ${item.name}`,
+              message: `${item.name} 库存量 (${quantityAfter} ${item.unit}) 已低于最低库存 (${item.minQuantity} ${item.unit})`,
+              link: `/inventory`,
+            },
+          });
+        }
+      }
+    }
+
     return { id, quantityBefore, quantityAfter, action };
   }
 

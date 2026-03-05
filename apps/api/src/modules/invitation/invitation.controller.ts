@@ -11,15 +11,18 @@ import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { InvitationService } from "./invitation.service";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { PermissionGuard } from "../../common/guards/permission.guard";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 @ApiTags("Invitations")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller()
 export class InvitationController {
   constructor(private invitationService: InvitationService) {}
 
   @Post("teams/:teamId/invitations")
+  @RequirePermission("team:manage")
   @ApiOperation({ summary: "Create a team invitation (EMAIL/LINK/CODE)" })
   async create(
     @Param("teamId") teamId: string,
@@ -43,6 +46,7 @@ export class InvitationController {
   }
 
   @Delete("teams/:teamId/invitations/:id")
+  @RequirePermission("team:manage")
   @ApiOperation({ summary: "Revoke an invitation" })
   async revoke(@Param("teamId") teamId: string, @Param("id") id: string) {
     return this.invitationService.revoke(teamId, id);

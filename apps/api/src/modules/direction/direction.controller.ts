@@ -13,15 +13,18 @@ import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { DirectionService } from "./direction.service";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { PermissionGuard } from "../../common/guards/permission.guard";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 @ApiTags("Directions")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), PermissionGuard)
 @Controller("directions")
 export class DirectionController {
   constructor(private directionService: DirectionService) {}
 
   @Post()
+  @RequirePermission("direction:manage")
   @ApiOperation({ summary: "Create a research direction" })
   async create(
     @Body()
@@ -49,6 +52,7 @@ export class DirectionController {
   }
 
   @Patch(":id")
+  @RequirePermission("direction:manage")
   @ApiOperation({ summary: "Update direction" })
   async update(
     @Param("id") id: string,
@@ -66,6 +70,7 @@ export class DirectionController {
   }
 
   @Delete(":id")
+  @RequirePermission("direction:manage")
   @ApiOperation({ summary: "Delete direction" })
   async delete(@Param("id") id: string) {
     return this.directionService.delete(id);
