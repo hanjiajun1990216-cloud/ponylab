@@ -59,17 +59,30 @@ type ViewMode = "canvas" | "list" | "board";
 function TaskNode({ data }: { data: any }) {
   const dueDate = data.dueDate ? new Date(data.dueDate) : null;
   const isOverdue = dueDate && dueDate < new Date();
-  const isSoon = dueDate && !isOverdue && (dueDate.getTime() - Date.now()) < 3 * 24 * 3600 * 1000;
+  const isSoon =
+    dueDate &&
+    !isOverdue &&
+    dueDate.getTime() - Date.now() < 3 * 24 * 3600 * 1000;
 
-  const completedSteps = data.steps?.filter((s: any) => s.completed).length || 0;
+  const completedSteps =
+    data.steps?.filter((s: any) => s.completed).length || 0;
   const totalSteps = data.steps?.length || 0;
 
   return (
-    <div className={`bg-white rounded-lg border-2 shadow-sm p-3 w-52 cursor-pointer hover:shadow-md transition-shadow ${
-      isOverdue ? "border-red-300" : isSoon ? "border-yellow-300" : "border-gray-200"
-    }`}>
+    <div
+      className={`bg-white rounded-lg border-2 shadow-sm p-3 w-52 cursor-pointer hover:shadow-md transition-shadow ${
+        isOverdue
+          ? "border-red-300"
+          : isSoon
+            ? "border-yellow-300"
+            : "border-gray-200"
+      }`}
+    >
       <div className="flex items-start justify-between gap-2 mb-2">
-        <Link href={`/tasks/${data.id}`} className="text-sm font-semibold text-slate-900 hover:text-blue-600 line-clamp-2 flex-1">
+        <Link
+          href={`/tasks/${data.id}`}
+          className="text-sm font-semibold text-slate-900 hover:text-blue-600 line-clamp-2 flex-1"
+        >
           {data.label}
         </Link>
         <Badge label={data.status} status={data.status} />
@@ -79,12 +92,16 @@ function TaskNode({ data }: { data: any }) {
         <div className="mb-2">
           <div className="flex justify-between text-xs text-gray-500 mb-1">
             <span>步骤</span>
-            <span>{completedSteps}/{totalSteps}</span>
+            <span>
+              {completedSteps}/{totalSteps}
+            </span>
           </div>
           <div className="h-1 rounded-full bg-gray-100">
             <div
               className="h-full rounded-full bg-blue-500"
-              style={{ width: `${totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0}%` }}
+              style={{
+                width: `${totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0}%`,
+              }}
             />
           </div>
         </div>
@@ -102,8 +119,13 @@ function TaskNode({ data }: { data: any }) {
           <div className="h-6 w-6" />
         )}
         {dueDate && (
-          <span className={`text-xs ${isOverdue ? "text-red-600 font-medium" : isSoon ? "text-yellow-600" : "text-gray-400"}`}>
-            {dueDate.toLocaleDateString("zh-CN", { month: "short", day: "numeric" })}
+          <span
+            className={`text-xs ${isOverdue ? "text-red-600 font-medium" : isSoon ? "text-yellow-600" : "text-gray-400"}`}
+          >
+            {dueDate.toLocaleDateString("zh-CN", {
+              month: "short",
+              day: "numeric",
+            })}
           </span>
         )}
       </div>
@@ -116,7 +138,14 @@ const nodeTypes: NodeTypes = { taskNode: TaskNode };
 // ─── Kanban Column ────────────────────────────────────────────────────────────
 
 function KanbanCard({ task }: { task: any }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -132,11 +161,22 @@ function KanbanCard({ task }: { task: any }) {
       {...listeners}
       className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm cursor-grab active:cursor-grabbing"
     >
-      <Link href={`/tasks/${task.id}`} className="block" onClick={(e) => e.stopPropagation()}>
-        <div className="text-sm font-medium text-slate-900 mb-2">{task.name}</div>
+      <Link
+        href={`/tasks/${task.id}`}
+        className="block"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="text-sm font-medium text-slate-900 mb-2">
+          {task.name}
+        </div>
         {task.assignee && (
           <div className="flex items-center gap-1 text-xs text-gray-500">
-            <Avatar firstName={task.assignee.firstName} lastName={task.assignee.lastName} userId={task.assignee.id} size="sm" />
+            <Avatar
+              firstName={task.assignee.firstName}
+              lastName={task.assignee.lastName}
+              userId={task.assignee.id}
+              size="sm"
+            />
             <span>{task.assignee.firstName}</span>
           </div>
         )}
@@ -150,7 +190,12 @@ function KanbanCard({ task }: { task: any }) {
   );
 }
 
-function KanbanColumn({ title, status, tasks, onStatusChange }: {
+function KanbanColumn({
+  title,
+  status,
+  tasks,
+  onStatusChange,
+}: {
   title: string;
   status: string;
   tasks: any[];
@@ -158,23 +203,35 @@ function KanbanColumn({ title, status, tasks, onStatusChange }: {
 }) {
   const sensors = useSensors(useSensor(PointerSensor));
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active } = event;
-    if (active) {
-      onStatusChange(active.id as string, status);
-    }
-  }, [status, onStatusChange]);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active } = event;
+      if (active) {
+        onStatusChange(active.id as string, status);
+      }
+    },
+    [status, onStatusChange],
+  );
 
   return (
     <div className="flex flex-col rounded-xl bg-gray-100 p-3 min-h-48">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-sm font-semibold text-gray-700">{title}</span>
-        <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-600">{tasks.length}</span>
+        <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-600">
+          {tasks.length}
+        </span>
       </div>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={tasks.map((t) => t.id)}
+          strategy={verticalListSortingStrategy}
+        >
           <div className="space-y-2 flex-1">
-            {tasks.map(task => (
+            {tasks.map((task) => (
               <KanbanCard key={task.id} task={task} />
             ))}
           </div>
@@ -196,9 +253,12 @@ function CommentPanel({ projectId }: { projectId: string }) {
   });
 
   const addComment = useMutation({
-    mutationFn: (text: string) => api.createComment({ content: text, projectId }),
+    mutationFn: (text: string) =>
+      api.createComment({ content: text, projectId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments-project", projectId] });
+      queryClient.invalidateQueries({
+        queryKey: ["comments-project", projectId],
+      });
       setContent("");
     },
   });
@@ -208,9 +268,16 @@ function CommentPanel({ projectId }: { projectId: string }) {
       <div className="flex-1 overflow-y-auto space-y-3 mb-3">
         {comments?.map((c: any) => (
           <div key={c.id} className="flex gap-2">
-            <Avatar firstName={c.author?.firstName} lastName={c.author?.lastName} userId={c.author?.id} size="sm" />
+            <Avatar
+              firstName={c.author?.firstName}
+              lastName={c.author?.lastName}
+              userId={c.author?.id}
+              size="sm"
+            />
             <div className="flex-1 rounded-lg bg-gray-50 p-2">
-              <div className="text-xs font-medium text-gray-700">{c.author?.firstName} {c.author?.lastName}</div>
+              <div className="text-xs font-medium text-gray-700">
+                {c.author?.firstName} {c.author?.lastName}
+              </div>
               <div className="text-sm text-gray-800 mt-0.5">{c.content}</div>
               <div className="text-xs text-gray-400 mt-1">
                 {new Date(c.createdAt).toLocaleString("zh-CN")}
@@ -226,7 +293,12 @@ function CommentPanel({ projectId }: { projectId: string }) {
         <input
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && content.trim()) { e.preventDefault(); addComment.mutate(content); } }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey && content.trim()) {
+              e.preventDefault();
+              addComment.mutate(content);
+            }
+          }}
           placeholder="留言... (Enter 发送)"
           className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
         />
@@ -272,9 +344,10 @@ export default function ProjectDetailPage() {
     const nodes: Node[] = tasks.map((task: any, i: number) => ({
       id: task.id,
       type: "taskNode",
-      position: task.positionX != null
-        ? { x: task.positionX, y: task.positionY }
-        : { x: (i % 4) * 240 + 40, y: Math.floor(i / 4) * 160 + 40 },
+      position:
+        task.positionX != null
+          ? { x: task.positionX, y: task.positionY }
+          : { x: (i % 4) * 240 + 40, y: Math.floor(i / 4) * 160 + 40 },
       data: {
         id: task.id,
         label: task.name,
@@ -300,13 +373,14 @@ export default function ProjectDetailPage() {
 
     setRfNodes(nodes);
     setRfEdges(edges);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks]);
 
   const updateTaskStatus = useMutation({
     mutationFn: ({ taskId, status }: { taskId: string; status: string }) =>
       api.updateTask(taskId, { status }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks-project", id] }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["tasks-project", id] }),
   });
 
   const createTask = useMutation({
@@ -319,35 +393,52 @@ export default function ProjectDetailPage() {
   });
 
   const onNodeDragStop = useCallback(async (_: any, node: Node) => {
-    await api.updateTaskPosition(node.id, { x: node.position.x, y: node.position.y });
+    await api.updateTaskPosition(node.id, {
+      x: node.position.x,
+      y: node.position.y,
+    });
   }, []);
 
-  const handleKanbanStatusChange = useCallback((taskId: string, newStatus: string) => {
-    updateTaskStatus.mutate({ taskId, status: newStatus });
-  }, [updateTaskStatus]);
+  const handleKanbanStatusChange = useCallback(
+    (taskId: string, newStatus: string) => {
+      updateTaskStatus.mutate({ taskId, status: newStatus });
+    },
+    [updateTaskStatus],
+  );
 
   if (loadingProject) return <LoadingSpinner fullPage />;
 
   const todoTasks = tasks?.filter((t: any) => t.status === "TODO") || [];
-  const inProgressTasks = tasks?.filter((t: any) => t.status === "IN_PROGRESS") || [];
-  const doneTasks = tasks?.filter((t: any) => t.status === "DONE" || t.status === "COMPLETED") || [];
+  const inProgressTasks =
+    tasks?.filter((t: any) => t.status === "IN_PROGRESS") || [];
+  const doneTasks =
+    tasks?.filter(
+      (t: any) => t.status === "DONE" || t.status === "COMPLETED",
+    ) || [];
 
   const totalTasks = tasks?.length || 0;
   const completedTasks = doneTasks.length;
-  const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const progress =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
     <div className="flex flex-col h-full">
       {/* Breadcrumb */}
       <div className="mb-3 flex items-center gap-2 text-sm text-gray-500">
-        <Link href="/directions" className="flex items-center gap-1 hover:text-gray-700">
+        <Link
+          href="/directions"
+          className="flex items-center gap-1 hover:text-gray-700"
+        >
           <ArrowLeft className="h-4 w-4" />
           返回
         </Link>
         {project?.direction && (
           <>
             <span>/</span>
-            <Link href={`/directions/${project.direction.id}`} className="hover:text-gray-700">
+            <Link
+              href={`/directions/${project.direction.id}`}
+              className="hover:text-gray-700"
+            >
               {project.direction.name}
             </Link>
           </>
@@ -361,11 +452,18 @@ export default function ProjectDetailPage() {
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-xl font-bold text-slate-900">{project?.name}</h1>
-              <Badge label={project?.status || "ACTIVE"} status={project?.status || "ACTIVE"} />
+              <h1 className="text-xl font-bold text-slate-900">
+                {project?.name}
+              </h1>
+              <Badge
+                label={project?.status || "ACTIVE"}
+                status={project?.status || "ACTIVE"}
+              />
             </div>
             {project?.description && (
-              <p className="text-sm text-gray-600 mb-2">{project.description}</p>
+              <p className="text-sm text-gray-600 mb-2">
+                {project.description}
+              </p>
             )}
             <div className="flex items-center gap-6 text-xs text-gray-500">
               {project?.leader && (
@@ -387,7 +485,10 @@ export default function ProjectDetailPage() {
             <div className="text-2xl font-bold text-blue-600">{progress}%</div>
             <div className="text-xs text-gray-500">完成度</div>
             <div className="mt-1 h-1.5 w-24 rounded-full bg-gray-100">
-              <div className="h-full rounded-full bg-blue-500" style={{ width: `${progress}%` }} />
+              <div
+                className="h-full rounded-full bg-blue-500"
+                style={{ width: `${progress}%` }}
+              />
             </div>
           </div>
         </div>
@@ -483,7 +584,10 @@ export default function ProjectDetailPage() {
                 {tasks?.map((task: any) => (
                   <tr key={task.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
-                      <Link href={`/tasks/${task.id}`} className="font-medium text-slate-900 hover:text-blue-600">
+                      <Link
+                        href={`/tasks/${task.id}`}
+                        className="font-medium text-slate-900 hover:text-blue-600"
+                      >
                         {task.name}
                       </Link>
                     </td>
@@ -493,13 +597,24 @@ export default function ProjectDetailPage() {
                     <td className="px-4 py-3">
                       {task.assignee ? (
                         <div className="flex items-center gap-2">
-                          <Avatar firstName={task.assignee.firstName} lastName={task.assignee.lastName} userId={task.assignee.id} size="sm" />
-                          <span className="text-gray-700">{task.assignee.firstName}</span>
+                          <Avatar
+                            firstName={task.assignee.firstName}
+                            lastName={task.assignee.lastName}
+                            userId={task.assignee.id}
+                            size="sm"
+                          />
+                          <span className="text-gray-700">
+                            {task.assignee.firstName}
+                          </span>
                         </div>
-                      ) : <span className="text-gray-400">—</span>}
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
-                      {task.dueDate ? new Date(task.dueDate).toLocaleDateString("zh-CN") : "—"}
+                      {task.dueDate
+                        ? new Date(task.dueDate).toLocaleDateString("zh-CN")
+                        : "—"}
                     </td>
                     <td className="px-4 py-3 text-gray-500">
                       {task.steps?.length > 0
@@ -510,7 +625,10 @@ export default function ProjectDetailPage() {
                 ))}
                 {(!tasks || tasks.length === 0) && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-12 text-center text-gray-500">
+                    <td
+                      colSpan={5}
+                      className="px-4 py-12 text-center text-gray-500"
+                    >
                       暂无任务
                     </td>
                   </tr>
@@ -531,7 +649,11 @@ export default function ProjectDetailPage() {
             <MessageSquare className="h-4 w-4" />
             项目留言
           </span>
-          {showComments ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          {showComments ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
         </button>
         {showComments && (
           <div className="px-4 pb-4 h-64">
@@ -541,28 +663,45 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Create Task Modal */}
-      <Modal open={showCreateTask} onClose={() => { setShowCreateTask(false); setNewTaskName(""); }} title="新建任务">
+      <Modal
+        open={showCreateTask}
+        onClose={() => {
+          setShowCreateTask(false);
+          setNewTaskName("");
+        }}
+        title="新建任务"
+      >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">任务名称 *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              任务名称 *
+            </label>
             <input
               value={newTaskName}
               onChange={(e) => setNewTaskName(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               placeholder="输入任务名称"
               autoFocus
-              onKeyDown={(e) => { if (e.key === "Enter" && newTaskName.trim()) createTask.mutate(newTaskName); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && newTaskName.trim())
+                  createTask.mutate(newTaskName);
+              }}
             />
           </div>
           <div className="flex justify-end gap-3">
             <button
-              onClick={() => { setShowCreateTask(false); setNewTaskName(""); }}
+              onClick={() => {
+                setShowCreateTask(false);
+                setNewTaskName("");
+              }}
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               取消
             </button>
             <button
-              onClick={() => newTaskName.trim() && createTask.mutate(newTaskName)}
+              onClick={() =>
+                newTaskName.trim() && createTask.mutate(newTaskName)
+              }
               disabled={!newTaskName.trim() || createTask.isPending}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >

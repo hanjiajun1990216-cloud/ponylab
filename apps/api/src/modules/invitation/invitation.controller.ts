@@ -44,10 +44,7 @@ export class InvitationController {
 
   @Delete("teams/:teamId/invitations/:id")
   @ApiOperation({ summary: "Revoke an invitation" })
-  async revoke(
-    @Param("teamId") teamId: string,
-    @Param("id") id: string,
-  ) {
+  async revoke(@Param("teamId") teamId: string, @Param("id") id: string) {
     return this.invitationService.revoke(teamId, id);
   }
 

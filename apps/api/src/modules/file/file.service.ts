@@ -6,13 +6,16 @@ import { randomUUID } from "crypto";
 export class FileService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: {
-    originalName: string;
-    mimeType: string;
-    size: number;
-    experimentId?: string;
-    resultId?: string;
-  }, userId: string) {
+  async create(
+    data: {
+      originalName: string;
+      mimeType: string;
+      size: number;
+      experimentId?: string;
+      resultId?: string;
+    },
+    userId: string,
+  ) {
     const filename = `${randomUUID()}-${data.originalName}`;
     const storagePath = `uploads/${new Date().toISOString().slice(0, 7)}/${filename}`;
 

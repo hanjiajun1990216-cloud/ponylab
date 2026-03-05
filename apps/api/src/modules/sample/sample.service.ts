@@ -5,15 +5,18 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 export class SampleService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: {
-    name: string;
-    sampleType: string;
-    barcode?: string;
-    metadata?: any;
-    storageId?: string;
-    storagePosition?: string;
-    experimentId?: string;
-  }, userId: string) {
+  async create(
+    data: {
+      name: string;
+      sampleType: string;
+      barcode?: string;
+      metadata?: any;
+      storageId?: string;
+      storagePosition?: string;
+      experimentId?: string;
+    },
+    userId: string,
+  ) {
     const sample = await this.prisma.sample.create({
       data: { ...data, createdById: userId },
     });
@@ -39,7 +42,11 @@ export class SampleService {
     return sample;
   }
 
-  async findAll(page = 1, limit = 20, filters?: { sampleType?: string; status?: string }) {
+  async findAll(
+    page = 1,
+    limit = 20,
+    filters?: { sampleType?: string; status?: string },
+  ) {
     const where: any = {};
     if (filters?.sampleType) where.sampleType = filters.sampleType;
     if (filters?.status) where.status = filters.status;
@@ -72,7 +79,9 @@ export class SampleService {
         experiment: true,
         createdBy: { select: { id: true, firstName: true, lastName: true } },
         events: {
-          include: { user: { select: { id: true, firstName: true, lastName: true } } },
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true } },
+          },
           orderBy: { createdAt: "desc" },
         },
       },
@@ -81,7 +90,12 @@ export class SampleService {
     return sample;
   }
 
-  async addEvent(sampleId: string, type: string, userId: string, note?: string) {
+  async addEvent(
+    sampleId: string,
+    type: string,
+    userId: string,
+    note?: string,
+  ) {
     return this.prisma.sampleEvent.create({
       data: { sampleId, type: type as any, userId, note },
     });

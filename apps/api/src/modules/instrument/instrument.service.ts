@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
 @Injectable()
@@ -37,7 +42,9 @@ export class InstrumentService {
       include: {
         bookings: {
           where: { startTime: { gte: new Date() } },
-          include: { user: { select: { id: true, firstName: true, lastName: true } } },
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true } },
+          },
           orderBy: { startTime: "asc" },
           take: 20,
         },
@@ -64,9 +71,7 @@ export class InstrumentService {
       where: {
         instrumentId: data.instrumentId,
         status: "CONFIRMED",
-        OR: [
-          { startTime: { lt: end }, endTime: { gt: start } },
-        ],
+        OR: [{ startTime: { lt: end }, endTime: { gt: start } }],
       },
     });
 
@@ -86,13 +91,16 @@ export class InstrumentService {
     });
   }
 
-  async addMaintenance(instrumentId: string, data: {
-    type: string;
-    description: string;
-    performedAt: string;
-    nextDueDate?: string;
-    cost?: number;
-  }) {
+  async addMaintenance(
+    instrumentId: string,
+    data: {
+      type: string;
+      description: string;
+      performedAt: string;
+      nextDueDate?: string;
+      cost?: number;
+    },
+  ) {
     return this.prisma.maintenanceRecord.create({
       data: {
         instrumentId,

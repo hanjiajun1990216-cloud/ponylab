@@ -9,7 +9,12 @@ import { PrismaService } from "../prisma/prisma.service";
 
 export const PERMISSION_KEY = "require_permission";
 
-export type PermissionAction = "project:delete" | "project:create" | "team:manage" | "instrument:admin" | "inventory:admin";
+export type PermissionAction =
+  | "project:delete"
+  | "project:create"
+  | "team:manage"
+  | "instrument:admin"
+  | "inventory:admin";
 
 /** Roles that are always allowed regardless of team context */
 const SUPER_ROLES = ["SUPER_ADMIN", "ADMIN"] as const;
@@ -40,10 +45,11 @@ export class PermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredPermission = this.reflector.getAllAndOverride<PermissionAction>(
-      PERMISSION_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const requiredPermission =
+      this.reflector.getAllAndOverride<PermissionAction>(PERMISSION_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]);
 
     if (!requiredPermission) return true;
 
@@ -58,9 +64,7 @@ export class PermissionGuard implements CanActivate {
 
     // Try to resolve teamId from route params or body
     const teamId =
-      request.params?.teamId ??
-      request.body?.teamId ??
-      request.query?.teamId;
+      request.params?.teamId ?? request.body?.teamId ?? request.query?.teamId;
 
     // If no teamId available, deny
     if (!teamId) throw new ForbiddenException("Insufficient permissions");

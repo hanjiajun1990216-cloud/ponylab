@@ -12,13 +12,17 @@ const sizeClasses = {
   lg: "h-12 w-12 border-4",
 };
 
-export function LoadingSpinner({ size = "md", className, fullPage }: LoadingSpinnerProps) {
+export function LoadingSpinner({
+  size = "md",
+  className,
+  fullPage,
+}: LoadingSpinnerProps) {
   const spinner = (
     <div
       className={clsx(
         "animate-spin rounded-full border-gray-200 border-t-blue-600",
         sizeClasses[size],
-        className
+        className,
       )}
     />
   );

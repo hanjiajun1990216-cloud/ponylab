@@ -21,13 +21,19 @@ export class NotificationController {
   constructor(private notificationService: NotificationService) {}
 
   @Get()
-  @ApiOperation({ summary: "Get notifications for current user (unread first)" })
+  @ApiOperation({
+    summary: "Get notifications for current user (unread first)",
+  })
   async findByUser(
     @CurrentUser("id") userId: string,
     @Query("page", new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query("limit", new DefaultValuePipe(20), ParseIntPipe) limit: number,
   ) {
-    return this.notificationService.findByUser(userId, page, Math.min(limit, 100));
+    return this.notificationService.findByUser(
+      userId,
+      page,
+      Math.min(limit, 100),
+    );
   }
 
   @Get("unread-count")
@@ -38,10 +44,7 @@ export class NotificationController {
 
   @Patch(":id/read")
   @ApiOperation({ summary: "Mark a notification as read" })
-  async markRead(
-    @Param("id") id: string,
-    @CurrentUser("id") userId: string,
-  ) {
+  async markRead(@Param("id") id: string, @CurrentUser("id") userId: string) {
     return this.notificationService.markRead(id, userId);
   }
 

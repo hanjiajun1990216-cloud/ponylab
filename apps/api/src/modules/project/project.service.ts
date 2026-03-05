@@ -125,8 +125,18 @@ export class ProjectService {
         status: data.status,
         directionId: data.directionId,
         leadId: data.leadId,
-        startDate: data.startDate === null ? null : data.startDate ? new Date(data.startDate) : undefined,
-        endDate: data.endDate === null ? null : data.endDate ? new Date(data.endDate) : undefined,
+        startDate:
+          data.startDate === null
+            ? null
+            : data.startDate
+              ? new Date(data.startDate)
+              : undefined,
+        endDate:
+          data.endDate === null
+            ? null
+            : data.endDate
+              ? new Date(data.endDate)
+              : undefined,
         priority: data.priority,
       },
     });

@@ -24,7 +24,13 @@ export class ProtocolController {
   @Post()
   @ApiOperation({ summary: "Create a new protocol" })
   async create(
-    @Body() body: { name: string; description?: string; category?: string; content: any },
+    @Body()
+    body: {
+      name: string;
+      description?: string;
+      category?: string;
+      content: any;
+    },
     @CurrentUser("id") userId: string,
   ) {
     return this.protocolService.create(body, userId);

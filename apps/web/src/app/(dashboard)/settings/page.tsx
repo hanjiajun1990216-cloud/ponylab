@@ -15,14 +15,16 @@ const profileSchema = z.object({
   lastName: z.string().min(1, "请输入姓氏"),
 });
 
-const passwordSchema = z.object({
-  currentPassword: z.string().min(1, "请输入当前密码"),
-  newPassword: z.string().min(6, "新密码至少 6 位"),
-  confirmPassword: z.string(),
-}).refine((d) => d.newPassword === d.confirmPassword, {
-  message: "两次密码不一致",
-  path: ["confirmPassword"],
-});
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "请输入当前密码"),
+    newPassword: z.string().min(6, "新密码至少 6 位"),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.newPassword === d.confirmPassword, {
+    message: "两次密码不一致",
+    path: ["confirmPassword"],
+  });
 
 type ProfileForm = z.infer<typeof profileSchema>;
 type PasswordForm = z.infer<typeof passwordSchema>;
@@ -30,7 +32,9 @@ type PasswordForm = z.infer<typeof passwordSchema>;
 export default function SettingsPage() {
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
-  const [activeSection, setActiveSection] = useState<"profile" | "password" | "notifications">("profile");
+  const [activeSection, setActiveSection] = useState<
+    "profile" | "password" | "notifications"
+  >("profile");
 
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -53,7 +57,10 @@ export default function SettingsPage() {
 
   const updatePassword = useMutation({
     mutationFn: (data: PasswordForm) =>
-      api.updatePassword({ currentPassword: data.currentPassword, newPassword: data.newPassword }),
+      api.updatePassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      }),
     onSuccess: () => {
       passwordForm.reset();
     },
@@ -96,7 +103,9 @@ export default function SettingsPage() {
           {/* Profile Section */}
           {activeSection === "profile" && (
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900 mb-6">个人信息</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-6">
+                个人信息
+              </h2>
 
               {/* Avatar */}
               <div className="flex items-center gap-4 mb-6">
@@ -111,39 +120,53 @@ export default function SettingsPage() {
                     {user?.firstName} {user?.lastName}
                   </div>
                   <div className="text-sm text-gray-500">{user?.email}</div>
-                  <div className="text-xs text-gray-400 mt-0.5">{user?.role}</div>
+                  <div className="text-xs text-gray-400 mt-0.5">
+                    {user?.role}
+                  </div>
                 </div>
               </div>
 
               <form
-                onSubmit={profileForm.handleSubmit((data) => updateProfile.mutate(data))}
+                onSubmit={profileForm.handleSubmit((data) =>
+                  updateProfile.mutate(data),
+                )}
                 className="space-y-4"
               >
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">名字</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      名字
+                    </label>
                     <input
                       {...profileForm.register("firstName")}
                       className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     {profileForm.formState.errors.firstName && (
-                      <p className="mt-1 text-xs text-red-600">{profileForm.formState.errors.firstName.message}</p>
+                      <p className="mt-1 text-xs text-red-600">
+                        {profileForm.formState.errors.firstName.message}
+                      </p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">姓氏</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      姓氏
+                    </label>
                     <input
                       {...profileForm.register("lastName")}
                       className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     {profileForm.formState.errors.lastName && (
-                      <p className="mt-1 text-xs text-red-600">{profileForm.formState.errors.lastName.message}</p>
+                      <p className="mt-1 text-xs text-red-600">
+                        {profileForm.formState.errors.lastName.message}
+                      </p>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    邮箱
+                  </label>
                   <input
                     value={user?.email || ""}
                     disabled
@@ -173,14 +196,20 @@ export default function SettingsPage() {
           {/* Password Section */}
           {activeSection === "password" && (
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900 mb-6">修改密码</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-6">
+                修改密码
+              </h2>
 
               <form
-                onSubmit={passwordForm.handleSubmit((data) => updatePassword.mutate(data))}
+                onSubmit={passwordForm.handleSubmit((data) =>
+                  updatePassword.mutate(data),
+                )}
                 className="space-y-4 max-w-md"
               >
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">当前密码</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    当前密码
+                  </label>
                   <input
                     {...passwordForm.register("currentPassword")}
                     type="password"
@@ -188,11 +217,15 @@ export default function SettingsPage() {
                     placeholder="输入当前密码"
                   />
                   {passwordForm.formState.errors.currentPassword && (
-                    <p className="mt-1 text-xs text-red-600">{passwordForm.formState.errors.currentPassword.message}</p>
+                    <p className="mt-1 text-xs text-red-600">
+                      {passwordForm.formState.errors.currentPassword.message}
+                    </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">新密码</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    新密码
+                  </label>
                   <input
                     {...passwordForm.register("newPassword")}
                     type="password"
@@ -200,11 +233,15 @@ export default function SettingsPage() {
                     placeholder="至少 6 位"
                   />
                   {passwordForm.formState.errors.newPassword && (
-                    <p className="mt-1 text-xs text-red-600">{passwordForm.formState.errors.newPassword.message}</p>
+                    <p className="mt-1 text-xs text-red-600">
+                      {passwordForm.formState.errors.newPassword.message}
+                    </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">确认新密码</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    确认新密码
+                  </label>
                   <input
                     {...passwordForm.register("confirmPassword")}
                     type="password"
@@ -212,7 +249,9 @@ export default function SettingsPage() {
                     placeholder="再次输入新密码"
                   />
                   {passwordForm.formState.errors.confirmPassword && (
-                    <p className="mt-1 text-xs text-red-600">{passwordForm.formState.errors.confirmPassword.message}</p>
+                    <p className="mt-1 text-xs text-red-600">
+                      {passwordForm.formState.errors.confirmPassword.message}
+                    </p>
                   )}
                 </div>
 
@@ -230,7 +269,9 @@ export default function SettingsPage() {
                     </span>
                   )}
                   {updatePassword.isError && (
-                    <span className="text-sm text-red-600">修改失败，请检查当前密码</span>
+                    <span className="text-sm text-red-600">
+                      修改失败，请检查当前密码
+                    </span>
                   )}
                 </div>
               </form>
@@ -240,23 +281,54 @@ export default function SettingsPage() {
           {/* Notifications Section */}
           {activeSection === "notifications" && (
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900 mb-6">通知偏好</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-6">
+                通知偏好
+              </h2>
 
               <div className="space-y-4">
                 {[
-                  { label: "任务分配通知", desc: "当有任务分配给我时通知", defaultChecked: true },
-                  { label: "任务截止提醒", desc: "任务即将截止前提醒我", defaultChecked: true },
-                  { label: "仪器预约确认", desc: "预约成功或取消时通知", defaultChecked: true },
-                  { label: "团队消息通知", desc: "收到新留言或 @提及时通知", defaultChecked: false },
-                  { label: "库存预警通知", desc: "库存低于警戒线时通知", defaultChecked: true },
+                  {
+                    label: "任务分配通知",
+                    desc: "当有任务分配给我时通知",
+                    defaultChecked: true,
+                  },
+                  {
+                    label: "任务截止提醒",
+                    desc: "任务即将截止前提醒我",
+                    defaultChecked: true,
+                  },
+                  {
+                    label: "仪器预约确认",
+                    desc: "预约成功或取消时通知",
+                    defaultChecked: true,
+                  },
+                  {
+                    label: "团队消息通知",
+                    desc: "收到新留言或 @提及时通知",
+                    defaultChecked: false,
+                  },
+                  {
+                    label: "库存预警通知",
+                    desc: "库存低于警戒线时通知",
+                    defaultChecked: true,
+                  },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
+                  >
                     <div>
-                      <div className="text-sm font-medium text-slate-900">{item.label}</div>
+                      <div className="text-sm font-medium text-slate-900">
+                        {item.label}
+                      </div>
                       <div className="text-xs text-gray-500">{item.desc}</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" defaultChecked={item.defaultChecked} className="sr-only peer" />
+                      <input
+                        type="checkbox"
+                        defaultChecked={item.defaultChecked}
+                        className="sr-only peer"
+                      />
                       <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600" />
                     </label>
                   </div>

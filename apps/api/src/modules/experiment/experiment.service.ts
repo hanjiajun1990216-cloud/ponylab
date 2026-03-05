@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { CreateExperimentDto } from "./dto/create-experiment.dto";
 import { UpdateExperimentDto } from "./dto/update-experiment.dto";
@@ -15,7 +19,9 @@ export class ExperimentService {
         projectId: dto.projectId,
         authorId,
       },
-      include: { author: { select: { id: true, firstName: true, lastName: true } } },
+      include: {
+        author: { select: { id: true, firstName: true, lastName: true } },
+      },
     });
 
     await this.prisma.auditLog.create({
@@ -56,7 +62,9 @@ export class ExperimentService {
     const experiment = await this.prisma.experiment.findUnique({
       where: { id },
       include: {
-        author: { select: { id: true, firstName: true, lastName: true, email: true } },
+        author: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
         project: { include: { team: true } },
         tasks: { orderBy: { priority: "desc" } },
         results: { orderBy: { createdAt: "desc" } },
@@ -70,7 +78,9 @@ export class ExperimentService {
   }
 
   async update(id: string, dto: UpdateExperimentDto, userId: string) {
-    const experiment = await this.prisma.experiment.findUnique({ where: { id } });
+    const experiment = await this.prisma.experiment.findUnique({
+      where: { id },
+    });
     if (!experiment) throw new NotFoundException("Experiment not found");
     if (experiment.status === "SIGNED") {
       throw new ForbiddenException("Cannot modify a signed experiment");
@@ -101,7 +111,9 @@ export class ExperimentService {
   }
 
   async sign(id: string, userId: string) {
-    const experiment = await this.prisma.experiment.findUnique({ where: { id } });
+    const experiment = await this.prisma.experiment.findUnique({
+      where: { id },
+    });
     if (!experiment) throw new NotFoundException("Experiment not found");
     if (experiment.status === "SIGNED") {
       throw new ForbiddenException("Experiment already signed");
@@ -109,7 +121,12 @@ export class ExperimentService {
 
     const signed = await this.prisma.experiment.update({
       where: { id },
-      data: { status: "SIGNED", signedAt: new Date(), signedBy: userId, lockedAt: new Date() },
+      data: {
+        status: "SIGNED",
+        signedAt: new Date(),
+        signedBy: userId,
+        lockedAt: new Date(),
+      },
     });
 
     await this.prisma.auditLog.create({
@@ -126,7 +143,9 @@ export class ExperimentService {
   }
 
   async delete(id: string, userId: string) {
-    const experiment = await this.prisma.experiment.findUnique({ where: { id } });
+    const experiment = await this.prisma.experiment.findUnique({
+      where: { id },
+    });
     if (!experiment) throw new NotFoundException("Experiment not found");
     if (experiment.status === "SIGNED") {
       throw new ForbiddenException("Cannot delete a signed experiment");

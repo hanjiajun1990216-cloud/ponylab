@@ -43,9 +43,7 @@ const navSections = [
   },
   {
     label: "团队",
-    items: [
-      { href: "/teams", label: "团队管理", icon: Users },
-    ],
+    items: [{ href: "/teams", label: "团队管理", icon: Users }],
   },
   {
     label: "系统",
@@ -116,7 +114,9 @@ export default function DashboardLayout({
               <div className="space-y-0.5">
                 {section.items.map((item) => {
                   const Icon = item.icon;
-                  const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+                  const isActive =
+                    pathname === item.href ||
+                    pathname?.startsWith(item.href + "/");
                   return (
                     <Link
                       key={item.href}
@@ -141,13 +141,16 @@ export default function DashboardLayout({
         <div className="border-t border-slate-700 p-3">
           <div className="flex items-center gap-2 rounded-lg px-2 py-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white flex-shrink-0">
-              {user?.firstName?.[0]}{user?.lastName?.[0]}
+              {user?.firstName?.[0]}
+              {user?.lastName?.[0]}
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-white truncate">
                 {user?.firstName} {user?.lastName}
               </div>
-              <div className="text-xs text-slate-400 truncate">{user?.role}</div>
+              <div className="text-xs text-slate-400 truncate">
+                {user?.role}
+              </div>
             </div>
             <Link
               href="/notifications"
@@ -172,9 +175,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
-        {children}
-      </main>
+      <main className="flex-1 overflow-y-auto bg-gray-50 p-6">{children}</main>
     </div>
   );
 }

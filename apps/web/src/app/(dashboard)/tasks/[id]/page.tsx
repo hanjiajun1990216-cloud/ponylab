@@ -47,8 +47,13 @@ export default function TaskDetailPage() {
   });
 
   const toggleStep = useMutation({
-    mutationFn: ({ stepId, completed }: { stepId: string; completed: boolean }) =>
-      api.updateTaskStep(id, stepId, { completed }),
+    mutationFn: ({
+      stepId,
+      completed,
+    }: {
+      stepId: string;
+      completed: boolean;
+    }) => api.updateTaskStep(id, stepId, { completed }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["task", id] }),
   });
 
@@ -75,9 +80,11 @@ export default function TaskDetailPage() {
   });
 
   if (isLoading) return <LoadingSpinner fullPage />;
-  if (!task) return <div className="text-center py-12 text-gray-500">任务不存在</div>;
+  if (!task)
+    return <div className="text-center py-12 text-gray-500">任务不存在</div>;
 
-  const completedSteps = task.steps?.filter((s: any) => s.completed).length || 0;
+  const completedSteps =
+    task.steps?.filter((s: any) => s.completed).length || 0;
   const totalSteps = task.steps?.length || 0;
 
   return (
@@ -85,7 +92,10 @@ export default function TaskDetailPage() {
       {/* Breadcrumb */}
       <div className="mb-4 flex items-center gap-2 text-sm text-gray-500">
         {task.project && (
-          <Link href={`/projects/${task.project.id}`} className="flex items-center gap-1 hover:text-gray-700">
+          <Link
+            href={`/projects/${task.project.id}`}
+            className="flex items-center gap-1 hover:text-gray-700"
+          >
             <ArrowLeft className="h-4 w-4" />
             {task.project.name}
           </Link>
@@ -98,14 +108,18 @@ export default function TaskDetailPage() {
           {/* Title & Status */}
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex items-start justify-between mb-4">
-              <h1 className="text-xl font-bold text-slate-900 flex-1 mr-4">{task.name}</h1>
+              <h1 className="text-xl font-bold text-slate-900 flex-1 mr-4">
+                {task.name}
+              </h1>
               <select
                 value={task.status}
                 onChange={(e) => updateTask.mutate({ status: e.target.value })}
                 className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
               >
-                {STATUS_OPTIONS.map(s => (
-                  <option key={s} value={s}>{s}</option>
+                {STATUS_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </div>
@@ -116,7 +130,9 @@ export default function TaskDetailPage() {
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <div className="text-xs font-medium text-gray-500 mb-1">负责人</div>
+                <div className="text-xs font-medium text-gray-500 mb-1">
+                  负责人
+                </div>
                 {task.assignee ? (
                   <div className="flex items-center gap-2">
                     <Avatar
@@ -125,18 +141,26 @@ export default function TaskDetailPage() {
                       userId={task.assignee.id}
                       size="sm"
                     />
-                    <span className="text-gray-800">{task.assignee.firstName} {task.assignee.lastName}</span>
+                    <span className="text-gray-800">
+                      {task.assignee.firstName} {task.assignee.lastName}
+                    </span>
                   </div>
                 ) : (
                   <span className="text-gray-400">未分配</span>
                 )}
               </div>
               <div>
-                <div className="text-xs font-medium text-gray-500 mb-1">截止日期</div>
+                <div className="text-xs font-medium text-gray-500 mb-1">
+                  截止日期
+                </div>
                 {task.dueDate ? (
-                  <span className={`flex items-center gap-1 text-sm ${
-                    new Date(task.dueDate) < new Date() ? "text-red-600" : "text-gray-700"
-                  }`}>
+                  <span
+                    className={`flex items-center gap-1 text-sm ${
+                      new Date(task.dueDate) < new Date()
+                        ? "text-red-600"
+                        : "text-gray-700"
+                    }`}
+                  >
                     <Calendar className="h-3 w-3" />
                     {new Date(task.dueDate).toLocaleDateString("zh-CN")}
                   </span>
@@ -154,7 +178,9 @@ export default function TaskDetailPage() {
                 <CheckSquare className="h-5 w-5 text-gray-600" />
                 <h2 className="font-semibold text-slate-900">执行步骤</h2>
                 {totalSteps > 0 && (
-                  <span className="text-sm text-gray-500">({completedSteps}/{totalSteps})</span>
+                  <span className="text-sm text-gray-500">
+                    ({completedSteps}/{totalSteps})
+                  </span>
                 )}
               </div>
               <button
@@ -182,7 +208,12 @@ export default function TaskDetailPage() {
                   className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-gray-50 group"
                 >
                   <button
-                    onClick={() => toggleStep.mutate({ stepId: step.id, completed: !step.completed })}
+                    onClick={() =>
+                      toggleStep.mutate({
+                        stepId: step.id,
+                        completed: !step.completed,
+                      })
+                    }
                     className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
                       step.completed
                         ? "border-green-500 bg-green-500 text-white"
@@ -191,7 +222,9 @@ export default function TaskDetailPage() {
                   >
                     {step.completed && <Check className="h-3 w-3" />}
                   </button>
-                  <span className={`flex-1 text-sm ${step.completed ? "line-through text-gray-400" : "text-gray-800"}`}>
+                  <span
+                    className={`flex-1 text-sm ${step.completed ? "line-through text-gray-400" : "text-gray-800"}`}
+                  >
                     {step.name}
                   </span>
                   <button
@@ -216,8 +249,12 @@ export default function TaskDetailPage() {
                     value={newStepName}
                     onChange={(e) => setNewStepName(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && newStepName.trim()) addStep.mutate(newStepName);
-                      if (e.key === "Escape") { setShowAddStep(false); setNewStepName(""); }
+                      if (e.key === "Enter" && newStepName.trim())
+                        addStep.mutate(newStepName);
+                      if (e.key === "Escape") {
+                        setShowAddStep(false);
+                        setNewStepName("");
+                      }
                     }}
                     placeholder="步骤名称... (Enter 确认, Esc 取消)"
                     className="flex-1 bg-transparent text-sm outline-none"
@@ -241,8 +278,15 @@ export default function TaskDetailPage() {
               <div className="space-y-2">
                 {task.participants.map((p: any) => (
                   <div key={p.id} className="flex items-center gap-2">
-                    <Avatar firstName={p.firstName} lastName={p.lastName} userId={p.id} size="sm" />
-                    <span className="text-sm text-gray-700">{p.firstName} {p.lastName}</span>
+                    <Avatar
+                      firstName={p.firstName}
+                      lastName={p.lastName}
+                      userId={p.id}
+                      size="sm"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {p.firstName} {p.lastName}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -270,7 +314,9 @@ export default function TaskDetailPage() {
                       <div className="text-xs font-medium text-gray-700">
                         {c.author?.firstName} {c.author?.lastName}
                       </div>
-                      <div className="text-sm text-gray-800 mt-0.5">{c.content}</div>
+                      <div className="text-sm text-gray-800 mt-0.5">
+                        {c.content}
+                      </div>
                     </div>
                     <div className="text-xs text-gray-400 mt-0.5 px-1">
                       {new Date(c.createdAt).toLocaleString("zh-CN")}
@@ -279,7 +325,9 @@ export default function TaskDetailPage() {
                 </div>
               ))}
               {(!comments || comments.length === 0) && (
-                <p className="text-xs text-gray-400 text-center py-4">暂无留言</p>
+                <p className="text-xs text-gray-400 text-center py-4">
+                  暂无留言
+                </p>
               )}
             </div>
 

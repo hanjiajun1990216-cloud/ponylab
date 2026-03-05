@@ -26,7 +26,9 @@ export class TaskController {
   }
 
   @Get(":id")
-  @ApiOperation({ summary: "Get task details with steps, dependencies, comments" })
+  @ApiOperation({
+    summary: "Get task details with steps, dependencies, comments",
+  })
   async findById(@Param("id") id: string) {
     return this.taskService.findById(id);
   }
@@ -56,7 +58,9 @@ export class TaskController {
   }
 
   @Patch(":id")
-  @ApiOperation({ summary: "Update task (status, assignee, description, etc.)" })
+  @ApiOperation({
+    summary: "Update task (status, assignee, description, etc.)",
+  })
   async update(
     @Param("id") id: string,
     @Body()

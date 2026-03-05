@@ -5,14 +5,26 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, MessageSquare, BarChart3, Wrench, Pin, Tag } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  MessageSquare,
+  BarChart3,
+  Wrench,
+  Pin,
+  Tag,
+} from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Avatar } from "@/components/Avatar";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Modal } from "@/components/Modal";
 
 // Calendar library
-import { Calendar as BigCalendar, dateFnsLocalizer, Event } from "react-big-calendar";
+import {
+  Calendar as BigCalendar,
+  dateFnsLocalizer,
+  Event,
+} from "react-big-calendar";
 import { format, parse, startOfWeek, getDay, addHours } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -27,13 +39,22 @@ const localizer = dateFnsLocalizer({
 
 // User colors (deterministic)
 const USER_COLORS = [
-  "#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6",
-  "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1",
+  "#3b82f6",
+  "#ef4444",
+  "#10b981",
+  "#f59e0b",
+  "#8b5cf6",
+  "#ec4899",
+  "#06b6d4",
+  "#84cc16",
+  "#f97316",
+  "#6366f1",
 ];
 
 function getUserColor(userId: string): string {
   let hash = 0;
-  for (let i = 0; i < userId.length; i++) hash = userId.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < userId.length; i++)
+    hash = userId.charCodeAt(i) + ((hash << 5) - hash);
   return USER_COLORS[Math.abs(hash) % USER_COLORS.length];
 }
 
@@ -43,13 +64,20 @@ type Tab = "calendar" | "comments" | "maintenance" | "stats";
 
 function CalendarTab({ instrumentId }: { instrumentId: string }) {
   const [showBookModal, setShowBookModal] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<{
+    start: Date;
+    end: Date;
+  } | null>(null);
   const [purpose, setPurpose] = useState("");
   const queryClient = useQueryClient();
 
   const now = new Date();
   const startStr = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const endStr = new Date(now.getFullYear(), now.getMonth() + 2, 0).toISOString();
+  const endStr = new Date(
+    now.getFullYear(),
+    now.getMonth() + 2,
+    0,
+  ).toISOString();
 
   const { data: bookings } = useQuery({
     queryKey: ["instrument-bookings", instrumentId],
@@ -57,10 +85,15 @@ function CalendarTab({ instrumentId }: { instrumentId: string }) {
   });
 
   const createBooking = useMutation({
-    mutationFn: (data: { startTime: string; endTime: string; purpose?: string }) =>
-      api.createBooking({ instrumentId, ...data }),
+    mutationFn: (data: {
+      startTime: string;
+      endTime: string;
+      purpose?: string;
+    }) => api.createBooking({ instrumentId, ...data }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["instrument-bookings", instrumentId] });
+      queryClient.invalidateQueries({
+        queryKey: ["instrument-bookings", instrumentId],
+      });
       setShowBookModal(false);
       setPurpose("");
     },
@@ -88,10 +121,13 @@ function CalendarTab({ instrumentId }: { instrumentId: string }) {
     };
   }, []);
 
-  const handleSelectSlot = useCallback(({ start, end }: { start: Date; end: Date }) => {
-    setSelectedSlot({ start, end });
-    setShowBookModal(true);
-  }, []);
+  const handleSelectSlot = useCallback(
+    ({ start, end }: { start: Date; end: Date }) => {
+      setSelectedSlot({ start, end });
+      setShowBookModal(true);
+    },
+    [],
+  );
 
   return (
     <div>
@@ -122,7 +158,10 @@ function CalendarTab({ instrumentId }: { instrumentId: string }) {
 
       <Modal
         open={showBookModal}
-        onClose={() => { setShowBookModal(false); setPurpose(""); }}
+        onClose={() => {
+          setShowBookModal(false);
+          setPurpose("");
+        }}
         title="预约仪器"
       >
         <div className="space-y-4">
@@ -133,7 +172,9 @@ function CalendarTab({ instrumentId }: { instrumentId: string }) {
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">使用目的（可选）</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              使用目的（可选）
+            </label>
             <input
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
@@ -143,7 +184,10 @@ function CalendarTab({ instrumentId }: { instrumentId: string }) {
           </div>
           <div className="flex justify-end gap-3">
             <button
-              onClick={() => { setShowBookModal(false); setPurpose(""); }}
+              onClick={() => {
+                setShowBookModal(false);
+                setPurpose("");
+              }}
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               取消
@@ -185,7 +229,9 @@ function CommentsTab({ instrumentId }: { instrumentId: string }) {
   const addComment = useMutation({
     mutationFn: () => api.createComment({ content, instrumentId, tags: [tag] }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments-instrument", instrumentId] });
+      queryClient.invalidateQueries({
+        queryKey: ["comments-instrument", instrumentId],
+      });
       setContent("");
     },
   });
@@ -229,15 +275,23 @@ function CommentsTab({ instrumentId }: { instrumentId: string }) {
       {/* Input */}
       <div className="rounded-lg border border-gray-200 p-3 space-y-2">
         <div className="flex gap-2">
-          {["GENERAL", "QUESTION", "SUGGESTION", "MAINTENANCE"].map(t => (
+          {["GENERAL", "QUESTION", "SUGGESTION", "MAINTENANCE"].map((t) => (
             <button
               key={t}
               onClick={() => setTag(t)}
               className={`rounded-full px-2 py-0.5 text-xs font-medium transition-colors ${
-                tag === t ? tagColors[t] : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                tag === t
+                  ? tagColors[t]
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
               }`}
             >
-              {t === "GENERAL" ? "通用" : t === "QUESTION" ? "问题" : t === "SUGGESTION" ? "建议" : "维护"}
+              {t === "GENERAL"
+                ? "通用"
+                : t === "QUESTION"
+                  ? "问题"
+                  : t === "SUGGESTION"
+                    ? "建议"
+                    : "维护"}
             </button>
           ))}
         </div>
@@ -262,7 +316,13 @@ function CommentsTab({ instrumentId }: { instrumentId: string }) {
   );
 }
 
-function CommentCard({ comment, tagColors }: { comment: any; tagColors: Record<string, string> }) {
+function CommentCard({
+  comment,
+  tagColors,
+}: {
+  comment: any;
+  tagColors: Record<string, string>;
+}) {
   return (
     <div className="rounded-lg border border-gray-100 bg-white p-3">
       <div className="flex items-start gap-2">
@@ -278,7 +338,10 @@ function CommentCard({ comment, tagColors }: { comment: any; tagColors: Record<s
               {comment.author?.firstName} {comment.author?.lastName}
             </span>
             {comment.tags?.map((t: string) => (
-              <span key={t} className={`rounded-full px-1.5 py-0.5 text-xs ${tagColors[t] || tagColors.GENERAL}`}>
+              <span
+                key={t}
+                className={`rounded-full px-1.5 py-0.5 text-xs ${tagColors[t] || tagColors.GENERAL}`}
+              >
                 <Tag className="h-2.5 w-2.5 inline mr-0.5" />
                 {t}
               </span>
@@ -308,7 +371,8 @@ export default function InstrumentDetailPage() {
   });
 
   if (isLoading) return <LoadingSpinner fullPage />;
-  if (!instrument) return <div className="text-center py-12 text-gray-500">仪器不存在</div>;
+  if (!instrument)
+    return <div className="text-center py-12 text-gray-500">仪器不存在</div>;
 
   const tabs: { key: Tab; label: string; icon: any }[] = [
     { key: "calendar", label: "预约日历", icon: Calendar },
@@ -321,7 +385,10 @@ export default function InstrumentDetailPage() {
     <div>
       {/* Breadcrumb */}
       <div className="mb-4 flex items-center gap-2 text-sm text-gray-500">
-        <Link href="/instruments" className="flex items-center gap-1 hover:text-gray-700">
+        <Link
+          href="/instruments"
+          className="flex items-center gap-1 hover:text-gray-700"
+        >
           <ArrowLeft className="h-4 w-4" />
           仪器
         </Link>
@@ -334,7 +401,9 @@ export default function InstrumentDetailPage() {
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-xl font-bold text-slate-900">{instrument.name}</h1>
+              <h1 className="text-xl font-bold text-slate-900">
+                {instrument.name}
+              </h1>
               <Badge label={instrument.status} status={instrument.status} />
             </div>
             <p className="text-sm text-gray-500">
@@ -342,7 +411,9 @@ export default function InstrumentDetailPage() {
               {instrument.model && `· ${instrument.model}`}
             </p>
             <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
-              {instrument.serialNumber && <span>S/N: {instrument.serialNumber}</span>}
+              {instrument.serialNumber && (
+                <span>S/N: {instrument.serialNumber}</span>
+              )}
               {instrument.location && <span>位置: {instrument.location}</span>}
               <span>{instrument._count?.bookings || 0} 次预约</span>
             </div>
@@ -382,7 +453,9 @@ export default function InstrumentDetailPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="rounded-lg bg-blue-50 p-4 text-center">
-                <div className="text-2xl font-bold text-blue-600">{instrument._count?.bookings || 0}</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {instrument._count?.bookings || 0}
+                </div>
                 <div className="text-xs text-blue-700 mt-1">总预约次数</div>
               </div>
               <div className="rounded-lg bg-green-50 p-4 text-center">

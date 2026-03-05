@@ -13,7 +13,8 @@ export default function SamplesPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["samples", page, filter],
-    queryFn: () => api.getSamples(page, filter ? { sampleType: filter } : undefined),
+    queryFn: () =>
+      api.getSamples(page, filter ? { sampleType: filter } : undefined),
   });
 
   const createMutation = useMutation({
@@ -61,14 +62,18 @@ export default function SamplesPage() {
           >
             <input
               value={newSample.name}
-              onChange={(e) => setNewSample({ ...newSample, name: e.target.value })}
+              onChange={(e) =>
+                setNewSample({ ...newSample, name: e.target.value })
+              }
               placeholder="Sample name..."
               className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
               required
             />
             <input
               value={newSample.sampleType}
-              onChange={(e) => setNewSample({ ...newSample, sampleType: e.target.value })}
+              onChange={(e) =>
+                setNewSample({ ...newSample, sampleType: e.target.value })
+              }
               placeholder="Type (e.g., DNA, Protein)"
               className="w-48 rounded-lg border border-gray-300 px-3 py-2 text-sm"
               required
@@ -112,7 +117,9 @@ export default function SamplesPage() {
                   <td className="px-4 py-3 font-medium text-gray-900">
                     {sample.name}
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{sample.sampleType}</td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {sample.sampleType}
+                  </td>
                   <td className="px-4 py-3">
                     <span>
                       {statusIcons[sample.status] || "⚪"} {sample.status}
@@ -130,7 +137,10 @@ export default function SamplesPage() {
                 </tr>
               )) || (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                  <td
+                    colSpan={6}
+                    className="px-4 py-8 text-center text-gray-500"
+                  >
                     No samples found
                   </td>
                 </tr>

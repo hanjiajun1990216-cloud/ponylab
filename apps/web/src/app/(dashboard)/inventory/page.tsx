@@ -36,9 +36,11 @@ export default function InventoryPage() {
     },
   });
 
-  const lowStockCount = data?.data?.filter(
-    (item: any) => item.minQuantity != null && item.quantity <= item.minQuantity
-  ).length || 0;
+  const lowStockCount =
+    data?.data?.filter(
+      (item: any) =>
+        item.minQuantity != null && item.quantity <= item.minQuantity,
+    ).length || 0;
 
   return (
     <div>
@@ -80,7 +82,8 @@ export default function InventoryPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {data?.data?.map((item: any) => {
-                const isLow = item.minQuantity != null && item.quantity <= item.minQuantity;
+                const isLow =
+                  item.minQuantity != null && item.quantity <= item.minQuantity;
                 return (
                   <tr
                     key={item.id}
@@ -88,21 +91,31 @@ export default function InventoryPage() {
                   >
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-900 flex items-center gap-1.5">
-                        {isLow && <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />}
+                        {isLow && (
+                          <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />
+                        )}
                         {item.name}
                       </div>
                       {item.sku && (
-                        <div className="text-xs text-gray-500 font-mono mt-0.5">{item.sku}</div>
+                        <div className="text-xs text-gray-500 font-mono mt-0.5">
+                          {item.sku}
+                        </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{item.category || "—"}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {item.category || "—"}
+                    </td>
                     <td className="px-4 py-3">
-                      <span className={`font-semibold ${isLow ? "text-red-600" : "text-gray-900"}`}>
+                      <span
+                        className={`font-semibold ${isLow ? "text-red-600" : "text-gray-900"}`}
+                      >
                         {item.quantity} {item.unit}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-500">
-                      {item.minQuantity != null ? `${item.minQuantity} ${item.unit}` : "—"}
+                      {item.minQuantity != null
+                        ? `${item.minQuantity} ${item.unit}`
+                        : "—"}
                     </td>
                     <td className="px-4 py-3">
                       {isLow ? (
@@ -116,7 +129,9 @@ export default function InventoryPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{item.supplier || "—"}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {item.supplier || "—"}
+                    </td>
                     <td className="px-4 py-3 text-gray-500">
                       {item.expiryDate
                         ? new Date(item.expiryDate).toLocaleDateString("zh-CN")
@@ -134,7 +149,10 @@ export default function InventoryPage() {
                 );
               }) || (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                  <td
+                    colSpan={8}
+                    className="px-4 py-8 text-center text-gray-500"
+                  >
                     暂无库存记录
                   </td>
                 </tr>
@@ -147,13 +165,20 @@ export default function InventoryPage() {
       {/* Adjust Modal */}
       <Modal
         open={!!adjustItem}
-        onClose={() => { setAdjustItem(null); setAdjustAmount(""); setAdjustReason(""); }}
+        onClose={() => {
+          setAdjustItem(null);
+          setAdjustAmount("");
+          setAdjustReason("");
+        }}
         title={`调整库存 — ${adjustItem?.name}`}
       >
         <div className="space-y-4">
           <div>
             <div className="text-sm text-gray-500 mb-3">
-              当前库存: <span className="font-semibold text-slate-900">{adjustItem?.quantity} {adjustItem?.unit}</span>
+              当前库存:{" "}
+              <span className="font-semibold text-slate-900">
+                {adjustItem?.quantity} {adjustItem?.unit}
+              </span>
             </div>
             <div className="grid grid-cols-2 gap-2 mb-3">
               <button
@@ -196,7 +221,9 @@ export default function InventoryPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">原因（可选）</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              原因（可选）
+            </label>
             <input
               value={adjustReason}
               onChange={(e) => setAdjustReason(e.target.value)}
@@ -206,19 +233,33 @@ export default function InventoryPage() {
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <button
-              onClick={() => { setAdjustItem(null); setAdjustAmount(""); setAdjustReason(""); }}
+              onClick={() => {
+                setAdjustItem(null);
+                setAdjustAmount("");
+                setAdjustReason("");
+              }}
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               取消
             </button>
             <button
               onClick={() => adjustAmount && adjustMutation.mutate()}
-              disabled={!adjustAmount || Number(adjustAmount) <= 0 || adjustMutation.isPending}
+              disabled={
+                !adjustAmount ||
+                Number(adjustAmount) <= 0 ||
+                adjustMutation.isPending
+              }
               className={`rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-50 ${
-                adjustAction === "ADD" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
+                adjustAction === "ADD"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
               }`}
             >
-              {adjustMutation.isPending ? "处理中..." : adjustAction === "ADD" ? "确认入库" : "确认出库"}
+              {adjustMutation.isPending
+                ? "处理中..."
+                : adjustAction === "ADD"
+                  ? "确认入库"
+                  : "确认出库"}
             </button>
           </div>
         </div>

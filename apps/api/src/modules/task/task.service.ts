@@ -158,7 +158,10 @@ export class TaskService {
   async removeDependency(taskId: string, upstreamTaskId: string) {
     return this.prisma.taskDependency.delete({
       where: {
-        dependentTaskId_upstreamTaskId: { dependentTaskId: taskId, upstreamTaskId },
+        dependentTaskId_upstreamTaskId: {
+          dependentTaskId: taskId,
+          upstreamTaskId,
+        },
       },
     });
   }

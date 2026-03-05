@@ -33,7 +33,9 @@ function StatCard({
     <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-medium text-gray-600">{title}</span>
-        <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${color}`}>
+        <div
+          className={`flex h-9 w-9 items-center justify-center rounded-lg ${color}`}
+        >
           <Icon className="h-5 w-5 text-white" />
         </div>
       </div>
@@ -84,17 +86,18 @@ export default function DashboardPage() {
 
   // Compute stats
   const projectList = projects?.data || [];
-  const lowStockItems = inventory?.data?.filter(
-    (item: any) => item.minQuantity != null && item.quantity <= item.minQuantity
-  ) || [];
+  const lowStockItems =
+    inventory?.data?.filter(
+      (item: any) =>
+        item.minQuantity != null && item.quantity <= item.minQuantity,
+    ) || [];
 
-  const activeProjects = projectList.filter((p: any) =>
-    p.status === "ACTIVE" || p.status === "IN_PROGRESS"
+  const activeProjects = projectList.filter(
+    (p: any) => p.status === "ACTIVE" || p.status === "IN_PROGRESS",
   ).length;
 
-  const availableInstruments = instruments?.data?.filter(
-    (i: any) => i.status === "AVAILABLE"
-  ).length || 0;
+  const availableInstruments =
+    instruments?.data?.filter((i: any) => i.status === "AVAILABLE").length || 0;
 
   return (
     <div>
@@ -147,7 +150,10 @@ export default function DashboardPage() {
               <Bell className="h-4 w-4 text-violet-500" />
               待办 & 提醒
             </h2>
-            <Link href="/notifications" className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+            <Link
+              href="/notifications"
+              className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-0.5"
+            >
               查看全部 <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -161,9 +167,13 @@ export default function DashboardPage() {
                   key={n.id}
                   className={`flex items-start gap-2 rounded-lg p-2 ${n.isRead ? "bg-white" : "bg-blue-50"}`}
                 >
-                  <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${n.isRead ? "bg-gray-300" : "bg-blue-500"}`} />
+                  <div
+                    className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${n.isRead ? "bg-gray-300" : "bg-blue-500"}`}
+                  />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 line-clamp-1">{n.title || n.message || "新通知"}</p>
+                    <p className="text-sm text-gray-800 line-clamp-1">
+                      {n.title || n.message || "新通知"}
+                    </p>
                     <p className="text-xs text-gray-400 mt-0.5">
                       {new Date(n.createdAt).toLocaleString("zh-CN")}
                     </p>
@@ -192,12 +202,21 @@ export default function DashboardPage() {
               {projectList.slice(0, 5).map((p: any) => {
                 const total = p._count?.tasks || 0;
                 const completed = p.completedTasks || 0;
-                const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                const progress =
+                  total > 0 ? Math.round((completed / total) * 100) : 0;
                 return (
-                  <Link key={p.id} href={`/projects/${p.id}`} className="block group">
+                  <Link
+                    key={p.id}
+                    href={`/projects/${p.id}`}
+                    className="block group"
+                  >
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-gray-800 group-hover:text-blue-600 font-medium line-clamp-1">{p.name}</span>
-                      <span className="text-gray-400 text-xs ml-2 flex-shrink-0">{progress}%</span>
+                      <span className="text-gray-800 group-hover:text-blue-600 font-medium line-clamp-1">
+                        {p.name}
+                      </span>
+                      <span className="text-gray-400 text-xs ml-2 flex-shrink-0">
+                        {progress}%
+                      </span>
                     </div>
                     <div className="h-1.5 rounded-full bg-gray-100">
                       <div
@@ -221,7 +240,10 @@ export default function DashboardPage() {
               <Calendar className="h-4 w-4 text-teal-500" />
               仪器状态
             </h2>
-            <Link href="/instruments" className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+            <Link
+              href="/instruments"
+              className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-0.5"
+            >
               查看全部 <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -256,7 +278,10 @@ export default function DashboardPage() {
               <AlertTriangle className="h-4 w-4 text-orange-500" />
               库存预警
             </h2>
-            <Link href="/inventory" className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+            <Link
+              href="/inventory"
+              className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-0.5"
+            >
               查看库存 <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -266,11 +291,17 @@ export default function DashboardPage() {
           ) : lowStockItems.length > 0 ? (
             <div className="space-y-2">
               {lowStockItems.slice(0, 5).map((item: any) => (
-                <div key={item.id} className="flex items-center justify-between rounded-lg bg-red-50 px-3 py-2">
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between rounded-lg bg-red-50 px-3 py-2"
+                >
                   <div>
-                    <div className="text-sm font-medium text-red-800">{item.name}</div>
+                    <div className="text-sm font-medium text-red-800">
+                      {item.name}
+                    </div>
                     <div className="text-xs text-red-600">
-                      剩余 {item.quantity} {item.unit} / 最低 {item.minQuantity} {item.unit}
+                      剩余 {item.quantity} {item.unit} / 最低 {item.minQuantity}{" "}
+                      {item.unit}
                     </div>
                   </div>
                   <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
@@ -287,7 +318,9 @@ export default function DashboardPage() {
           {/* Teams section */}
           {teams && teams.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-100">
-              <div className="text-xs font-semibold uppercase text-gray-400 mb-2">团队动态</div>
+              <div className="text-xs font-semibold uppercase text-gray-400 mb-2">
+                团队动态
+              </div>
               <div className="space-y-1">
                 {teams.slice(0, 3).map((team: any) => (
                   <Link
@@ -296,7 +329,9 @@ export default function DashboardPage() {
                     className="flex items-center justify-between text-xs text-gray-600 hover:text-blue-600 py-0.5"
                   >
                     <span>{team.name}</span>
-                    <span className="text-gray-400">{team.members?.length || 0} 成员</span>
+                    <span className="text-gray-400">
+                      {team.members?.length || 0} 成员
+                    </span>
                   </Link>
                 ))}
               </div>

@@ -133,26 +133,26 @@ ponylab/
 
 ## 2. 技术栈选型
 
-| 层级 | 技术 | 理由 |
-|------|------|------|
-| **前端** | Next.js 15 + React 19 | SSR/SSG、App Router、Server Components |
-| **UI 框架** | Tailwind CSS + shadcn/ui | 快速开发 + 高质量组件 |
-| **富文本** | TipTap (ProseMirror) | 可扩展的实验记录编辑器 |
-| **状态管理** | Zustand + TanStack Query | 轻量 + 服务端状态管理 |
-| **后端** | NestJS 11 | 模块化、装饰器、TypeScript 原生 |
-| **ORM** | Prisma 6 | 类型安全、迁移管理 |
-| **数据库** | PostgreSQL 16 | JSONB、全文搜索、GIS |
-| **缓存** | Redis 7 | Session、缓存、实时 |
-| **搜索** | Meilisearch | 快速全文搜索、中文支持 |
-| **文件存储** | S3/MinIO | 对象存储 |
-| **消息队列** | BullMQ (Redis) | 后台任务处理 |
-| **实时通信** | Socket.IO | 实时协作 |
-| **AI** | Claude API + OpenAI | LLM 推理 |
-| **向量数据库** | pgvector | PostgreSQL 原生向量搜索 |
-| **认证** | Passport.js + JWT | 灵活的认证策略 |
-| **测试** | Vitest + Playwright | 单元测试 + E2E |
-| **Monorepo** | Turborepo + pnpm | 构建缓存 + workspace |
-| **部署** | Docker + Vercel/Railway | 容器化部署 |
+| 层级           | 技术                     | 理由                                   |
+| -------------- | ------------------------ | -------------------------------------- |
+| **前端**       | Next.js 15 + React 19    | SSR/SSG、App Router、Server Components |
+| **UI 框架**    | Tailwind CSS + shadcn/ui | 快速开发 + 高质量组件                  |
+| **富文本**     | TipTap (ProseMirror)     | 可扩展的实验记录编辑器                 |
+| **状态管理**   | Zustand + TanStack Query | 轻量 + 服务端状态管理                  |
+| **后端**       | NestJS 11                | 模块化、装饰器、TypeScript 原生        |
+| **ORM**        | Prisma 6                 | 类型安全、迁移管理                     |
+| **数据库**     | PostgreSQL 16            | JSONB、全文搜索、GIS                   |
+| **缓存**       | Redis 7                  | Session、缓存、实时                    |
+| **搜索**       | Meilisearch              | 快速全文搜索、中文支持                 |
+| **文件存储**   | S3/MinIO                 | 对象存储                               |
+| **消息队列**   | BullMQ (Redis)           | 后台任务处理                           |
+| **实时通信**   | Socket.IO                | 实时协作                               |
+| **AI**         | Claude API + OpenAI      | LLM 推理                               |
+| **向量数据库** | pgvector                 | PostgreSQL 原生向量搜索                |
+| **认证**       | Passport.js + JWT        | 灵活的认证策略                         |
+| **测试**       | Vitest + Playwright      | 单元测试 + E2E                         |
+| **Monorepo**   | Turborepo + pnpm         | 构建缓存 + workspace                   |
+| **部署**       | Docker + Vercel/Railway  | 容器化部署                             |
 
 ---
 
@@ -162,8 +162,7 @@ ponylab/
 
 ```yaml
 触发: push/PR to main, develop
-步骤:
-  1. Lint（ESLint + Prettier）
+步骤: 1. Lint（ESLint + Prettier）
   2. Type Check（tsc --noEmit）
   3. Unit Tests（Vitest）
   4. Build（turbo build）
@@ -212,15 +211,16 @@ main (production)
 
 - **main**: 生产分支，仅通过 PR 合并
 - **develop**: 开发分支，功能集成
-- **feature/***: 功能分支
-- **fix/***: 修复分支
-- **docs/***: 文档分支
+- **feature/\***: 功能分支
+- **fix/\***: 修复分支
+- **docs/\***: 文档分支
 
 ---
 
 ## 5. 文档时间戳规范
 
 所有文档文件名必须包含精确到分的时间戳：
+
 - 格式: `YYYY-MM-DD-HHmm_{简述}.md`
 - 示例: `2026-03-04-2135_prd-v1.md`
 - 时区: 本地时区（CST/UTC+8）

@@ -5,14 +5,18 @@ import { PrismaService } from "../../common/prisma/prisma.service";
 export class AuditService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(page = 1, limit = 50, filters?: {
-    entityType?: string;
-    entityId?: string;
-    userId?: string;
-    action?: string;
-    from?: string;
-    to?: string;
-  }) {
+  async findAll(
+    page = 1,
+    limit = 50,
+    filters?: {
+      entityType?: string;
+      entityId?: string;
+      userId?: string;
+      action?: string;
+      from?: string;
+      to?: string;
+    },
+  ) {
     const where: any = {};
     if (filters?.entityType) where.entityType = filters.entityType;
     if (filters?.entityId) where.entityId = filters.entityId;
@@ -30,7 +34,9 @@ export class AuditService {
         skip: (page - 1) * limit,
         take: limit,
         include: {
-          user: { select: { id: true, firstName: true, lastName: true, email: true } },
+          user: {
+            select: { id: true, firstName: true, lastName: true, email: true },
+          },
         },
         orderBy: { createdAt: "desc" },
       }),

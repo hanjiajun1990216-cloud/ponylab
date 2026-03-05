@@ -34,7 +34,9 @@ export class InventoryController {
     @Query("limit", new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query("category") category?: string,
   ) {
-    return this.inventoryService.findAll(page, Math.min(limit, 100), { category });
+    return this.inventoryService.findAll(page, Math.min(limit, 100), {
+      category,
+    });
   }
 
   @Get("low-stock")
@@ -53,9 +55,16 @@ export class InventoryController {
   @ApiOperation({ summary: "Adjust inventory quantity" })
   async adjust(
     @Param("id") id: string,
-    @Body() body: { action: "IN" | "OUT" | "ADJUST"; amount: number; reason?: string },
+    @Body()
+    body: { action: "IN" | "OUT" | "ADJUST"; amount: number; reason?: string },
     @CurrentUser("id") userId: string,
   ) {
-    return this.inventoryService.adjustQuantity(id, body.action, body.amount, userId, body.reason);
+    return this.inventoryService.adjustQuantity(
+      id,
+      body.action,
+      body.amount,
+      userId,
+      body.reason,
+    );
   }
 }

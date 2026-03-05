@@ -60,7 +60,9 @@ export class ProjectController {
   }
 
   @Get(":id")
-  @ApiOperation({ summary: "Get project details with tasks, experiments, comments, lead" })
+  @ApiOperation({
+    summary: "Get project details with tasks, experiments, comments, lead",
+  })
   async findById(@Param("id") id: string) {
     return this.projectService.findById(id);
   }

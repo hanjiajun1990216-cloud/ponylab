@@ -40,12 +40,12 @@ export class InvitationService {
     const token = crypto.randomBytes(32).toString("hex");
     const code = data.type === "CODE" ? generateCode() : undefined;
     const expiresAt = new Date();
-    expiresAt.setDate(
-      expiresAt.getDate() + (data.expiresInDays ?? 7),
-    );
+    expiresAt.setDate(expiresAt.getDate() + (data.expiresInDays ?? 7));
 
     if (data.type === "EMAIL" && !data.email) {
-      throw new BadRequestException("Email is required for EMAIL type invitation");
+      throw new BadRequestException(
+        "Email is required for EMAIL type invitation",
+      );
     }
 
     return this.prisma.teamInvitation.create({
@@ -91,14 +91,14 @@ export class InvitationService {
     }
 
     const invitation = await this.prisma.teamInvitation.findFirst({
-      where: input.token
-        ? { token: input.token }
-        : { code: input.code },
+      where: input.token ? { token: input.token } : { code: input.code },
     });
 
     if (!invitation) throw new NotFoundException("Invitation not found");
     if (invitation.status !== "PENDING") {
-      throw new BadRequestException(`Invitation is ${invitation.status.toLowerCase()}`);
+      throw new BadRequestException(
+        `Invitation is ${invitation.status.toLowerCase()}`,
+      );
     }
     if (invitation.expiresAt < new Date()) {
       await this.prisma.teamInvitation.update({
@@ -135,7 +135,8 @@ export class InvitationService {
           // Mark ACCEPTED only for single-use EMAIL/CODE invitations
           status:
             invitation.type === "EMAIL" ||
-            (invitation.maxUses && invitation.usedCount + 1 >= invitation.maxUses)
+            (invitation.maxUses &&
+              invitation.usedCount + 1 >= invitation.maxUses)
               ? "ACCEPTED"
               : "PENDING",
         },

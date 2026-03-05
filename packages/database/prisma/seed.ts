@@ -153,7 +153,8 @@ async function main() {
   const direction = await prisma.direction.create({
     data: {
       name: "Recombinant Protein Production",
-      description: "Research focus on optimizing expression and purification of recombinant proteins",
+      description:
+        "Research focus on optimizing expression and purification of recombinant proteins",
       leadId: pi.id,
       teamId: team.id,
       color: "#0ea5e9",
@@ -265,7 +266,8 @@ async function main() {
   const task5 = await prisma.task.create({
     data: {
       title: "Submit monthly progress report",
-      description: "Compile results from all ongoing experiments and submit to PI",
+      description:
+        "Compile results from all ongoing experiments and submit to PI",
       status: "TODO",
       priority: 1,
       projectId: project.id,
@@ -469,14 +471,54 @@ async function main() {
           version: 1,
           content: {
             steps: [
-              { order: 1, title: "Thaw competent cells", duration: "10 min", description: "Thaw on ice for 10 minutes" },
-              { order: 2, title: "Add DNA", duration: "1 min", description: "Add 1-5 µL of plasmid DNA, mix gently" },
-              { order: 3, title: "Incubate on ice", duration: "30 min", description: "Incubate on ice for 30 minutes" },
-              { order: 4, title: "Heat shock", duration: "45 sec", description: "42°C water bath for exactly 45 seconds" },
-              { order: 5, title: "Ice recovery", duration: "2 min", description: "Return to ice for 2 minutes" },
-              { order: 6, title: "Add SOC media", duration: "1 min", description: "Add 250 µL pre-warmed SOC media" },
-              { order: 7, title: "Recovery incubation", duration: "1 hr", description: "37°C shaker at 250 rpm for 1 hour" },
-              { order: 8, title: "Plate", duration: "5 min", description: "Plate 50-200 µL on selective agar plates" },
+              {
+                order: 1,
+                title: "Thaw competent cells",
+                duration: "10 min",
+                description: "Thaw on ice for 10 minutes",
+              },
+              {
+                order: 2,
+                title: "Add DNA",
+                duration: "1 min",
+                description: "Add 1-5 µL of plasmid DNA, mix gently",
+              },
+              {
+                order: 3,
+                title: "Incubate on ice",
+                duration: "30 min",
+                description: "Incubate on ice for 30 minutes",
+              },
+              {
+                order: 4,
+                title: "Heat shock",
+                duration: "45 sec",
+                description: "42°C water bath for exactly 45 seconds",
+              },
+              {
+                order: 5,
+                title: "Ice recovery",
+                duration: "2 min",
+                description: "Return to ice for 2 minutes",
+              },
+              {
+                order: 6,
+                title: "Add SOC media",
+                duration: "1 min",
+                description: "Add 250 µL pre-warmed SOC media",
+              },
+              {
+                order: 7,
+                title: "Recovery incubation",
+                duration: "1 hr",
+                description: "37°C shaker at 250 rpm for 1 hour",
+              },
+              {
+                order: 8,
+                title: "Plate",
+                duration: "5 min",
+                description: "Plate 50-200 µL on selective agar plates",
+              },
             ],
           },
         },
@@ -586,7 +628,8 @@ async function main() {
   // ─── 14. Comments (项目级 + 仪器级) ───
   const projectComment1 = await prisma.comment.create({
     data: {
-      content: "Great progress on the IPTG optimization! Please make sure to document all conditions carefully.",
+      content:
+        "Great progress on the IPTG optimization! Please make sure to document all conditions carefully.",
       authorId: pi.id,
       projectId: project.id,
       isPinned: true,
@@ -597,7 +640,8 @@ async function main() {
   // Reply to project comment
   await prisma.comment.create({
     data: {
-      content: "Understood! I will update the ELN entry with all concentration details.",
+      content:
+        "Understood! I will update the ELN entry with all concentration details.",
       authorId: researcher.id,
       projectId: project.id,
       parentId: projectComment1.id,
@@ -607,7 +651,8 @@ async function main() {
   // Task-level comment
   await prisma.comment.create({
     data: {
-      content: "I have set up the 3 dilutions. They are in the 4°C fridge, labeled.",
+      content:
+        "I have set up the 3 dilutions. They are in the 4°C fridge, labeled.",
       authorId: tech.id,
       taskId: task3.id,
       label: "share",
@@ -617,7 +662,8 @@ async function main() {
   // Instrument-level comment (maintenance note)
   await prisma.comment.create({
     data: {
-      content: "Calibrated UV lamp last week. Performance is optimal. Next calibration due in 3 months.",
+      content:
+        "Calibrated UV lamp last week. Performance is optimal. Next calibration due in 3 months.",
       authorId: tech.id,
       instrumentId: spectro.id,
       label: "maintenance",
@@ -627,7 +673,8 @@ async function main() {
 
   await prisma.comment.create({
     data: {
-      content: "Please ensure the cuvette holder is clean before each use — residues can affect readings.",
+      content:
+        "Please ensure the cuvette holder is clean before each use — residues can affect readings.",
       authorId: pi.id,
       instrumentId: spectro.id,
       label: "suggestion",
@@ -646,7 +693,8 @@ async function main() {
         scope: "TEAM",
         authorId: pi.id,
         title: "Lab Safety Reminder",
-        content: "Please review the updated SDS sheets for IPTG and Ampicillin. Training session on Friday at 10am.",
+        content:
+          "Please review the updated SDS sheets for IPTG and Ampicillin. Training session on Friday at 10am.",
         isPinned: true,
         teamId: team.id,
         expiresAt: expiresNextMonth,
@@ -655,14 +703,16 @@ async function main() {
         scope: "TEAM",
         authorId: admin.id,
         title: "System Maintenance Window",
-        content: "PonyLab system will undergo maintenance on Saturday 2am-4am. Please save all work before then.",
+        content:
+          "PonyLab system will undergo maintenance on Saturday 2am-4am. Please save all work before then.",
         teamId: team.id,
       },
       {
         scope: "INSTRUMENT",
         authorId: tech.id,
         title: "Spectrophotometer: New SOP",
-        content: "A new SOP for the Cary 60 spectrophotometer has been uploaded to the shared drive. Please read before next use.",
+        content:
+          "A new SOP for the Cary 60 spectrophotometer has been uploaded to the shared drive. Please read before next use.",
         instrumentId: spectro.id,
         isPinned: true,
       },
@@ -702,7 +752,11 @@ async function main() {
         entityType: "InventoryItem",
         entityId: iptgItem.id,
         oldValue: { quantity: 10 },
-        newValue: { quantity: 5, action: "OUT", reason: "Used for IPTG induction experiment" },
+        newValue: {
+          quantity: 5,
+          action: "OUT",
+          reason: "Used for IPTG induction experiment",
+        },
       },
     ],
   });

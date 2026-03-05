@@ -57,13 +57,14 @@ interface BadgeProps {
 }
 
 export function Badge({ label, variant, status, className }: BadgeProps) {
-  const resolvedVariant = variant || (status ? statusToVariant(status) : "gray");
+  const resolvedVariant =
+    variant || (status ? statusToVariant(status) : "gray");
   return (
     <span
       className={clsx(
         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
         variantClasses[resolvedVariant],
-        className
+        className,
       )}
     >
       {label}

@@ -46,17 +46,29 @@ export class InstrumentController {
   @ApiOperation({ summary: "Book instrument (with conflict detection)" })
   async createBooking(
     @Param("id") instrumentId: string,
-    @Body() body: { title: string; startTime: string; endTime: string; notes?: string },
+    @Body()
+    body: { title: string; startTime: string; endTime: string; notes?: string },
     @CurrentUser("id") userId: string,
   ) {
-    return this.instrumentService.createBooking({ ...body, instrumentId, userId });
+    return this.instrumentService.createBooking({
+      ...body,
+      instrumentId,
+      userId,
+    });
   }
 
   @Post(":id/maintenance")
   @ApiOperation({ summary: "Add maintenance record" })
   async addMaintenance(
     @Param("id") instrumentId: string,
-    @Body() body: { type: string; description: string; performedAt: string; nextDueDate?: string; cost?: number },
+    @Body()
+    body: {
+      type: string;
+      description: string;
+      performedAt: string;
+      nextDueDate?: string;
+      cost?: number;
+    },
   ) {
     return this.instrumentService.addMaintenance(instrumentId, body);
   }

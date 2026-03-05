@@ -40,7 +40,13 @@ export class ApplicationService {
       // Update rejected application to re-apply
       return this.prisma.teamApplication.update({
         where: { id: existing.id },
-        data: { status: "PENDING", reason, reviewerId: null, reviewNote: null, reviewedAt: null },
+        data: {
+          status: "PENDING",
+          reason,
+          reviewerId: null,
+          reviewNote: null,
+          reviewedAt: null,
+        },
         include: { user: { select: USER_SELECT } },
       });
     }

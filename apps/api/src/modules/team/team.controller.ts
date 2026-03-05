@@ -23,15 +23,14 @@ export class TeamController {
 
   @Post()
   @ApiOperation({ summary: "Create a new team" })
-  async create(
-    @Body() dto: CreateTeamDto,
-    @CurrentUser("id") userId: string,
-  ) {
+  async create(@Body() dto: CreateTeamDto, @CurrentUser("id") userId: string) {
     return this.teamService.create(dto, userId);
   }
 
   @Get()
-  @ApiOperation({ summary: "List teams for current user (SUPER_ADMIN sees all)" })
+  @ApiOperation({
+    summary: "List teams for current user (SUPER_ADMIN sees all)",
+  })
   async findAll(@CurrentUser() user: { id: string; role: string }) {
     return this.teamService.findAll(user.id, user.role);
   }
@@ -70,7 +69,11 @@ export class TeamController {
     @Param("userId") userId: string,
     @Body() body: { role?: string },
   ) {
-    return this.teamService.addMember(teamId, userId, (body.role as any) ?? "MEMBER");
+    return this.teamService.addMember(
+      teamId,
+      userId,
+      (body.role as any) ?? "MEMBER",
+    );
   }
 
   @Delete(":id/members/:userId")

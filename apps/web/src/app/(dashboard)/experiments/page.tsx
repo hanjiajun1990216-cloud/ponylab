@@ -10,7 +10,13 @@ import { EmptyState } from "@/components/EmptyState";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Modal } from "@/components/Modal";
 
-const ALL_STATUSES = ["DRAFT", "IN_PROGRESS", "COMPLETED", "SIGNED", "ARCHIVED"];
+const ALL_STATUSES = [
+  "DRAFT",
+  "IN_PROGRESS",
+  "COMPLETED",
+  "SIGNED",
+  "ARCHIVED",
+];
 
 const statusLabel: Record<string, string> = {
   DRAFT: "草稿",
@@ -116,7 +122,9 @@ export default function ExperimentsPage() {
           <button
             onClick={() => setStatusFilter("")}
             className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
-              !statusFilter ? "bg-slate-800 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              !statusFilter
+                ? "bg-slate-800 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             全部
@@ -126,7 +134,9 @@ export default function ExperimentsPage() {
               key={s}
               onClick={() => setStatusFilter(s === statusFilter ? "" : s)}
               className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
-                statusFilter === s ? "bg-slate-800 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                statusFilter === s
+                  ? "bg-slate-800 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
               {statusLabel[s]}
@@ -148,7 +158,9 @@ export default function ExperimentsPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-slate-900">{exp.title}</h3>
+                    <h3 className="font-semibold text-slate-900">
+                      {exp.title}
+                    </h3>
                     {exp.status === "SIGNED" && (
                       <CheckCircle2 className="h-4 w-4 text-purple-500" />
                     )}
@@ -162,14 +174,22 @@ export default function ExperimentsPage() {
                           userId={exp.author.id}
                           size="sm"
                         />
-                        <span>{exp.author.firstName} {exp.author.lastName}</span>
+                        <span>
+                          {exp.author.firstName} {exp.author.lastName}
+                        </span>
                       </div>
                     )}
                     <span>·</span>
-                    <span>更新于 {new Date(exp.updatedAt).toLocaleDateString("zh-CN")}</span>
+                    <span>
+                      更新于{" "}
+                      {new Date(exp.updatedAt).toLocaleDateString("zh-CN")}
+                    </span>
                   </div>
                 </div>
-                <Badge label={statusLabel[exp.status] || exp.status} status={exp.status} />
+                <Badge
+                  label={statusLabel[exp.status] || exp.status}
+                  status={exp.status}
+                />
               </div>
               <div className="mt-3 flex gap-4 text-xs text-gray-400">
                 <span>{exp._count?.tasks || 0} 个任务</span>
@@ -195,28 +215,51 @@ export default function ExperimentsPage() {
         <EmptyState
           icon={FlaskConical}
           title="暂无实验记录"
-          description={statusFilter ? `没有状态为"${statusLabel[statusFilter]}"的记录` : "创建第一个实验记录"}
-          action={!statusFilter ? { label: "新建记录", onClick: () => setShowCreate(true) } : undefined}
+          description={
+            statusFilter
+              ? `没有状态为"${statusLabel[statusFilter]}"的记录`
+              : "创建第一个实验记录"
+          }
+          action={
+            !statusFilter
+              ? { label: "新建记录", onClick: () => setShowCreate(true) }
+              : undefined
+          }
         />
       )}
 
       {/* Create Modal */}
-      <Modal open={showCreate} onClose={() => { setShowCreate(false); setNewTitle(""); }} title="新建实验记录">
+      <Modal
+        open={showCreate}
+        onClose={() => {
+          setShowCreate(false);
+          setNewTitle("");
+        }}
+        title="新建实验记录"
+      >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">标题 *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              标题 *
+            </label>
             <input
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               placeholder="实验标题..."
               autoFocus
-              onKeyDown={(e) => { if (e.key === "Enter" && newTitle.trim()) createMutation.mutate(newTitle); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && newTitle.trim())
+                  createMutation.mutate(newTitle);
+              }}
             />
           </div>
           <div className="flex justify-end gap-3">
             <button
-              onClick={() => { setShowCreate(false); setNewTitle(""); }}
+              onClick={() => {
+                setShowCreate(false);
+                setNewTitle("");
+              }}
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               取消

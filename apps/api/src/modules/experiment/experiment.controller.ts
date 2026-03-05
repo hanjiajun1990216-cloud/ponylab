@@ -41,7 +41,11 @@ export class ExperimentController {
     @Query("page", new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query("limit", new DefaultValuePipe(20), ParseIntPipe) limit: number,
   ) {
-    return this.experimentService.findByProject(projectId, page, Math.min(limit, 100));
+    return this.experimentService.findByProject(
+      projectId,
+      page,
+      Math.min(limit, 100),
+    );
   }
 
   @Get(":id")
@@ -62,19 +66,13 @@ export class ExperimentController {
 
   @Post(":id/sign")
   @ApiOperation({ summary: "Sign experiment (immutable after signing)" })
-  async sign(
-    @Param("id") id: string,
-    @CurrentUser("id") userId: string,
-  ) {
+  async sign(@Param("id") id: string, @CurrentUser("id") userId: string) {
     return this.experimentService.sign(id, userId);
   }
 
   @Delete(":id")
   @ApiOperation({ summary: "Delete experiment" })
-  async delete(
-    @Param("id") id: string,
-    @CurrentUser("id") userId: string,
-  ) {
+  async delete(@Param("id") id: string, @CurrentUser("id") userId: string) {
     return this.experimentService.delete(id, userId);
   }
 }

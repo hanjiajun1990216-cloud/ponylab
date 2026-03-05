@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
 @Injectable()
@@ -25,7 +29,11 @@ export class InventoryService {
     });
   }
 
-  async findAll(page = 1, limit = 20, filters?: { category?: string; lowStock?: boolean }) {
+  async findAll(
+    page = 1,
+    limit = 20,
+    filters?: { category?: string; lowStock?: boolean },
+  ) {
     const where: any = {};
     if (filters?.category) where.category = filters.category;
     if (filters?.lowStock) {
@@ -61,7 +69,9 @@ export class InventoryService {
       where: { id },
       include: {
         logs: {
-          include: { user: { select: { id: true, firstName: true, lastName: true } } },
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true } },
+          },
           orderBy: { createdAt: "desc" },
           take: 50,
         },
@@ -90,7 +100,8 @@ export class InventoryService {
         break;
       case "OUT":
         quantityAfter = quantityBefore - amount;
-        if (quantityAfter < 0) throw new BadRequestException("Insufficient stock");
+        if (quantityAfter < 0)
+          throw new BadRequestException("Insufficient stock");
         break;
       case "ADJUST":
         quantityAfter = amount;
@@ -104,7 +115,14 @@ export class InventoryService {
         data: { quantity: quantityAfter },
       }),
       this.prisma.inventoryLog.create({
-        data: { itemId: id, action, quantityBefore, quantityAfter, reason, userId },
+        data: {
+          itemId: id,
+          action,
+          quantityBefore,
+          quantityAfter,
+          reason,
+          userId,
+        },
       }),
       this.prisma.auditLog.create({
         data: {

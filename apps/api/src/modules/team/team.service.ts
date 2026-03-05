@@ -35,7 +35,8 @@ export class TeamService {
   }
 
   async findAll(userId: string, userRole?: string) {
-    const where = userRole === "SUPER_ADMIN" ? {} : { members: { some: { userId } } };
+    const where =
+      userRole === "SUPER_ADMIN" ? {} : { members: { some: { userId } } };
     return this.prisma.team.findMany({
       where,
       include: {

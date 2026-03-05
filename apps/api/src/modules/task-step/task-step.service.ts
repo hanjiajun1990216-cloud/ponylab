@@ -59,7 +59,8 @@ export class TaskStepService {
     });
     if (!step) throw new NotFoundException("Task step not found");
 
-    const isCompleting = data.status === "COMPLETED" && step.status !== "COMPLETED";
+    const isCompleting =
+      data.status === "COMPLETED" && step.status !== "COMPLETED";
 
     return this.prisma.taskStep.update({
       where: { id: stepId },
@@ -68,7 +69,12 @@ export class TaskStepService {
         description: data.description,
         status: data.status,
         assigneeId: data.assigneeId,
-        dueDate: data.dueDate === null ? null : data.dueDate ? new Date(data.dueDate) : undefined,
+        dueDate:
+          data.dueDate === null
+            ? null
+            : data.dueDate
+              ? new Date(data.dueDate)
+              : undefined,
         notes: data.notes,
         completedAt: isCompleting ? new Date() : undefined,
         completedBy: isCompleting ? userId : undefined,

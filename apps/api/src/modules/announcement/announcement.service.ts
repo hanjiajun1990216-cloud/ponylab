@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 
 const AUTHOR_SELECT = {
@@ -48,7 +52,9 @@ export class AnnouncementService {
       throw new BadRequestException("teamId is required for TEAM scope");
     }
     if (data.scope === "INSTRUMENT" && !data.instrumentId) {
-      throw new BadRequestException("instrumentId is required for INSTRUMENT scope");
+      throw new BadRequestException(
+        "instrumentId is required for INSTRUMENT scope",
+      );
     }
 
     return this.prisma.announcement.create({
@@ -77,7 +83,9 @@ export class AnnouncementService {
       expiresAt?: string | null;
     },
   ) {
-    const announcement = await this.prisma.announcement.findUnique({ where: { id } });
+    const announcement = await this.prisma.announcement.findUnique({
+      where: { id },
+    });
     if (!announcement) throw new NotFoundException("Announcement not found");
 
     return this.prisma.announcement.update({
@@ -86,14 +94,21 @@ export class AnnouncementService {
         title: data.title,
         content: data.content,
         isPinned: data.isPinned,
-        expiresAt: data.expiresAt === null ? null : data.expiresAt ? new Date(data.expiresAt) : undefined,
+        expiresAt:
+          data.expiresAt === null
+            ? null
+            : data.expiresAt
+              ? new Date(data.expiresAt)
+              : undefined,
       },
       include: { author: { select: AUTHOR_SELECT } },
     });
   }
 
   async delete(id: string) {
-    const announcement = await this.prisma.announcement.findUnique({ where: { id } });
+    const announcement = await this.prisma.announcement.findUnique({
+      where: { id },
+    });
     if (!announcement) throw new NotFoundException("Announcement not found");
     return this.prisma.announcement.delete({ where: { id } });
   }

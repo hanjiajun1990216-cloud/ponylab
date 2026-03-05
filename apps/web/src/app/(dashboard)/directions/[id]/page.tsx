@@ -5,7 +5,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Plus, FolderKanban, User, Calendar, CheckSquare } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  FolderKanban,
+  User,
+  Calendar,
+  CheckSquare,
+} from "lucide-react";
 import { Modal } from "@/components/Modal";
 import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
@@ -37,7 +44,12 @@ export default function DirectionDetailPage() {
     queryFn: () => api.getProjectsByDirection(id),
   });
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateForm>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateForm>({
     resolver: zodResolver(createSchema),
   });
 
@@ -61,7 +73,10 @@ export default function DirectionDetailPage() {
     <div>
       {/* Breadcrumb */}
       <div className="mb-4 flex items-center gap-2 text-sm text-gray-500">
-        <Link href="/directions" className="flex items-center gap-1 hover:text-gray-700">
+        <Link
+          href="/directions"
+          className="flex items-center gap-1 hover:text-gray-700"
+        >
           <ArrowLeft className="h-4 w-4" />
           研究方向
         </Link>
@@ -72,9 +87,13 @@ export default function DirectionDetailPage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">{direction?.name}</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {direction?.name}
+          </h1>
           {direction?.description && (
-            <p className="mt-1 text-sm text-gray-600">{direction.description}</p>
+            <p className="mt-1 text-sm text-gray-600">
+              {direction.description}
+            </p>
           )}
           <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
             {direction?.leader && (
@@ -109,7 +128,10 @@ export default function DirectionDetailPage() {
           {projects.map((project: any) => {
             const totalTasks = project._count?.tasks || 0;
             const completedTasks = project.completedTasks || 0;
-            const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            const progress =
+              totalTasks > 0
+                ? Math.round((completedTasks / totalTasks) * 100)
+                : 0;
 
             return (
               <Link
@@ -128,7 +150,9 @@ export default function DirectionDetailPage() {
                 </div>
 
                 {project.description && (
-                  <p className="text-sm text-gray-500 line-clamp-2 mb-3">{project.description}</p>
+                  <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                    {project.description}
+                  </p>
                 )}
 
                 {/* Progress bar */}
@@ -170,19 +194,35 @@ export default function DirectionDetailPage() {
       )}
 
       {/* Create Modal */}
-      <Modal open={showCreate} onClose={() => { setShowCreate(false); reset(); }} title="新建项目">
-        <form onSubmit={handleSubmit((data) => createMutation.mutate(data))} className="space-y-4">
+      <Modal
+        open={showCreate}
+        onClose={() => {
+          setShowCreate(false);
+          reset();
+        }}
+        title="新建项目"
+      >
+        <form
+          onSubmit={handleSubmit((data) => createMutation.mutate(data))}
+          className="space-y-4"
+        >
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">项目名称 *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              项目名称 *
+            </label>
             <input
               {...register("name")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="输入项目名称"
             />
-            {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
+            {errors.name && (
+              <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>
+            )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              描述
+            </label>
             <textarea
               {...register("description")}
               rows={3}
@@ -193,7 +233,10 @@ export default function DirectionDetailPage() {
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => { setShowCreate(false); reset(); }}
+              onClick={() => {
+                setShowCreate(false);
+                reset();
+              }}
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               取消

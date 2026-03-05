@@ -42,7 +42,12 @@ export default function TeamsPage() {
     queryFn: () => api.getTeams(),
   });
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateForm>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CreateForm>({
     resolver: zodResolver(createSchema),
     defaultValues: { visibility: "PRIVATE" },
   });
@@ -105,7 +110,9 @@ export default function TeamsPage() {
                   {team.name}
                 </h3>
                 {team.description && (
-                  <p className="mt-1 text-sm text-gray-500 line-clamp-2">{team.description}</p>
+                  <p className="mt-1 text-sm text-gray-500 line-clamp-2">
+                    {team.description}
+                  </p>
                 )}
 
                 <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
@@ -122,19 +129,35 @@ export default function TeamsPage() {
       )}
 
       {/* Create Modal */}
-      <Modal open={showCreate} onClose={() => { setShowCreate(false); reset(); }} title="创建团队">
-        <form onSubmit={handleSubmit((data) => createMutation.mutate(data))} className="space-y-4">
+      <Modal
+        open={showCreate}
+        onClose={() => {
+          setShowCreate(false);
+          reset();
+        }}
+        title="创建团队"
+      >
+        <form
+          onSubmit={handleSubmit((data) => createMutation.mutate(data))}
+          className="space-y-4"
+        >
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">团队名称 *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              团队名称 *
+            </label>
             <input
               {...register("name")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="例如：蛋白质组学研究团队"
             />
-            {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
+            {errors.name && (
+              <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>
+            )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              描述
+            </label>
             <textarea
               {...register("description")}
               rows={2}
@@ -143,7 +166,9 @@ export default function TeamsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">可见性</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              可见性
+            </label>
             <select
               {...register("visibility")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
@@ -156,7 +181,10 @@ export default function TeamsPage() {
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => { setShowCreate(false); reset(); }}
+              onClick={() => {
+                setShowCreate(false);
+                reset();
+              }}
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
             >
               取消

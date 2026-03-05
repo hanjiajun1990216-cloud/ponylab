@@ -42,8 +42,17 @@ const sizeClasses = {
   lg: "h-10 w-10 text-base",
 };
 
-export function Avatar({ firstName, lastName, userId, color, size = "md", className }: AvatarProps) {
-  const initials = [firstName?.[0], lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?";
+export function Avatar({
+  firstName,
+  lastName,
+  userId,
+  color,
+  size = "md",
+  className,
+}: AvatarProps) {
+  const initials =
+    [firstName?.[0], lastName?.[0]].filter(Boolean).join("").toUpperCase() ||
+    "?";
   const bgColor = color || stringToColor(userId || firstName || "?");
 
   return (
@@ -52,7 +61,7 @@ export function Avatar({ firstName, lastName, userId, color, size = "md", classN
         "flex items-center justify-center rounded-full font-bold text-white flex-shrink-0",
         bgColor,
         sizeClasses[size],
-        className
+        className,
       )}
       title={`${firstName || ""} ${lastName || ""}`.trim()}
     >
@@ -87,7 +96,7 @@ export function AvatarGroup({ users, max = 3, size = "sm" }: AvatarGroupProps) {
         <div
           className={clsx(
             "flex items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-600 ring-2 ring-white",
-            sizeClasses[size]
+            sizeClasses[size],
           )}
         >
           +{remaining}
