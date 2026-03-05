@@ -138,7 +138,7 @@ export class InstrumentService {
       orderBy: { startTime: "asc" },
     });
 
-    return bookings.map((b) => ({
+    return bookings.map((b: any) => ({
       id: b.id,
       title: b.title,
       start: b.startTime,
