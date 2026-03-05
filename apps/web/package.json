@@ -9,7 +9,7 @@
     "lint": "echo 'no lint yet'",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "test:e2e": "playwright test"
+    "test:e2e": "echo 'no e2e tests yet'"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
