@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/stores/auth";
+import { api } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -87,6 +88,27 @@ export default function LoginPage() {
             Create one
           </Link>
         </p>
+
+        <div className="mt-6 border-t border-gray-200 pt-4">
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                const config = await api.getSamlConfig();
+                if (!config.enabled) {
+                  setError("SSO is not configured for this instance");
+                  return;
+                }
+                window.location.href = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api"}/auth/saml/login`;
+              } catch {
+                setError("SSO configuration not available");
+              }
+            }}
+            className="w-full rounded-lg border border-gray-300 bg-white py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            Sign in with SSO
+          </button>
+        </div>
       </div>
     </div>
   );

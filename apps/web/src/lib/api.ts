@@ -45,6 +45,12 @@ class ApiClient {
   }
 
   // Auth
+  getSamlConfig() {
+    return this.fetch<{ enabled: boolean; entryPoint: string | null }>(
+      "/auth/saml/config",
+    );
+  }
+
   login(email: string, password: string) {
     return this.fetch<{ accessToken: string; refreshToken: string }>(
       "/auth/login",
@@ -359,8 +365,24 @@ class ApiClient {
     });
   }
 
-  signExperiment(id: string) {
-    return this.fetch<any>(`/experiments/${id}/sign`, { method: "POST" });
+  signExperiment(id: string, password: string) {
+    return this.fetch<any>(`/experiments/${id}/sign`, {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    });
+  }
+
+  witnessExperiment(id: string, password: string) {
+    return this.fetch<any>(`/experiments/${id}/witness`, {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    });
+  }
+
+  verifyAuditChain(limit = 1000) {
+    return this.fetch<{ valid: boolean; totalChecked: number; errors: any[] }>(
+      `/audit/verify-chain?limit=${limit}`,
+    );
   }
 
   getExperimentHistory(id: string) {
@@ -806,6 +828,22 @@ class ApiClient {
     return this.fetch<any>(`/ai/inventory/${itemId}/forecast`, {
       method: "POST",
     });
+  }
+
+  // Webhooks
+  registerWebhook(data: { url: string; events: string[]; secret: string }) {
+    return this.fetch<any>("/webhooks", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  getWebhooks() {
+    return this.fetch<any[]>("/webhooks");
+  }
+
+  deleteWebhook(id: string) {
+    return this.fetch<any>(`/webhooks/${id}`, { method: "DELETE" });
   }
 }
 

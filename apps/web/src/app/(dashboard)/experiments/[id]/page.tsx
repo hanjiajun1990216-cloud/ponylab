@@ -371,6 +371,8 @@ export default function ExperimentDetailPage() {
   const [editTitle, setEditTitle] = useState("");
   const [showHistoryDropdown, setShowHistoryDropdown] = useState(false);
   const [signError, setSignError] = useState<string | null>(null);
+  const [showSignDialog, setShowSignDialog] = useState(false);
+  const [signPassword, setSignPassword] = useState("");
   const historyDropdownRef = useRef<HTMLDivElement>(null);
 
   // 获取实验详情
@@ -399,11 +401,14 @@ export default function ExperimentDetailPage() {
     },
   });
 
-  // 签名
+  // 签名（21 CFR Part 11：需密码确认）
   const signMutation = useMutation({
-    mutationFn: () => api.signExperiment(experimentId),
+    mutationFn: (password: string) =>
+      api.signExperiment(experimentId, password),
     onSuccess: () => {
       setSignError(null);
+      setShowSignDialog(false);
+      setSignPassword("");
       queryClient.invalidateQueries({ queryKey: ["experiment", experimentId] });
     },
     onError: (err: any) => {
@@ -521,15 +526,19 @@ export default function ExperimentDetailPage() {
 
         {/* 右侧：操作按钮组 */}
         <div className="flex flex-shrink-0 flex-wrap items-center gap-2">
-          {/* 签名按钮（仅 COMPLETED 状态显示） */}
+          {/* 签名按钮（仅 COMPLETED 状态显示，21 CFR Part 11 需密码确认） */}
           {isCompleted && !isSigned && (
             <button
-              onClick={() => signMutation.mutate()}
+              onClick={() => {
+                setSignPassword("");
+                setSignError(null);
+                setShowSignDialog(true);
+              }}
               disabled={signMutation.isPending}
               className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
             >
               <CheckCircle2 className="h-4 w-4" />
-              {signMutation.isPending ? "签名中…" : "签名"}
+              签名
             </button>
           )}
 
@@ -643,6 +652,63 @@ export default function ExperimentDetailPage() {
 
       {/* AI Assistant Panel */}
       <AIAssistantPanel experimentId={experimentId} />
+
+      {/* 21 CFR Part 11 电子签名密码确认对话框 */}
+      {showSignDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
+            <h2 className="mb-1 text-lg font-semibold text-gray-900">
+              电子签名确认
+            </h2>
+            <p className="mb-4 text-sm text-gray-500">
+              根据 21 CFR Part 11
+              合规要求，电子签名需要输入您的登录密码以验证身份。
+            </p>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              登录密码
+            </label>
+            <input
+              type="password"
+              value={signPassword}
+              onChange={(e) => setSignPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && signPassword) {
+                  signMutation.mutate(signPassword);
+                }
+              }}
+              placeholder="请输入您的密码"
+              className="mb-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              autoFocus
+            />
+            {signError && (
+              <div className="mb-3 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                {signError}
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowSignDialog(false);
+                  setSignPassword("");
+                  setSignError(null);
+                }}
+                disabled={signMutation.isPending}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                取消
+              </button>
+              <button
+                onClick={() => signMutation.mutate(signPassword)}
+                disabled={!signPassword || signMutation.isPending}
+                className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+              >
+                {signMutation.isPending ? "签名中…" : "确认签名"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
