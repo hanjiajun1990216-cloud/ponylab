@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Patch,
+  Post,
+  Body,
   Param,
   Query,
   UseGuards,
@@ -40,6 +42,22 @@ export class NotificationController {
   @ApiOperation({ summary: "Get unread notification count" })
   async getUnreadCount(@CurrentUser("id") userId: string) {
     return this.notificationService.getUnreadCount(userId);
+  }
+
+  @Get("preferences")
+  @ApiOperation({ summary: "Get notification preferences" })
+  async getPreferences(@CurrentUser("id") userId: string) {
+    return this.notificationService.getPreferences(userId);
+  }
+
+  @Patch("preferences/:type")
+  @ApiOperation({ summary: "Update notification preference" })
+  async updatePreference(
+    @CurrentUser("id") userId: string,
+    @Param("type") type: string,
+    @Body() body: { email?: boolean; inApp?: boolean },
+  ) {
+    return this.notificationService.updatePreference(userId, type, body);
   }
 
   @Patch(":id/read")

@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Query, Res, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { ApiTags, ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
 import { Response } from "express";
@@ -48,5 +48,27 @@ export class ExportController {
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Content-Disposition", "attachment; filename=samples.csv");
     res.send("\uFEFF" + csv);
+  }
+
+  @Get("experiment/:id/pdf")
+  @ApiOperation({ summary: "Export experiment as PDF" })
+  async exportExperimentPdf(@Param("id") id: string, @Res() res: Response) {
+    const buffer = await this.exportService.exportExperimentPdf(id);
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="experiment-${id}.pdf"`,
+    });
+    res.send(buffer);
+  }
+
+  @Get("project/:id/report")
+  @ApiOperation({ summary: "Export project report as PDF" })
+  async exportProjectPdf(@Param("id") id: string, @Res() res: Response) {
+    const buffer = await this.exportService.exportProjectPdf(id);
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="project-${id}-report.pdf"`,
+    });
+    res.send(buffer);
   }
 }

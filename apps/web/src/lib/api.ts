@@ -563,6 +563,34 @@ class ApiClient {
     return this.fetch<any>("/notifications/read-all", { method: "POST" });
   }
 
+  // Notification Preferences
+  getNotificationPreferences() {
+    return this.fetch<any[]>("/notifications/preferences");
+  }
+
+  updateNotificationPreference(
+    type: string,
+    data: { email?: boolean; inApp?: boolean },
+  ) {
+    return this.fetch<any>(`/notifications/preferences/${type}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Booking Approval
+  approveBooking(bookingId: string) {
+    return this.fetch<any>(`/instruments/bookings/${bookingId}/approve`, {
+      method: "POST",
+    });
+  }
+
+  rejectBooking(bookingId: string) {
+    return this.fetch<any>(`/instruments/bookings/${bookingId}/reject`, {
+      method: "POST",
+    });
+  }
+
   // Audit
   getAuditLogs(page = 1, filters?: any) {
     const params = new URLSearchParams({ page: String(page) });
@@ -684,6 +712,65 @@ class ApiClient {
     return this.fetch<any>(`/protocol-executions/${executionId}/complete`, {
       method: "POST",
     });
+  }
+
+  // Storage
+  getStorageTree() {
+    return this.fetch<any[]>("/storage/tree");
+  }
+
+  createStorageLocation(data: {
+    name: string;
+    type: string;
+    parentId?: string;
+    temperature?: number;
+    capacity?: number;
+  }) {
+    return this.fetch<any>("/storage", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  getStorageLocation(id: string) {
+    return this.fetch<any>(`/storage/${id}`);
+  }
+
+  getStorageContents(id: string, page = 1) {
+    return this.fetch<any>(`/storage/${id}/contents?page=${page}`);
+  }
+
+  deleteStorageLocation(id: string) {
+    return this.fetch<any>(`/storage/${id}`, { method: "DELETE" });
+  }
+
+  // Export - PDF downloads
+  async downloadExperimentPdf(id: string) {
+    const token = this.getToken();
+    const res = await fetch(`${API_BASE}/export/experiment/${id}/pdf`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `experiment-${id}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async downloadProjectReport(id: string) {
+    const token = this.getToken();
+    const res = await fetch(`${API_BASE}/export/project/${id}/report`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `project-${id}-report.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   // Health

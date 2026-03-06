@@ -67,4 +67,43 @@ export class NotificationService {
     });
     return { count };
   }
+
+  async getPreferences(userId: string) {
+    const prefs = await this.prisma.notificationPreference.findMany({
+      where: { userId },
+    });
+    // Return default preferences for types that don't exist yet
+    const defaultTypes = [
+      "TASK_ASSIGNED",
+      "TASK_DUE",
+      "BOOKING_CONFIRMED",
+      "TEAM_MESSAGE",
+      "LOW_STOCK",
+      "EXPERIMENT_STATUS",
+      "BOOKING_REMINDER",
+    ];
+    const prefMap = new Map(prefs.map((p: any) => [p.type, p]));
+    return defaultTypes.map((type) => ({
+      type,
+      email: (prefMap.get(type) as any)?.email ?? true,
+      inApp: (prefMap.get(type) as any)?.inApp ?? true,
+    }));
+  }
+
+  async updatePreference(
+    userId: string,
+    type: string,
+    data: { email?: boolean; inApp?: boolean },
+  ) {
+    return this.prisma.notificationPreference.upsert({
+      where: { userId_type: { userId, type } },
+      update: { email: data.email, inApp: data.inApp },
+      create: {
+        userId,
+        type,
+        email: data.email ?? true,
+        inApp: data.inApp ?? true,
+      },
+    });
+  }
 }

@@ -57,6 +57,20 @@ export class InstrumentController {
     return this.instrumentService.getAllBookings(start, end);
   }
 
+  @Post("bookings/:bookingId/approve")
+  @RequirePermission("instrument:admin")
+  @ApiOperation({ summary: "Approve a pending booking" })
+  async approveBooking(@Param("bookingId") bookingId: string) {
+    return this.instrumentService.approveBooking(bookingId);
+  }
+
+  @Post("bookings/:bookingId/reject")
+  @RequirePermission("instrument:admin")
+  @ApiOperation({ summary: "Reject a pending booking" })
+  async rejectBooking(@Param("bookingId") bookingId: string) {
+    return this.instrumentService.rejectBooking(bookingId);
+  }
+
   @Get(":id")
   @ApiOperation({ summary: "Get instrument with bookings and maintenance" })
   async findById(@Param("id") id: string) {

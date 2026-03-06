@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
 import { useForm } from "react-hook-form";
@@ -9,6 +9,135 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User, Lock, Bell, Check } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
+
+const NOTIFICATION_TYPE_META: Record<string, { label: string; desc: string }> =
+  {
+    TASK_ASSIGNED: { label: "任务分配通知", desc: "当有任务分配给我时通知" },
+    TASK_DUE: { label: "任务截止提醒", desc: "任务即将截止前提醒我" },
+    BOOKING_CONFIRMED: { label: "仪器预约确认", desc: "预约成功或取消时通知" },
+    TEAM_MESSAGE: { label: "团队消息通知", desc: "收到新留言或 @提及时通知" },
+    LOW_STOCK: { label: "库存预警通知", desc: "库存低于警戒线时通知" },
+    EXPERIMENT_STATUS: {
+      label: "实验状态变更",
+      desc: "实验状态发生变化时通知",
+    },
+    BOOKING_REMINDER: { label: "预约提醒", desc: "仪器预约开始前提醒" },
+  };
+
+function NotificationsSection() {
+  const queryClient = useQueryClient();
+
+  const { data: preferences, isLoading } = useQuery({
+    queryKey: ["notification-preferences"],
+    queryFn: () => api.getNotificationPreferences(),
+  });
+
+  const updatePref = useMutation({
+    mutationFn: ({
+      type,
+      data,
+    }: {
+      type: string;
+      data: { email?: boolean; inApp?: boolean };
+    }) => api.updateNotificationPreference(type, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notification-preferences"] });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="text-sm text-gray-500">加载中...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <h2 className="text-lg font-semibold text-slate-900 mb-6">通知偏好</h2>
+
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-2 px-0">
+        <div className="flex-1" />
+        <div className="flex items-center gap-6 text-xs text-gray-500 font-medium pr-1">
+          <span className="w-12 text-center">邮件</span>
+          <span className="w-12 text-center">应用内</span>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        {(preferences ?? []).map(
+          (pref: { type: string; email: boolean; inApp: boolean }) => {
+            const meta = NOTIFICATION_TYPE_META[pref.type];
+            if (!meta) return null;
+            return (
+              <div
+                key={pref.type}
+                className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
+              >
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-slate-900">
+                    {meta.label}
+                  </div>
+                  <div className="text-xs text-gray-500">{meta.desc}</div>
+                </div>
+                <div className="flex items-center gap-6 pr-1">
+                  {/* Email toggle */}
+                  <div className="w-12 flex justify-center">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={pref.email}
+                        onChange={(e) =>
+                          updatePref.mutate({
+                            type: pref.type,
+                            data: {
+                              email: e.target.checked,
+                              inApp: pref.inApp,
+                            },
+                          })
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600" />
+                    </label>
+                  </div>
+                  {/* InApp toggle */}
+                  <div className="w-12 flex justify-center">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={pref.inApp}
+                        onChange={(e) =>
+                          updatePref.mutate({
+                            type: pref.type,
+                            data: {
+                              email: pref.email,
+                              inApp: e.target.checked,
+                            },
+                          })
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            );
+          },
+        )}
+      </div>
+
+      {updatePref.isSuccess && (
+        <div className="mt-4 flex items-center gap-1 text-sm text-green-600">
+          <Check className="h-4 w-4" /> 偏好已保存
+        </div>
+      )}
+    </div>
+  );
+}
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "请输入名字"),
@@ -279,69 +408,7 @@ export default function SettingsPage() {
           )}
 
           {/* Notifications Section */}
-          {activeSection === "notifications" && (
-            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900 mb-6">
-                通知偏好
-              </h2>
-
-              <div className="space-y-4">
-                {[
-                  {
-                    label: "任务分配通知",
-                    desc: "当有任务分配给我时通知",
-                    defaultChecked: true,
-                  },
-                  {
-                    label: "任务截止提醒",
-                    desc: "任务即将截止前提醒我",
-                    defaultChecked: true,
-                  },
-                  {
-                    label: "仪器预约确认",
-                    desc: "预约成功或取消时通知",
-                    defaultChecked: true,
-                  },
-                  {
-                    label: "团队消息通知",
-                    desc: "收到新留言或 @提及时通知",
-                    defaultChecked: false,
-                  },
-                  {
-                    label: "库存预警通知",
-                    desc: "库存低于警戒线时通知",
-                    defaultChecked: true,
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
-                  >
-                    <div>
-                      <div className="text-sm font-medium text-slate-900">
-                        {item.label}
-                      </div>
-                      <div className="text-xs text-gray-500">{item.desc}</div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        defaultChecked={item.defaultChecked}
-                        className="sr-only peer"
-                      />
-                      <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600" />
-                    </label>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6">
-                <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-                  保存偏好设置
-                </button>
-              </div>
-            </div>
-          )}
+          {activeSection === "notifications" && <NotificationsSection />}
         </div>
       </div>
     </div>

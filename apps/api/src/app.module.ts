@@ -27,6 +27,7 @@ import { ExperimentTemplateModule } from "./modules/experiment-template/experime
 import { ProtocolExecutionModule } from "./modules/protocol-execution/protocol-execution.module";
 import { InventoryColumnModule } from "./modules/inventory-column/inventory-column.module";
 import { AIModule } from "./modules/ai/ai.module";
+import { StorageModule } from "./modules/storage/storage.module";
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { AIModule } from "./modules/ai/ai.module";
     ProtocolExecutionModule,
     InventoryColumnModule,
     AIModule,
+    StorageModule,
   ],
 })
 export class AppModule {}

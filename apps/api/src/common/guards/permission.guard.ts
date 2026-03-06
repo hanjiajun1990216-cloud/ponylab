@@ -17,7 +17,8 @@ export type PermissionAction =
   | "inventory:admin"
   | "experiment:write"
   | "direction:manage"
-  | "announcement:manage";
+  | "announcement:manage"
+  | "storage:manage";
 
 /** Roles that are always allowed regardless of team context */
 const SUPER_ROLES = ["SUPER_ADMIN", "ADMIN"] as const;
@@ -32,6 +33,7 @@ const TEAM_ROLE_PERMISSIONS: Record<PermissionAction, string[]> = {
   "experiment:write": ["OWNER", "ADMIN", "MEMBER"],
   "direction:manage": ["OWNER", "ADMIN"],
   "announcement:manage": ["OWNER", "ADMIN"],
+  "storage:manage": ["OWNER", "ADMIN"],
 };
 
 /** System user roles that are always allowed */
@@ -44,6 +46,7 @@ const USER_ROLE_PERMISSIONS: Record<PermissionAction, string[]> = {
   "experiment:write": ["SUPER_ADMIN", "ADMIN", "PI", "RESEARCHER"],
   "direction:manage": ["SUPER_ADMIN", "ADMIN", "PI"],
   "announcement:manage": ["SUPER_ADMIN", "ADMIN"],
+  "storage:manage": ["SUPER_ADMIN", "ADMIN", "PI"],
 };
 
 @Injectable()
