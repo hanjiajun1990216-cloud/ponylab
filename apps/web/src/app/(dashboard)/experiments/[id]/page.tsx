@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { Badge } from "@/components/Badge";
 import { Avatar } from "@/components/Avatar";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import AIAssistantPanel from "@/components/AIAssistantPanel";
 import dynamic from "next/dynamic";
 import {
   ArrowLeft,
@@ -639,6 +640,9 @@ export default function ExperimentDetailPage() {
           )}
         </div>
       </div>
+
+      {/* AI Assistant Panel */}
+      <AIAssistantPanel experimentId={experimentId} />
     </div>
   );
 }

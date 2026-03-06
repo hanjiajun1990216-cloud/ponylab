@@ -165,4 +165,74 @@ export class TaskService {
       },
     });
   }
+
+  async removeDependencyById(dependencyId: string) {
+    return this.prisma.taskDependency.delete({
+      where: { id: dependencyId },
+    });
+  }
+
+  // ─── TaskParticipant ──────────────────────────────────────────────────────
+
+  async addParticipant(taskId: string, userId: string) {
+    const task = await this.prisma.task.findUnique({ where: { id: taskId } });
+    if (!task) throw new NotFoundException("Task not found");
+    return this.prisma.taskParticipant.create({
+      data: { taskId, userId },
+      include: { user: { select: USER_SELECT } },
+    });
+  }
+
+  async removeParticipant(taskId: string, userId: string) {
+    return this.prisma.taskParticipant.delete({
+      where: { taskId_userId: { taskId, userId } },
+    });
+  }
+
+  async listParticipants(taskId: string) {
+    const task = await this.prisma.task.findUnique({ where: { id: taskId } });
+    if (!task) throw new NotFoundException("Task not found");
+    return this.prisma.taskParticipant.findMany({
+      where: { taskId },
+      include: { user: { select: USER_SELECT } },
+      orderBy: { addedAt: "asc" },
+    });
+  }
+
+  // ─── TaskInventoryUsage ───────────────────────────────────────────────────
+
+  async addInventoryUsage(
+    taskId: string,
+    userId: string,
+    data: { inventoryItemId: string; quantity: number; unit: string },
+  ) {
+    const task = await this.prisma.task.findUnique({ where: { id: taskId } });
+    if (!task) throw new NotFoundException("Task not found");
+    return this.prisma.taskInventoryUsage.create({
+      data: {
+        taskId,
+        userId,
+        inventoryItemId: data.inventoryItemId,
+        quantity: data.quantity,
+        unit: data.unit,
+      },
+      include: {
+        item: { select: { id: true, name: true, category: true } },
+        user: { select: USER_SELECT },
+      },
+    });
+  }
+
+  async listInventoryUsage(taskId: string) {
+    const task = await this.prisma.task.findUnique({ where: { id: taskId } });
+    if (!task) throw new NotFoundException("Task not found");
+    return this.prisma.taskInventoryUsage.findMany({
+      where: { taskId },
+      include: {
+        item: { select: { id: true, name: true, category: true } },
+        user: { select: USER_SELECT },
+      },
+      orderBy: { usedAt: "desc" },
+    });
+  }
 }

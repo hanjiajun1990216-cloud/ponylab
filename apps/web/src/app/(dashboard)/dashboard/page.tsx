@@ -14,6 +14,8 @@ import {
   Microscope,
   Activity,
   Clock,
+  TrendingDown,
+  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -376,6 +378,71 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Inventory Consumption Forecast */}
+      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+            <TrendingDown className="h-4 w-4 text-indigo-500" />
+            库存消耗预测
+          </h2>
+          <Link
+            href="/inventory"
+            className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-0.5"
+          >
+            查看库存 <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-4 rounded-xl bg-indigo-50 px-5 py-4">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-indigo-900">
+              启用 AI 功能后可查看消耗预测
+            </p>
+            <p className="mt-0.5 text-xs text-indigo-600">
+              基于历史使用量，AI
+              将预测低库存试剂的耗尽时间，并自动触发采购提醒。
+            </p>
+          </div>
+          <button
+            disabled
+            className="flex-shrink-0 rounded-lg bg-indigo-200 px-3 py-1.5 text-xs font-medium text-indigo-500 cursor-not-allowed"
+            title="即将推出"
+          >
+            即将推出
+          </button>
+        </div>
+
+        {/* Show top low-stock items if available */}
+        {lowStockItems.length > 0 && (
+          <div className="mt-4">
+            <p className="mb-2 text-xs font-semibold uppercase text-gray-400">
+              当前预警库存（候选预测对象）
+            </p>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {lowStockItems.slice(0, 3).map((item: any) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between rounded-lg border border-orange-100 bg-orange-50 px-3 py-2"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-orange-800">
+                      {item.name}
+                    </p>
+                    <p className="text-xs text-orange-600">
+                      剩余 {item.quantity} {item.unit}
+                    </p>
+                  </div>
+                  <AlertTriangle className="h-4 w-4 flex-shrink-0 text-orange-400 ml-2" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

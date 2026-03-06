@@ -421,6 +421,29 @@ class ApiClient {
     });
   }
 
+  getInventoryColumns(teamId: string) {
+    return this.fetch<any[]>(`/inventory/columns?teamId=${teamId}`);
+  }
+
+  createInventoryColumn(data: {
+    teamId: string;
+    name: string;
+    type: string;
+    options?: any;
+    isRequired?: boolean;
+  }) {
+    return this.fetch<any>("/inventory/columns", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  deleteInventoryColumn(id: string, teamId: string) {
+    return this.fetch<any>(`/inventory/columns/${id}?teamId=${teamId}`, {
+      method: "DELETE",
+    });
+  }
+
   // Protocols
   getProtocols(page = 1, category?: string) {
     const params = new URLSearchParams({ page: String(page) });
@@ -431,6 +454,12 @@ class ApiClient {
   // Instruments
   getInstruments(page = 1) {
     return this.fetch<any>(`/instruments?page=${page}`);
+  }
+
+  getAllInstrumentBookings(start: string, end: string) {
+    return this.fetch<any[]>(
+      `/instruments/all-bookings?start=${start}&end=${end}`,
+    );
   }
 
   getTodayBookings() {
@@ -575,6 +604,53 @@ class ApiClient {
     return this.fetch<any>(`/experiment-templates/${id}`, { method: "DELETE" });
   }
 
+  // Task Participants
+  addTaskParticipant(taskId: string, userId: string) {
+    return this.fetch<any>(`/tasks/${taskId}/participants`, {
+      method: "POST",
+      body: JSON.stringify({ userId }),
+    });
+  }
+
+  removeTaskParticipant(taskId: string, userId: string) {
+    return this.fetch<any>(`/tasks/${taskId}/participants/${userId}`, {
+      method: "DELETE",
+    });
+  }
+
+  getTaskParticipants(taskId: string) {
+    return this.fetch<any[]>(`/tasks/${taskId}/participants`);
+  }
+
+  // Task Dependencies
+  createTaskDependency(taskId: string, upstreamTaskId: string) {
+    return this.fetch<any>(`/tasks/${taskId}/dependencies`, {
+      method: "POST",
+      body: JSON.stringify({ upstreamTaskId }),
+    });
+  }
+
+  deleteTaskDependency(taskId: string, dependencyId: string) {
+    return this.fetch<any>(`/tasks/${taskId}/dependencies/${dependencyId}`, {
+      method: "DELETE",
+    });
+  }
+
+  // Task Inventory Usage
+  addTaskInventoryUsage(
+    taskId: string,
+    data: { inventoryItemId: string; quantity: number; unit: string },
+  ) {
+    return this.fetch<any>(`/tasks/${taskId}/inventory-usage`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  getTaskInventoryUsage(taskId: string) {
+    return this.fetch<any[]>(`/tasks/${taskId}/inventory-usage`);
+  }
+
   // Protocol Execution
   startProtocolExecution(
     taskId: string,
@@ -613,6 +689,36 @@ class ApiClient {
   // Health
   healthCheck() {
     return this.fetch<any>("/health");
+  }
+
+  // AI
+  aiChat(experimentId: string, message: string) {
+    return this.fetch<{ response: string }>(
+      `/ai/experiment/${experimentId}/chat`,
+      {
+        method: "POST",
+        body: JSON.stringify({ message }),
+      },
+    );
+  }
+
+  aiParseProtocol(text: string) {
+    return this.fetch<any>("/ai/protocol/parse", {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    });
+  }
+
+  aiDetectAnomalies(experimentId: string) {
+    return this.fetch<any>(`/ai/experiment/${experimentId}/anomaly`, {
+      method: "POST",
+    });
+  }
+
+  aiInventoryForecast(itemId: string) {
+    return this.fetch<any>(`/ai/inventory/${itemId}/forecast`, {
+      method: "POST",
+    });
   }
 }
 

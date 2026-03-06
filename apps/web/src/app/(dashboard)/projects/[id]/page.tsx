@@ -11,6 +11,7 @@ import {
   LayoutGrid,
   List,
   Kanban,
+  GanttChart,
   User,
   Calendar,
   MessageSquare,
@@ -22,6 +23,7 @@ import { Avatar, AvatarGroup } from "@/components/Avatar";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { EmptyState } from "@/components/EmptyState";
 import { Modal } from "@/components/Modal";
+import { GanttView } from "@/components/GanttView";
 
 // Reactflow imports
 import ReactFlow, {
@@ -52,7 +54,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-type ViewMode = "canvas" | "list" | "board";
+type ViewMode = "canvas" | "list" | "board" | "gantt";
 
 // ─── Custom Task Node for ReactFlow ───────────────────────────────────────────
 
@@ -501,6 +503,7 @@ export default function ProjectDetailPage() {
             { mode: "canvas" as ViewMode, icon: LayoutGrid, label: "画布" },
             { mode: "list" as ViewMode, icon: List, label: "列表" },
             { mode: "board" as ViewMode, icon: Kanban, label: "看板" },
+            { mode: "gantt" as ViewMode, icon: GanttChart, label: "甘特图" },
           ].map(({ mode, icon: Icon, label }) => (
             <button
               key={mode}
@@ -567,6 +570,15 @@ export default function ProjectDetailPage() {
               onStatusChange={handleKanbanStatusChange}
             />
           </div>
+        ) : viewMode === "gantt" ? (
+          <GanttView
+            tasks={tasks || []}
+            onTaskUpdate={() =>
+              queryClient.invalidateQueries({
+                queryKey: ["tasks-project", id],
+              })
+            }
+          />
         ) : (
           // List view
           <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
