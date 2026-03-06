@@ -45,7 +45,7 @@ export class ProtocolExecutionService {
     const steps: any[] = Array.isArray(content?.steps) ? content.steps : [];
 
     // Create execution with steps in a transaction
-    const execution = await this.prisma.$transaction(async (tx) => {
+    const execution = await this.prisma.$transaction(async (tx: any) => {
       const exec = await tx.protocolExecution.create({
         data: {
           taskId,
@@ -172,7 +172,7 @@ export class ProtocolExecutionService {
 
     // Validate all steps are COMPLETED or SKIPPED
     const incompleteSteps = execution.steps.filter(
-      (s) => s.status !== "COMPLETED" && s.status !== "SKIPPED",
+      (s: any) => s.status !== "COMPLETED" && s.status !== "SKIPPED",
     );
 
     if (incompleteSteps.length > 0) {
