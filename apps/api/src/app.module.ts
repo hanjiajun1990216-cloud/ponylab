@@ -22,6 +22,7 @@ import { NotificationModule } from "./modules/notification/notification.module";
 import { TaskStepModule } from "./modules/task-step/task-step.module";
 import { TaskModule } from "./modules/task/task.module";
 import { ExportModule } from "./modules/export/export.module";
+import { ExperimentTemplateModule } from "./modules/experiment-template/experiment-template.module";
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { ExportModule } from "./modules/export/export.module";
     TaskStepModule,
     TaskModule,
     ExportModule,
+    ExperimentTemplateModule,
   ],
 })
 export class AppModule {}

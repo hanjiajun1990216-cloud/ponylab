@@ -82,8 +82,8 @@ export class ExperimentService {
       where: { id },
     });
     if (!experiment) throw new NotFoundException("Experiment not found");
-    if (experiment.status === "SIGNED") {
-      throw new ForbiddenException("Cannot modify a signed experiment");
+    if (["SIGNED", "WITNESSED", "ARCHIVED"].includes(experiment.status)) {
+      throw new ForbiddenException("Cannot modify experiment in this status");
     }
 
     // Create version snapshot before update
@@ -155,6 +155,131 @@ export class ExperimentService {
     });
 
     return signed;
+  }
+
+  async submit(id: string, userId: string) {
+    const experiment = await this.prisma.experiment.findUnique({
+      where: { id },
+    });
+    if (!experiment) throw new NotFoundException("Experiment not found");
+    if (experiment.status !== "COMPLETED") {
+      throw new ForbiddenException(
+        "Only COMPLETED experiments can be submitted",
+      );
+    }
+
+    const submitted = await this.prisma.experiment.update({
+      where: { id },
+      data: { status: "SUBMITTED" },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId,
+        action: "SUBMIT",
+        entityType: "Experiment",
+        entityId: id,
+        newValue: { status: "SUBMITTED", submittedAt: new Date() },
+      },
+    });
+
+    return submitted;
+  }
+
+  async witness(id: string, witnessId: string) {
+    const experiment = await this.prisma.experiment.findUnique({
+      where: { id },
+    });
+    if (!experiment) throw new NotFoundException("Experiment not found");
+    if (experiment.status !== "SIGNED") {
+      throw new ForbiddenException("Only SIGNED experiments can be witnessed");
+    }
+    if (experiment.signedBy === witnessId) {
+      throw new ForbiddenException("Witness must be different from the signer");
+    }
+
+    const witnessed = await this.prisma.experiment.update({
+      where: { id },
+      data: {
+        status: "WITNESSED",
+        witnessedAt: new Date(),
+        witnessedBy: witnessId,
+      },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId: witnessId,
+        action: "WITNESS",
+        entityType: "Experiment",
+        entityId: id,
+        newValue: { witnessedAt: witnessed.witnessedAt },
+      },
+    });
+
+    return witnessed;
+  }
+
+  async reject(id: string, userId: string, reason: string) {
+    const experiment = await this.prisma.experiment.findUnique({
+      where: { id },
+    });
+    if (!experiment) throw new NotFoundException("Experiment not found");
+    if (!["SUBMITTED", "SIGNED"].includes(experiment.status)) {
+      throw new ForbiddenException(
+        "Only SUBMITTED or SIGNED experiments can be rejected",
+      );
+    }
+
+    const rejected = await this.prisma.experiment.update({
+      where: { id },
+      data: {
+        status: "REJECTED",
+        rejectReason: reason,
+        rejectedAt: new Date(),
+      },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId,
+        action: "REJECT",
+        entityType: "Experiment",
+        entityId: id,
+        newValue: { rejectReason: reason, rejectedAt: rejected.rejectedAt },
+      },
+    });
+
+    return rejected;
+  }
+
+  async archive(id: string, userId: string) {
+    const experiment = await this.prisma.experiment.findUnique({
+      where: { id },
+    });
+    if (!experiment) throw new NotFoundException("Experiment not found");
+    if (experiment.status !== "WITNESSED") {
+      throw new ForbiddenException(
+        "Only WITNESSED experiments can be archived",
+      );
+    }
+
+    const archived = await this.prisma.experiment.update({
+      where: { id },
+      data: { status: "ARCHIVED" },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId,
+        action: "ARCHIVE",
+        entityType: "Experiment",
+        entityId: id,
+        newValue: { status: "ARCHIVED", archivedAt: new Date() },
+      },
+    });
+
+    return archived;
   }
 
   async getHistory(id: string) {

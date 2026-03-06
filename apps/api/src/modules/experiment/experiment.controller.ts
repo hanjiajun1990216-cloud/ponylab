@@ -81,6 +81,38 @@ export class ExperimentController {
     return this.experimentService.sign(id, userId);
   }
 
+  @Post(":id/submit")
+  @RequirePermission("experiment:write")
+  @ApiOperation({ summary: "Submit experiment for review" })
+  async submit(@Param("id") id: string, @CurrentUser("id") userId: string) {
+    return this.experimentService.submit(id, userId);
+  }
+
+  @Post(":id/witness")
+  @RequirePermission("experiment:write")
+  @ApiOperation({ summary: "Witness sign an experiment" })
+  async witness(@Param("id") id: string, @CurrentUser("id") userId: string) {
+    return this.experimentService.witness(id, userId);
+  }
+
+  @Post(":id/reject")
+  @RequirePermission("experiment:write")
+  @ApiOperation({ summary: "Reject experiment" })
+  async reject(
+    @Param("id") id: string,
+    @Body() body: { reason: string },
+    @CurrentUser("id") userId: string,
+  ) {
+    return this.experimentService.reject(id, userId, body.reason);
+  }
+
+  @Post(":id/archive")
+  @RequirePermission("experiment:write")
+  @ApiOperation({ summary: "Archive experiment" })
+  async archive(@Param("id") id: string, @CurrentUser("id") userId: string) {
+    return this.experimentService.archive(id, userId);
+  }
+
   @Delete(":id")
   @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Delete experiment" })
