@@ -77,8 +77,12 @@ export class ExperimentController {
   @Post(":id/sign")
   @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Sign experiment (immutable after signing)" })
-  async sign(@Param("id") id: string, @CurrentUser("id") userId: string) {
-    return this.experimentService.sign(id, userId);
+  async sign(
+    @Param("id") id: string,
+    @CurrentUser("id") userId: string,
+    @Body() body: { password: string },
+  ) {
+    return this.experimentService.sign(id, userId, body.password);
   }
 
   @Post(":id/submit")
@@ -91,8 +95,12 @@ export class ExperimentController {
   @Post(":id/witness")
   @RequirePermission("experiment:write")
   @ApiOperation({ summary: "Witness sign an experiment" })
-  async witness(@Param("id") id: string, @CurrentUser("id") userId: string) {
-    return this.experimentService.witness(id, userId);
+  async witness(
+    @Param("id") id: string,
+    @CurrentUser("id") userId: string,
+    @Body() body: { password: string },
+  ) {
+    return this.experimentService.witness(id, userId, body.password);
   }
 
   @Post(":id/reject")

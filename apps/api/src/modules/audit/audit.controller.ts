@@ -42,6 +42,15 @@ export class AuditController {
     });
   }
 
+  @Get("verify-chain")
+  @Roles("ADMIN")
+  @ApiOperation({ summary: "Verify audit trail hash chain integrity" })
+  async verifyChain(
+    @Query("limit", new DefaultValuePipe(1000), ParseIntPipe) limit: number,
+  ) {
+    return this.auditService.verifyChain(limit);
+  }
+
   @Get("entity")
   @ApiOperation({ summary: "Get audit trail for specific entity" })
   async findByEntity(

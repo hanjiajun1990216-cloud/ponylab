@@ -45,8 +45,16 @@ export class ProtocolController {
     @Query("page", new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query("limit", new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query("category") category?: string,
+    @Query("authorId") authorId?: string,
+    @Query("teamId") teamId?: string,
   ) {
-    return this.protocolService.findAll(page, Math.min(limit, 100), category);
+    return this.protocolService.findAll(
+      page,
+      Math.min(limit, 100),
+      category,
+      authorId,
+      teamId,
+    );
   }
 
   @Get(":id")

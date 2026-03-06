@@ -1,3 +1,4 @@
+import * as bcrypt from "bcrypt";
 import {
   Injectable,
   NotFoundException,
@@ -82,6 +83,14 @@ export class ExperimentService {
       where: { id },
     });
     if (!experiment) throw new NotFoundException("Experiment not found");
+
+    // 21 CFR Part 11: locked experiments cannot be modified
+    if ((experiment as any).lockedAt) {
+      throw new ForbiddenException(
+        "Experiment is locked and cannot be modified",
+      );
+    }
+
     if (["SIGNED", "WITNESSED", "ARCHIVED"].includes(experiment.status)) {
       throw new ForbiddenException("Cannot modify experiment in this status");
     }
@@ -125,7 +134,17 @@ export class ExperimentService {
     return updated;
   }
 
-  async sign(id: string, userId: string) {
+  async sign(id: string, userId: string, password: string) {
+    // Verify user's password for 21 CFR Part 11 compliance
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException("User not found");
+
+    const isValid = await bcrypt.compare(password, (user as any).passwordHash);
+    if (!isValid)
+      throw new ForbiddenException(
+        "Invalid password — electronic signature requires identity verification",
+      );
+
     const experiment = await this.prisma.experiment.findUnique({
       where: { id },
     });
@@ -150,7 +169,7 @@ export class ExperimentService {
         action: "SIGN",
         entityType: "Experiment",
         entityId: id,
-        newValue: { signedAt: signed.signedAt },
+        newValue: { signedAt: signed.signedAt, passwordVerified: true },
       },
     });
 
@@ -186,7 +205,19 @@ export class ExperimentService {
     return submitted;
   }
 
-  async witness(id: string, witnessId: string) {
+  async witness(id: string, witnessId: string, password: string) {
+    // Verify witness password for 21 CFR Part 11 compliance
+    const user = await this.prisma.user.findUnique({
+      where: { id: witnessId },
+    });
+    if (!user) throw new NotFoundException("User not found");
+
+    const isValid = await bcrypt.compare(password, (user as any).passwordHash);
+    if (!isValid)
+      throw new ForbiddenException(
+        "Invalid password — electronic signature requires identity verification",
+      );
+
     const experiment = await this.prisma.experiment.findUnique({
       where: { id },
     });
@@ -213,7 +244,10 @@ export class ExperimentService {
         action: "WITNESS",
         entityType: "Experiment",
         entityId: id,
-        newValue: { witnessedAt: witnessed.witnessedAt },
+        newValue: {
+          witnessedAt: witnessed.witnessedAt,
+          passwordVerified: true,
+        },
       },
     });
 

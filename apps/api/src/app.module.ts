@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
 import { PrismaModule } from "./common/prisma/prisma.module";
@@ -28,6 +28,8 @@ import { ProtocolExecutionModule } from "./modules/protocol-execution/protocol-e
 import { InventoryColumnModule } from "./modules/inventory-column/inventory-column.module";
 import { AIModule } from "./modules/ai/ai.module";
 import { StorageModule } from "./modules/storage/storage.module";
+import { WebhookModule } from "./modules/webhook/webhook.module";
+import { IpWhitelistMiddleware } from "./common/middleware/ip-whitelist.middleware";
 
 @Module({
   imports: [
@@ -61,6 +63,11 @@ import { StorageModule } from "./modules/storage/storage.module";
     InventoryColumnModule,
     AIModule,
     StorageModule,
+    WebhookModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(IpWhitelistMiddleware).exclude("health(.*)").forRoutes("*");
+  }
+}
