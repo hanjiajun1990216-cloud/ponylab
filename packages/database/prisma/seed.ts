@@ -763,6 +763,181 @@ async function main() {
 
   console.log("  Audit logs created.");
 
+  // ─── 17. Experiment Templates (1 public + 1 team-private) ───
+  await prisma.experimentTemplate.createMany({
+    data: [
+      {
+        name: "Western Blot Standard Protocol",
+        description:
+          "Standard template for western blot experiments with all required sections",
+        content: {
+          type: "doc",
+          content: [
+            {
+              type: "heading",
+              attrs: { level: 2 },
+              content: [{ type: "text", text: "Objective" }],
+            },
+            {
+              type: "paragraph",
+              content: [
+                { type: "text", text: "[Describe the target protein and expected results]" },
+              ],
+            },
+            {
+              type: "heading",
+              attrs: { level: 2 },
+              content: [{ type: "text", text: "Materials" }],
+            },
+            {
+              type: "heading",
+              attrs: { level: 2 },
+              content: [{ type: "text", text: "Procedure" }],
+            },
+            {
+              type: "heading",
+              attrs: { level: 2 },
+              content: [{ type: "text", text: "Results" }],
+            },
+          ],
+        },
+        category: "Protein Analysis",
+        isPublic: true,
+        teamId: team.id,
+        authorId: pi.id,
+      },
+      {
+        name: "Cell Culture Passage Log",
+        description: "Internal template for tracking cell culture passages",
+        content: {
+          type: "doc",
+          content: [
+            {
+              type: "heading",
+              attrs: { level: 2 },
+              content: [{ type: "text", text: "Cell Line" }],
+            },
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: "[Cell line name and passage number]" }],
+            },
+            {
+              type: "heading",
+              attrs: { level: 2 },
+              content: [{ type: "text", text: "Passage Details" }],
+            },
+          ],
+        },
+        category: "Cell Biology",
+        isPublic: false,
+        teamId: team.id,
+        authorId: researcher.id,
+      },
+    ],
+  });
+
+  console.log("  Experiment templates created.");
+
+  // ─── 18. Notification Preferences (4 users × 6 types) ───
+  const notifTypes = [
+    "TASK_ASSIGNED",
+    "TASK_DUE",
+    "BOOKING_CONFIRMED",
+    "TEAM_MESSAGE",
+    "LOW_STOCK",
+    "EXPERIMENT_STATUS",
+    "BOOKING_REMINDER",
+  ];
+
+  for (const user of [admin, pi, researcher, tech]) {
+    await prisma.notificationPreference.createMany({
+      data: notifTypes.map((type) => ({
+        userId: user.id,
+        type,
+        email: user.id === admin.id, // admin gets email notifications
+        inApp: true,
+      })),
+      skipDuplicates: true,
+    });
+  }
+
+  console.log("  Notification preferences created.");
+
+  // ─── 19. Maintenance Record (instrument calibration) ───
+  const lastWeek = new Date();
+  lastWeek.setDate(lastWeek.getDate() - 7);
+  const nextQuarter = new Date();
+  nextQuarter.setMonth(nextQuarter.getMonth() + 3);
+
+  await prisma.maintenanceRecord.create({
+    data: {
+      instrumentId: spectro.id,
+      type: "CALIBRATION",
+      description:
+        "Annual UV lamp calibration completed. Wavelength accuracy ±0.5nm verified. Photometric accuracy within 0.3% T specification.",
+      performedAt: lastWeek,
+      nextDueDate: nextQuarter,
+      cost: 350,
+    },
+  });
+
+  console.log("  Maintenance record created.");
+
+  // ─── 20. Additional Audit Logs (multi-role coverage) ───
+  await prisma.auditLog.createMany({
+    data: [
+      {
+        userId: pi.id,
+        action: "LOGIN",
+        entityType: "User",
+        entityId: pi.id,
+        newValue: { ip: "192.168.1.10", method: "password" },
+      },
+      {
+        userId: tech.id,
+        action: "CREATE",
+        entityType: "MaintenanceRecord",
+        entityId: spectro.id,
+        newValue: {
+          type: "CALIBRATION",
+          instrument: "UV-Vis Spectrophotometer",
+        },
+      },
+      {
+        userId: researcher.id,
+        action: "CREATE",
+        entityType: "Sample",
+        entityId: "sample-placeholder",
+        newValue: { name: "pET-28a-GFP plasmid", type: "Plasmid" },
+      },
+      {
+        userId: admin.id,
+        action: "UPDATE",
+        entityType: "Team",
+        entityId: team.id,
+        oldValue: { visibility: "OPEN" },
+        newValue: { visibility: "CLOSED" },
+      },
+    ],
+  });
+
+  console.log("  Additional audit logs created.");
+
+  // ─── 21. Second Direction (PAUSED status, for filter testing) ───
+  await prisma.direction.create({
+    data: {
+      name: "CRISPR Gene Editing Pipeline",
+      description:
+        "Establishing CRISPR-Cas9 editing workflow for mammalian cell lines",
+      leadId: pi.id,
+      teamId: team.id,
+      color: "#f43f5e",
+      status: "PAUSED",
+    },
+  });
+
+  console.log("  Second direction created.");
+
   console.log("\nSeed completed successfully!");
   console.log("─────────────────────────────────────────");
   console.log("  SUPER_ADMIN : admin@ponylab.io / admin123!");

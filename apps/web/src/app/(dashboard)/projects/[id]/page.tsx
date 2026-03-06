@@ -169,7 +169,7 @@ function KanbanCard({ task }: { task: any }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-sm font-medium text-slate-900 mb-2">
-          {task.name}
+          {task.title}
         </div>
         {task.assignee && (
           <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -352,7 +352,7 @@ export default function ProjectDetailPage() {
           : { x: (i % 4) * 240 + 40, y: Math.floor(i / 4) * 160 + 40 },
       data: {
         id: task.id,
-        label: task.name,
+        label: task.title,
         status: task.status,
         assignee: task.assignee,
         dueDate: task.dueDate,
@@ -600,7 +600,7 @@ export default function ProjectDetailPage() {
                         href={`/tasks/${task.id}`}
                         className="font-medium text-slate-900 hover:text-blue-600"
                       >
-                        {task.name}
+                        {task.title}
                       </Link>
                     </td>
                     <td className="px-4 py-3">

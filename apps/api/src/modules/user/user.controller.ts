@@ -1,6 +1,8 @@
 import {
   Controller,
   Get,
+  Patch,
+  Body,
   Param,
   Query,
   UseGuards,
@@ -23,6 +25,15 @@ export class UserController {
   @ApiOperation({ summary: "Get current user profile" })
   async getProfile(@CurrentUser("id") userId: string) {
     return this.userService.getProfile(userId);
+  }
+
+  @Patch("me")
+  @ApiOperation({ summary: "Update current user profile" })
+  async updateProfile(
+    @CurrentUser("id") userId: string,
+    @Body() body: { firstName?: string; lastName?: string; avatar?: string },
+  ) {
+    return this.userService.updateProfile(userId, body);
   }
 
   @Get()

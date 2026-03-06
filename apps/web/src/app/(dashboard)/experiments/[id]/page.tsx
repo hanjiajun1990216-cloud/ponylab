@@ -130,7 +130,7 @@ function TasksTab({ experimentId }: { experimentId: string }) {
           className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4"
         >
           <div>
-            <p className="font-medium text-slate-900">{task.name}</p>
+            <p className="font-medium text-slate-900">{task.title}</p>
             {task.dueDate && (
               <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
                 <Clock className="h-3 w-3" />

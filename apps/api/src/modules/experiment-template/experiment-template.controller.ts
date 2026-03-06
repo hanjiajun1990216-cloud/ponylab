@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Delete,
   Param,
   Body,
@@ -17,6 +18,7 @@ import {
 } from "@nestjs/swagger";
 import { ExperimentTemplateService } from "./experiment-template.service";
 import { CreateExperimentTemplateDto } from "./dto/create-template.dto";
+import { UpdateExperimentTemplateDto } from "./dto/update-template.dto";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { PermissionGuard } from "../../common/guards/permission.guard";
 import { RequirePermission } from "../../common/decorators/require-permission.decorator";
@@ -61,6 +63,17 @@ export class ExperimentTemplateController {
     @CurrentUser("id") userId: string,
   ) {
     return this.experimentTemplateService.create(dto, userId);
+  }
+
+  @Patch(":id")
+  @RequirePermission("experiment:write")
+  @ApiOperation({ summary: "更新实验模板（仅作者可改）" })
+  update(
+    @Param("id") id: string,
+    @Body() dto: UpdateExperimentTemplateDto,
+    @CurrentUser("id") userId: string,
+  ) {
+    return this.experimentTemplateService.update(id, dto, userId);
   }
 
   @Delete(":id")

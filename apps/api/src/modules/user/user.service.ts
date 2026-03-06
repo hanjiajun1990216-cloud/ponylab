@@ -54,4 +54,22 @@ export class UserService {
   async getProfile(userId: string) {
     return this.findById(userId);
   }
+
+  async updateProfile(
+    userId: string,
+    data: { firstName?: string; lastName?: string; avatar?: string },
+  ) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        role: true,
+      },
+    });
+  }
 }

@@ -280,7 +280,7 @@ class ApiClient {
     return this.fetch<any[]>(`/tasks/${taskId}/steps`);
   }
 
-  createTaskStep(taskId: string, data: { name: string; order?: number }) {
+  createTaskStep(taskId: string, data: { title: string; order?: number }) {
     return this.fetch<any>(`/tasks/${taskId}/steps`, {
       method: "POST",
       body: JSON.stringify(data),
@@ -290,7 +290,7 @@ class ApiClient {
   updateTaskStep(
     taskId: string,
     stepId: string,
-    data: { completed?: boolean; name?: string },
+    data: { completed?: boolean; title?: string },
   ) {
     return this.fetch<any>(`/tasks/${taskId}/steps/${stepId}`, {
       method: "PATCH",
@@ -306,15 +306,15 @@ class ApiClient {
 
   // Comments
   getCommentsByProject(projectId: string) {
-    return this.fetch<any[]>(`/comments/project/${projectId}`);
+    return this.fetch<any[]>(`/comments?projectId=${projectId}`);
   }
 
   getCommentsByTask(taskId: string) {
-    return this.fetch<any[]>(`/comments/task/${taskId}`);
+    return this.fetch<any[]>(`/comments?taskId=${taskId}`);
   }
 
   getCommentsByInstrument(instrumentId: string) {
-    return this.fetch<any[]>(`/comments/instrument/${instrumentId}`);
+    return this.fetch<any[]>(`/comments?instrumentId=${instrumentId}`);
   }
 
   createComment(data: {
@@ -507,7 +507,7 @@ class ApiClient {
 
   getInstrumentCalendar(id: string, start: string, end: string) {
     return this.fetch<any[]>(
-      `/instruments/${id}/bookings?start=${start}&end=${end}`,
+      `/instruments/${id}/calendar?start=${start}&end=${end}`,
     );
   }
 
@@ -517,7 +517,11 @@ class ApiClient {
 
   checkInstrumentAvailability(id: string, start: string, end: string) {
     return this.fetch<{ available: boolean }>(
-      `/instruments/${id}/availability?start=${start}&end=${end}`,
+      `/instruments/${id}/check-availability`,
+      {
+        method: "POST",
+        body: JSON.stringify({ startTime: start, endTime: end }),
+      },
     );
   }
 
@@ -527,16 +531,18 @@ class ApiClient {
     endTime: string;
     title: string;
   }) {
-    return this.fetch<any>("/instruments/bookings", {
+    const { instrumentId, ...bookingData } = data;
+    return this.fetch<any>(`/instruments/${instrumentId}/bookings`, {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify(bookingData),
     });
   }
 
-  cancelBooking(bookingId: string) {
-    return this.fetch<any>(`/instruments/bookings/${bookingId}`, {
-      method: "DELETE",
-    });
+  cancelBooking(instrumentId: string, bookingId: string) {
+    return this.fetch<any>(
+      `/instruments/${instrumentId}/bookings/${bookingId}`,
+      { method: "DELETE" },
+    );
   }
 
   addMaintenanceRecord(
@@ -578,11 +584,11 @@ class ApiClient {
   }
 
   markNotificationRead(id: string) {
-    return this.fetch<any>(`/notifications/${id}/read`, { method: "POST" });
+    return this.fetch<any>(`/notifications/${id}/read`, { method: "PATCH" });
   }
 
   markAllNotificationsRead() {
-    return this.fetch<any>("/notifications/read-all", { method: "POST" });
+    return this.fetch<any>("/notifications/read-all", { method: "PATCH" });
   }
 
   // Notification Preferences
