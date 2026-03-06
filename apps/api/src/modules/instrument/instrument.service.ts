@@ -79,6 +79,13 @@ export class InstrumentService {
       throw new ConflictException("Time slot conflicts with existing booking");
     }
 
+    const instrument = await this.prisma.instrument.findUnique({
+      where: { id: data.instrumentId },
+    });
+    if (!instrument) throw new NotFoundException("Instrument not found");
+
+    const bookingStatus = instrument.requiresApproval ? "PENDING" : "CONFIRMED";
+
     return this.prisma.booking.create({
       data: {
         instrumentId: data.instrumentId,
@@ -87,6 +94,39 @@ export class InstrumentService {
         startTime: start,
         endTime: end,
         notes: data.notes,
+        status: bookingStatus as any,
+      },
+    });
+  }
+
+  async approveBooking(bookingId: string) {
+    const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } });
+    if (!booking) throw new NotFoundException("Booking not found");
+    if (booking.status !== "PENDING") {
+      throw new BadRequestException("Only PENDING bookings can be approved");
+    }
+    return this.prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: "CONFIRMED" },
+      include: {
+        instrument: { select: { id: true, name: true } },
+        user: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+  }
+
+  async rejectBooking(bookingId: string) {
+    const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } });
+    if (!booking) throw new NotFoundException("Booking not found");
+    if (booking.status !== "PENDING") {
+      throw new BadRequestException("Only PENDING bookings can be rejected");
+    }
+    return this.prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: "CANCELLED" },
+      include: {
+        instrument: { select: { id: true, name: true } },
+        user: { select: { id: true, firstName: true, lastName: true } },
       },
     });
   }
