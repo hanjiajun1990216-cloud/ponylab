@@ -18,7 +18,7 @@ test.describe("Auth Flow", () => {
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /sign in|login/i }),
+      page.getByRole("button", { name: "Sign In", exact: true }),
     ).toBeVisible();
   });
 
@@ -37,7 +37,7 @@ test.describe("Auth Flow", () => {
     await page.goto("/login");
     await page.locator('input[type="email"]').fill("admin@ponylab.io");
     await page.locator('input[type="password"]').fill("admin123!");
-    await page.getByRole("button", { name: /sign in|login/i }).click();
+    await page.getByRole("button", { name: "Sign In", exact: true }).click();
     // Should redirect to dashboard
     await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
   });
@@ -46,7 +46,7 @@ test.describe("Auth Flow", () => {
     await page.goto("/login");
     await page.locator('input[type="email"]').fill("admin@ponylab.io");
     await page.locator('input[type="password"]').fill("wrongpassword");
-    await page.getByRole("button", { name: /sign in|login/i }).click();
+    await page.getByRole("button", { name: "Sign In", exact: true }).click();
     // Should show error message
     await expect(
       page.getByText(/invalid|error|failed|unauthorized/i),
@@ -66,65 +66,44 @@ test.describe("Dashboard Navigation", () => {
     await page.goto("/login");
     await page.locator('input[type="email"]').fill("admin@ponylab.io");
     await page.locator('input[type="password"]').fill("admin123!");
-    await page.getByRole("button", { name: /sign in|login/i }).click();
+    await page.getByRole("button", { name: "Sign In", exact: true }).click();
     await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
   });
 
   test("dashboard displays stats and navigation", async ({ page }) => {
-    // Check sidebar navigation links (use role to avoid strict mode)
-    await expect(
-      page.getByRole("link", { name: /experiment/i }).first(),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: /sample/i }).first(),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: /inventor/i }).first(),
-    ).toBeVisible();
+    const sidebar = page.getByRole("complementary");
+    await expect(sidebar.getByRole("link", { name: "实验记录" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "样品" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "库存" })).toBeVisible();
   });
 
   test("navigate to experiments page", async ({ page }) => {
-    await page
-      .getByRole("link", { name: /experiment/i })
-      .first()
-      .click();
+    await page.getByRole("complementary").getByRole("link", { name: "实验记录" }).click();
     await expect(page).toHaveURL(/experiments/);
   });
 
   test("navigate to samples page", async ({ page }) => {
-    await page
-      .getByRole("link", { name: /sample/i })
-      .first()
-      .click();
+    await page.getByRole("complementary").getByRole("link", { name: "样品" }).click();
     await expect(page).toHaveURL(/samples/);
   });
 
   test("navigate to inventory page", async ({ page }) => {
-    await page
-      .getByRole("link", { name: /inventor/i })
-      .first()
-      .click();
+    await page.getByRole("complementary").getByRole("link", { name: "库存" }).click();
     await expect(page).toHaveURL(/inventory/);
   });
 
   test("navigate to protocols page", async ({ page }) => {
-    await page
-      .getByRole("link", { name: /protocol/i })
-      .first()
-      .click();
+    await page.getByRole("complementary").getByRole("link", { name: "协议" }).click();
     await expect(page).toHaveURL(/protocols/);
   });
 
   test("navigate to instruments page", async ({ page }) => {
-    await page
-      .getByRole("link", { name: /instrument/i })
-      .first()
-      .click();
+    await page.getByRole("complementary").getByRole("link", { name: "仪器" }).click();
     await expect(page).toHaveURL(/instruments/);
   });
 
   test("navigate to audit page", async ({ page }) => {
-    await page.getByRole("link", { name: /audit/i }).first().click();
+    await page.getByRole("complementary").getByRole("link", { name: "审计日志" }).click();
     await expect(page).toHaveURL(/audit/);
   });
 });

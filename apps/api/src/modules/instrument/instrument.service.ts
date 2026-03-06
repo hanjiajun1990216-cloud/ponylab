@@ -135,6 +135,43 @@ export class InstrumentService {
     });
   }
 
+  async cancelBooking(instrumentId: string, bookingId: string, userId: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { instrument: { select: { id: true, name: true } } },
+    });
+
+    if (!booking) throw new NotFoundException("Booking not found");
+    if (booking.instrumentId !== instrumentId) {
+      throw new BadRequestException("Booking does not belong to this instrument");
+    }
+    if (booking.status === "CANCELLED") {
+      throw new BadRequestException("Booking is already cancelled");
+    }
+
+    const updated = await this.prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: "CANCELLED" },
+      include: {
+        instrument: { select: { id: true, name: true } },
+        user: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId,
+        action: "CANCEL",
+        entityType: "Booking",
+        entityId: bookingId,
+        oldValue: { status: booking.status },
+        newValue: { status: "CANCELLED", instrumentName: booking.instrument.name },
+      },
+    });
+
+    return updated;
+  }
+
   async addMaintenance(
     instrumentId: string,
     data: {

@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Param,
   Body,
   Query,
@@ -91,6 +92,17 @@ export class InstrumentController {
       instrumentId,
       userId,
     });
+  }
+
+  @Delete(":id/bookings/:bookingId")
+  @RequirePermission("instrument:admin")
+  @ApiOperation({ summary: "Cancel a booking" })
+  async cancelBooking(
+    @Param("id") instrumentId: string,
+    @Param("bookingId") bookingId: string,
+    @CurrentUser("id") userId: string,
+  ) {
+    return this.instrumentService.cancelBooking(instrumentId, bookingId, userId);
   }
 
   @Post(":id/maintenance")

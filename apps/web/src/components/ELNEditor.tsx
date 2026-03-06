@@ -113,6 +113,7 @@ export default function ELNEditor({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         // CodeBlock 由 CodeBlockLowlight 替代

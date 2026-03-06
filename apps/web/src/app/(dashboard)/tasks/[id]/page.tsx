@@ -416,7 +416,7 @@ function StepsTab({ task, taskId }: { task: any; taskId: string }) {
   });
 
   const addStep = useMutation({
-    mutationFn: (name: string) => api.createTaskStep(taskId, { name }),
+    mutationFn: (name: string) => api.createTaskStep(taskId, { title: name }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["task", taskId] });
       setNewStepName("");
@@ -488,7 +488,7 @@ function StepsTab({ task, taskId }: { task: any; taskId: string }) {
             <span
               className={`flex-1 text-sm ${step.completed ? "line-through text-gray-400" : "text-gray-800"}`}
             >
-              {step.name}
+              {step.title}
             </span>
             <button
               onClick={() => deleteStep.mutate(step.id)}
@@ -592,7 +592,7 @@ export default function TaskDetailPage() {
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm mb-4">
         <div className="flex items-start justify-between mb-4">
           <h1 className="text-xl font-bold text-slate-900 flex-1 mr-4">
-            {task.name}
+            {task.title}
           </h1>
           <select
             value={task.status}

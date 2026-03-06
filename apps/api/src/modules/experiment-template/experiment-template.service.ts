@@ -5,6 +5,7 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { CreateExperimentTemplateDto } from "./dto/create-template.dto";
+import { UpdateExperimentTemplateDto } from "./dto/update-template.dto";
 
 @Injectable()
 export class ExperimentTemplateService {
@@ -81,6 +82,49 @@ export class ExperimentTemplateService {
     });
 
     return template;
+  }
+
+  async update(id: string, dto: UpdateExperimentTemplateDto, userId: string) {
+    const template = await this.prisma.experimentTemplate.findUnique({
+      where: { id },
+    });
+
+    if (!template) {
+      throw new NotFoundException(`实验模板 ${id} 不存在`);
+    }
+
+    if (template.authorId !== userId) {
+      throw new ForbiddenException("只有模板作者才能修改该模板");
+    }
+
+    const updated = await this.prisma.experimentTemplate.update({
+      where: { id },
+      data: {
+        ...(dto.name !== undefined && { name: dto.name }),
+        ...(dto.description !== undefined && { description: dto.description }),
+        ...(dto.content !== undefined && { content: dto.content }),
+        ...(dto.category !== undefined && { category: dto.category }),
+        ...(dto.isPublic !== undefined && { isPublic: dto.isPublic }),
+      },
+      include: {
+        author: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
+      },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        userId,
+        action: "UPDATE",
+        entityType: "ExperimentTemplate",
+        entityId: id,
+        oldValue: { name: template.name, isPublic: template.isPublic },
+        newValue: { name: updated.name, isPublic: updated.isPublic },
+      },
+    });
+
+    return updated;
   }
 
   async delete(id: string, userId: string) {
