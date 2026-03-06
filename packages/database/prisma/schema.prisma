@@ -776,6 +776,7 @@ model Booking {
   endTime      DateTime      @map("end_time")
   status       BookingStatus @default(CONFIRMED)
   notes        String?
+  reminderSent Boolean       @default(false) @map("reminder_sent")
   createdAt    DateTime      @default(now()) @map("created_at")
 
   instrument   Instrument    @relation(fields: [instrumentId], references: [id], onDelete: Cascade)

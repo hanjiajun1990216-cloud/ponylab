@@ -39,6 +39,15 @@ export class InstrumentController {
     return this.instrumentService.findAll(page, Math.min(limit, 100));
   }
 
+  @Get("bookings/today")
+  @ApiOperation({ summary: "Get today bookings across all instruments" })
+  async getTodayBookings(
+    @Query("start") start: string,
+    @Query("end") end: string,
+  ) {
+    return this.instrumentService.getTodayBookings(start, end);
+  }
+
   @Get(":id")
   @ApiOperation({ summary: "Get instrument with bookings and maintenance" })
   async findById(@Param("id") id: string) {
@@ -76,6 +85,12 @@ export class InstrumentController {
     },
   ) {
     return this.instrumentService.addMaintenance(instrumentId, body);
+  }
+
+  @Get(":id/stats")
+  @ApiOperation({ summary: "Get instrument usage statistics" })
+  async getStats(@Param("id") id: string) {
+    return this.instrumentService.getStats(id);
   }
 
   @Get(":id/calendar")

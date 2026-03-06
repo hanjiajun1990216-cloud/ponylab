@@ -150,6 +150,90 @@ export class InstrumentService {
     }));
   }
 
+  async getStats(instrumentId: string) {
+    const instrument = await this.prisma.instrument.findUnique({
+      where: { id: instrumentId },
+    });
+    if (!instrument) throw new NotFoundException("Instrument not found");
+
+    // Get booking stats for last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const bookings = await this.prisma.booking.findMany({
+      where: {
+        instrumentId,
+        startTime: { gte: thirtyDaysAgo },
+      },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true } },
+      },
+      orderBy: { startTime: "asc" },
+    });
+
+    // Daily booking counts (last 30 days)
+    const dailyCounts: Record<string, number> = {};
+    for (let i = 0; i < 30; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - 29 + i);
+      dailyCounts[d.toISOString().split("T")[0]] = 0;
+    }
+    bookings.forEach((b: any) => {
+      const day = new Date(b.startTime).toISOString().split("T")[0];
+      if (dailyCounts[day] !== undefined) dailyCounts[day]++;
+    });
+
+    // User usage breakdown
+    const userUsage: Record<
+      string,
+      { name: string; count: number; hours: number }
+    > = {};
+    bookings.forEach((b: any) => {
+      const uid = b.user.id;
+      if (!userUsage[uid]) {
+        userUsage[uid] = {
+          name: `${b.user.firstName} ${b.user.lastName}`,
+          count: 0,
+          hours: 0,
+        };
+      }
+      userUsage[uid].count++;
+      userUsage[uid].hours +=
+        (new Date(b.endTime).getTime() - new Date(b.startTime).getTime()) /
+        3600000;
+    });
+
+    const totalHours = Object.values(userUsage).reduce(
+      (sum, u) => sum + u.hours,
+      0,
+    );
+
+    return {
+      totalBookings: bookings.length,
+      totalHours: Math.round(totalHours * 10) / 10,
+      dailyCounts: Object.entries(dailyCounts).map(([date, count]) => ({
+        date,
+        count,
+      })),
+      userUsage: Object.values(userUsage).sort((a, b) => b.hours - a.hours),
+    };
+  }
+
+  async getTodayBookings(start: string, end: string) {
+    return this.prisma.booking.findMany({
+      where: {
+        startTime: { gte: new Date(start) },
+        endTime: { lte: new Date(end) },
+      },
+      include: {
+        instrument: { select: { id: true, name: true } },
+        user: { select: { id: true, firstName: true, lastName: true } },
+      },
+      orderBy: { startTime: "asc" },
+      take: 10,
+    });
+  }
+
   async checkAvailability(
     instrumentId: string,
     startTime: string,

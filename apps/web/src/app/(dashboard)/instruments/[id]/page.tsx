@@ -13,11 +13,25 @@ import {
   Wrench,
   Pin,
   Tag,
+  Plus,
 } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { Avatar } from "@/components/Avatar";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Modal } from "@/components/Modal";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 
 // Calendar library
 import {
@@ -355,6 +369,408 @@ function CommentCard({
   );
 }
 
+// ─── Maintenance Tab ──────────────────────────────────────────────────────────
+
+const MAINTENANCE_TYPE_COLORS: Record<string, string> = {
+  CALIBRATION: "bg-blue-100 text-blue-700",
+  PREVENTIVE: "bg-green-100 text-green-700",
+  REPAIR: "bg-red-100 text-red-700",
+  CLEANING: "bg-yellow-100 text-yellow-700",
+};
+
+const MAINTENANCE_TYPE_LABELS: Record<string, string> = {
+  CALIBRATION: "校准",
+  PREVENTIVE: "预防性维护",
+  REPAIR: "维修",
+  CLEANING: "清洁",
+};
+
+function MaintenanceTab({
+  instrumentId,
+  maintenance,
+}: {
+  instrumentId: string;
+  maintenance: any[];
+}) {
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({
+    type: "CALIBRATION",
+    description: "",
+    performedAt: new Date().toISOString().split("T")[0],
+    nextDueDate: "",
+    cost: "",
+  });
+  const queryClient = useQueryClient();
+
+  const addMaintenance = useMutation({
+    mutationFn: () =>
+      api.addMaintenanceRecord(instrumentId, {
+        type: form.type,
+        description: form.description,
+        performedAt: form.performedAt,
+        nextDueDate: form.nextDueDate || undefined,
+        cost: form.cost ? parseFloat(form.cost) : undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["instrument", instrumentId] });
+      setShowModal(false);
+      setForm({
+        type: "CALIBRATION",
+        description: "",
+        performedAt: new Date().toISOString().split("T")[0],
+        nextDueDate: "",
+        cost: "",
+      });
+    },
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-700">维护记录</h3>
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          <Plus className="h-4 w-4" />
+          添加记录
+        </button>
+      </div>
+
+      {maintenance.length === 0 ? (
+        <div className="py-12 text-center text-gray-400">
+          <Wrench className="mx-auto mb-2 h-10 w-10 opacity-40" />
+          <p>暂无维护记录</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {maintenance.map((record: any) => (
+            <div
+              key={record.id}
+              className="rounded-lg border border-gray-100 bg-gray-50 p-4"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${MAINTENANCE_TYPE_COLORS[record.type] || "bg-gray-100 text-gray-700"}`}
+                  >
+                    {MAINTENANCE_TYPE_LABELS[record.type] || record.type}
+                  </span>
+                  {record.cost != null && (
+                    <span className="text-xs text-gray-500">
+                      ¥{record.cost.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs text-gray-400">
+                  {new Date(record.performedAt).toLocaleDateString("zh-CN")}
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-gray-700">{record.description}</p>
+              {record.nextDueDate && (
+                <p className="mt-1 text-xs text-orange-600">
+                  下次维护:{" "}
+                  {new Date(record.nextDueDate).toLocaleDateString("zh-CN")}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title="添加维护记录"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              维护类型
+            </label>
+            <select
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value })}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            >
+              <option value="CALIBRATION">校准</option>
+              <option value="PREVENTIVE">预防性维护</option>
+              <option value="REPAIR">维修</option>
+              <option value="CLEANING">清洁</option>
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              描述 <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              value={form.description}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
+              rows={3}
+              placeholder="描述维护内容..."
+              className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                执行日期 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={form.performedAt}
+                onChange={(e) =>
+                  setForm({ ...form, performedAt: e.target.value })
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                下次维护日期（可选）
+              </label>
+              <input
+                type="date"
+                value={form.nextDueDate}
+                onChange={(e) =>
+                  setForm({ ...form, nextDueDate: e.target.value })
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              费用（可选，元）
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.cost}
+              onChange={(e) => setForm({ ...form, cost: e.target.value })}
+              placeholder="0.00"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setShowModal(false)}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            >
+              取消
+            </button>
+            <button
+              onClick={() => addMaintenance.mutate()}
+              disabled={
+                !form.description.trim() ||
+                !form.performedAt ||
+                addMaintenance.isPending
+              }
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {addMaintenance.isPending ? "保存中..." : "保存"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── Stats Tab ─────────────────────────────────────────────────────────────────
+
+const PIE_COLORS = [
+  "#3b82f6",
+  "#10b981",
+  "#f59e0b",
+  "#ef4444",
+  "#8b5cf6",
+  "#ec4899",
+  "#06b6d4",
+  "#84cc16",
+];
+
+function StatsTab({ instrumentId }: { instrumentId: string }) {
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["instrument-stats", instrumentId],
+    queryFn: () => api.getInstrumentStats(instrumentId),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return <div className="py-12 text-center text-gray-400">暂无统计数据</div>;
+  }
+
+  const uniqueUsers = stats.userUsage?.length || 0;
+  const avgDaily =
+    stats.totalBookings > 0 ? (stats.totalBookings / 30).toFixed(1) : "0.0";
+
+  const dailyData = (stats.dailyCounts || []).map((d: any) => ({
+    date: d.date.slice(5), // "MM-DD"
+    count: d.count,
+  }));
+
+  const pieData = (stats.userUsage || []).map((u: any) => ({
+    name: u.name,
+    value: Math.round(u.hours * 10) / 10,
+  }));
+
+  return (
+    <div className="space-y-6">
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="rounded-lg bg-blue-50 p-4 text-center">
+          <div className="text-2xl font-bold text-blue-600">
+            {stats.totalBookings}
+          </div>
+          <div className="mt-1 text-xs text-blue-700">近30天预约次数</div>
+        </div>
+        <div className="rounded-lg bg-green-50 p-4 text-center">
+          <div className="text-2xl font-bold text-green-600">
+            {stats.totalHours}h
+          </div>
+          <div className="mt-1 text-xs text-green-700">近30天使用小时</div>
+        </div>
+        <div className="rounded-lg bg-purple-50 p-4 text-center">
+          <div className="text-2xl font-bold text-purple-600">
+            {uniqueUsers}
+          </div>
+          <div className="mt-1 text-xs text-purple-700">使用用户数</div>
+        </div>
+        <div className="rounded-lg bg-orange-50 p-4 text-center">
+          <div className="text-2xl font-bold text-orange-600">{avgDaily}</div>
+          <div className="mt-1 text-xs text-orange-700">日均预约次数</div>
+        </div>
+      </div>
+
+      {/* Bar Chart: Daily Bookings */}
+      <div>
+        <h4 className="mb-3 text-sm font-semibold text-gray-700">
+          近30天每日预约量
+        </h4>
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart
+            data={dailyData}
+            margin={{ top: 4, right: 8, left: -16, bottom: 0 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis
+              dataKey="date"
+              tick={{ fontSize: 10 }}
+              interval={4}
+              tickLine={false}
+            />
+            <YAxis
+              allowDecimals={false}
+              tick={{ fontSize: 11 }}
+              tickLine={false}
+            />
+            <Tooltip
+              formatter={(value: any) => [`${value} 次`, "预约次数"]}
+              labelFormatter={(label) => `日期: ${label}`}
+            />
+            <Bar dataKey="count" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Pie Chart: User Usage */}
+      {pieData.length > 0 && (
+        <div>
+          <h4 className="mb-3 text-sm font-semibold text-gray-700">
+            用户使用时长分布
+          </h4>
+          <div className="flex flex-col items-center md:flex-row md:items-start md:gap-8">
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  label={({ name, percent }) =>
+                    `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+                  }
+                  labelLine={false}
+                >
+                  {pieData.map((_: any, index: number) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={PIE_COLORS[index % PIE_COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: any) => [`${value}h`, "使用时长"]}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Usage Table */}
+          <div className="mt-4 overflow-hidden rounded-lg border border-gray-100">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-2 text-left font-medium text-gray-600">
+                    用户
+                  </th>
+                  <th className="px-4 py-2 text-right font-medium text-gray-600">
+                    预约次数
+                  </th>
+                  <th className="px-4 py-2 text-right font-medium text-gray-600">
+                    使用时长
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {stats.userUsage.map((u: any, i: number) => (
+                  <tr key={i} className="hover:bg-gray-50">
+                    <td className="flex items-center gap-2 px-4 py-2">
+                      <span
+                        className="inline-block h-2.5 w-2.5 rounded-full"
+                        style={{
+                          backgroundColor: PIE_COLORS[i % PIE_COLORS.length],
+                        }}
+                      />
+                      {u.name}
+                    </td>
+                    <td className="px-4 py-2 text-right text-gray-700">
+                      {u.count}
+                    </td>
+                    <td className="px-4 py-2 text-right text-gray-700">
+                      {(Math.round(u.hours * 10) / 10).toFixed(1)}h
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {pieData.length === 0 && (
+        <div className="py-8 text-center text-sm text-gray-400">
+          近30天暂无使用数据
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function InstrumentDetailPage() {
@@ -441,29 +857,12 @@ export default function InstrumentDetailPage() {
         {activeTab === "calendar" && <CalendarTab instrumentId={id} />}
         {activeTab === "comments" && <CommentsTab instrumentId={id} />}
         {activeTab === "maintenance" && (
-          <div className="text-center py-12 text-gray-400">
-            <Wrench className="h-10 w-10 mx-auto mb-2 opacity-40" />
-            <p>维护记录功能开发中</p>
-          </div>
+          <MaintenanceTab
+            instrumentId={id}
+            maintenance={instrument.maintenance || []}
+          />
         )}
-        {activeTab === "stats" && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="rounded-lg bg-blue-50 p-4 text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {instrument._count?.bookings || 0}
-                </div>
-                <div className="text-xs text-blue-700 mt-1">总预约次数</div>
-              </div>
-              <div className="rounded-lg bg-green-50 p-4 text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {instrument.status === "AVAILABLE" ? "正常" : "占用"}
-                </div>
-                <div className="text-xs text-green-700 mt-1">当前状态</div>
-              </div>
-            </div>
-          </div>
-        )}
+        {activeTab === "stats" && <StatsTab instrumentId={id} />}
       </div>
     </div>
   );

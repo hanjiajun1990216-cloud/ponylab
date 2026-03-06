@@ -12,6 +12,8 @@ import {
   CheckSquare,
   ArrowRight,
   Microscope,
+  Activity,
+  Clock,
 } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -82,6 +84,16 @@ export default function DashboardPage() {
   const { data: notifCount } = useQuery({
     queryKey: ["notifications-unread"],
     queryFn: () => api.getUnreadNotificationCount(),
+  });
+
+  const { data: todayBookings, isLoading: todayBookingsLoading } = useQuery({
+    queryKey: ["today-bookings"],
+    queryFn: () => api.getTodayBookings(),
+  });
+
+  const { data: auditLogs, isLoading: auditLoading } = useQuery({
+    queryKey: ["audit-logs-dashboard"],
+    queryFn: () => api.getAuditLogs(1),
   });
 
   // Compute stats
@@ -229,12 +241,12 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Bottom Left: Instruments */}
+        {/* Bottom Left: Today's Instrument Bookings */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
               <Calendar className="h-4 w-4 text-teal-500" />
-              仪器状态
+              今日仪器预约
             </h2>
             <Link
               href="/instruments"
@@ -244,26 +256,44 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          {!instruments ? (
+          {todayBookingsLoading ? (
             <LoadingSpinner size="sm" />
-          ) : instruments.data?.length > 0 ? (
+          ) : todayBookings && todayBookings.length > 0 ? (
             <div className="space-y-2">
-              {instruments.data.slice(0, 5).map((inst: any) => (
+              {todayBookings.slice(0, 5).map((booking: any) => (
                 <Link
-                  key={inst.id}
-                  href={`/instruments/${inst.id}`}
-                  className="flex items-center justify-between rounded-lg p-2 hover:bg-gray-50"
+                  key={booking.id}
+                  href={`/instruments/${booking.instrumentId}`}
+                  className="flex items-start justify-between rounded-lg p-2 hover:bg-gray-50"
                 >
-                  <div className="flex items-center gap-2">
-                    <Microscope className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-800">{inst.name}</span>
+                  <div className="flex items-start gap-2 min-w-0">
+                    <Microscope className="h-4 w-4 text-teal-400 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-gray-800 font-medium line-clamp-1">
+                        {booking.instrument?.name}
+                      </p>
+                      <p className="text-xs text-gray-500 line-clamp-1">
+                        {booking.user?.firstName} {booking.user?.lastName}
+                      </p>
+                    </div>
                   </div>
-                  <Badge label={inst.status} status={inst.status} />
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {new Date(booking.startTime).toLocaleTimeString("zh-CN", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                    <Badge label={booking.status} status={booking.status} />
+                  </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-400 text-center py-6">暂无仪器</p>
+            <p className="text-sm text-gray-400 text-center py-6">
+              今日暂无预约
+            </p>
           )}
         </div>
 
@@ -311,28 +341,40 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Teams section */}
-          {teams && teams.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <div className="text-xs font-semibold uppercase text-gray-400 mb-2">
-                团队动态
-              </div>
-              <div className="space-y-1">
-                {teams.slice(0, 3).map((team: any) => (
-                  <Link
-                    key={team.id}
-                    href={`/teams/${team.id}`}
-                    className="flex items-center justify-between text-xs text-gray-600 hover:text-blue-600 py-0.5"
-                  >
-                    <span>{team.name}</span>
-                    <span className="text-gray-400">
-                      {team.members?.length || 0} 成员
-                    </span>
-                  </Link>
+          {/* Recent Team Activity */}
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-1 text-xs font-semibold uppercase text-gray-400 mb-2">
+              <Activity className="h-3 w-3" />
+              近期团队动态
+            </div>
+            {auditLoading ? (
+              <LoadingSpinner size="sm" />
+            ) : auditLogs?.data && auditLogs.data.length > 0 ? (
+              <div className="space-y-1.5">
+                {auditLogs.data.slice(0, 5).map((log: any) => (
+                  <div key={log.id} className="flex items-start gap-2">
+                    <div className="mt-1 h-1.5 w-1.5 rounded-full bg-blue-400 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-700 line-clamp-1">
+                        <span className="font-medium">{log.action}</span>{" "}
+                        {log.entityType}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(log.createdAt).toLocaleString("zh-CN", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="text-xs text-gray-400">暂无动态</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -382,6 +382,24 @@ class ApiClient {
     });
   }
 
+  getSample(id: string) {
+    return this.fetch<any>(`/samples/${id}`);
+  }
+
+  addSampleEvent(id: string, data: { type: string; note?: string }) {
+    return this.fetch<any>(`/samples/${id}/events`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  updateSampleStatus(id: string, status: string) {
+    return this.fetch<any>(`/samples/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  }
+
   // Inventory
   getInventory(page = 1, category?: string) {
     const params = new URLSearchParams({ page: String(page) });
@@ -415,6 +433,23 @@ class ApiClient {
     return this.fetch<any>(`/instruments?page=${page}`);
   }
 
+  getTodayBookings() {
+    const today = new Date();
+    const start = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    ).toISOString();
+    const end = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + 1,
+    ).toISOString();
+    return this.fetch<any[]>(
+      `/instruments/bookings/today?start=${start}&end=${end}`,
+    );
+  }
+
   getInstrument(id: string) {
     return this.fetch<any>(`/instruments/${id}`);
   }
@@ -423,6 +458,10 @@ class ApiClient {
     return this.fetch<any[]>(
       `/instruments/${id}/bookings?start=${start}&end=${end}`,
     );
+  }
+
+  getInstrumentStats(id: string) {
+    return this.fetch<any>(`/instruments/${id}/stats`);
   }
 
   checkInstrumentAvailability(id: string, start: string, end: string) {
@@ -446,6 +485,22 @@ class ApiClient {
   cancelBooking(bookingId: string) {
     return this.fetch<any>(`/instruments/bookings/${bookingId}`, {
       method: "DELETE",
+    });
+  }
+
+  addMaintenanceRecord(
+    instrumentId: string,
+    data: {
+      type: string;
+      description: string;
+      performedAt: string;
+      nextDueDate?: string;
+      cost?: number;
+    },
+  ) {
+    return this.fetch<any>(`/instruments/${instrumentId}/maintenance`, {
+      method: "POST",
+      body: JSON.stringify(data),
     });
   }
 
@@ -518,6 +573,41 @@ class ApiClient {
 
   deleteExperimentTemplate(id: string) {
     return this.fetch<any>(`/experiment-templates/${id}`, { method: "DELETE" });
+  }
+
+  // Protocol Execution
+  startProtocolExecution(
+    taskId: string,
+    data: { protocolId: string; versionId: string },
+  ) {
+    return this.fetch<any>(`/tasks/${taskId}/protocol-execution`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  getProtocolExecution(taskId: string) {
+    return this.fetch<any>(`/tasks/${taskId}/protocol-execution`);
+  }
+
+  updateExecutionStep(
+    executionId: string,
+    stepId: string,
+    data: { status?: string; notes?: string; deviations?: string },
+  ) {
+    return this.fetch<any>(
+      `/protocol-executions/${executionId}/steps/${stepId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      },
+    );
+  }
+
+  completeProtocolExecution(executionId: string) {
+    return this.fetch<any>(`/protocol-executions/${executionId}/complete`, {
+      method: "POST",
+    });
   }
 
   // Health

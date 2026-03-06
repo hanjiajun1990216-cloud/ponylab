@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
@@ -115,7 +116,12 @@ export default function SamplesPage() {
               {data?.data?.map((sample: any) => (
                 <tr key={sample.id} className="hover:bg-gray-50 cursor-pointer">
                   <td className="px-4 py-3 font-medium text-gray-900">
-                    {sample.name}
+                    <Link
+                      href={`/samples/${sample.id}`}
+                      className="hover:text-blue-600 transition-colors"
+                    >
+                      {sample.name}
+                    </Link>
                   </td>
                   <td className="px-4 py-3 text-gray-600">
                     {sample.sampleType}
