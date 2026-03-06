@@ -28,8 +28,18 @@ echo "--- Step 3: Generate Prisma client ---"
 npx prisma generate --schema=packages/database/prisma/schema.prisma
 echo "Prisma client generated."
 
-# 4. Build API (and all its dependencies)
-echo "--- Step 4: Build API ---"
+# 4. Push schema to database (idempotent, applies any new model changes)
+echo "--- Step 4: Push Prisma schema to DB ---"
+npx prisma db push --schema=packages/database/prisma/schema.prisma --skip-generate
+echo "Schema pushed."
+
+# 5. Seed database (idempotent — cleans and re-seeds)
+echo "--- Step 5: Seed database ---"
+cd packages/database && npx tsx prisma/seed.ts && cd ../..
+echo "Database seeded."
+
+# 6. Build API (and all its dependencies)
+echo "--- Step 6: Build API ---"
 # Use npx as fallback since pnpm exec may not find turbo with node-linker=hoisted
 npx turbo build --filter=@ponylab/api...
 
