@@ -359,6 +359,14 @@ class ApiClient {
     });
   }
 
+  signExperiment(id: string) {
+    return this.fetch<any>(`/experiments/${id}/sign`, { method: "POST" });
+  }
+
+  getExperimentHistory(id: string) {
+    return this.fetch<any[]>(`/experiments/${id}/history`);
+  }
+
   // Samples
   getSamples(page = 1, filters?: { sampleType?: string; status?: string }) {
     const params = new URLSearchParams({ page: String(page) });
@@ -480,6 +488,36 @@ class ApiClient {
       });
     }
     return this.fetch<any>(`/audit?${params}`);
+  }
+
+  // Experiment Templates
+  getExperimentTemplates(teamId?: string, isPublic?: boolean) {
+    const params = new URLSearchParams();
+    if (teamId) params.set("teamId", teamId);
+    if (isPublic !== undefined) params.set("isPublic", String(isPublic));
+    return this.fetch<any[]>(`/experiment-templates?${params}`);
+  }
+
+  getExperimentTemplate(id: string) {
+    return this.fetch<any>(`/experiment-templates/${id}`);
+  }
+
+  createExperimentTemplate(data: {
+    name: string;
+    description?: string;
+    content?: any;
+    category?: string;
+    isPublic?: boolean;
+    teamId: string;
+  }) {
+    return this.fetch<any>("/experiment-templates", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  deleteExperimentTemplate(id: string) {
+    return this.fetch<any>(`/experiment-templates/${id}`, { method: "DELETE" });
   }
 
   // Health

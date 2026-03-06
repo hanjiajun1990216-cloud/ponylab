@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { FlaskConical, Plus, Filter, CheckCircle2 } from "lucide-react";
@@ -151,9 +152,10 @@ export default function ExperimentsPage() {
       ) : filteredExperiments?.length > 0 ? (
         <div className="space-y-3">
           {filteredExperiments.map((exp: any) => (
-            <div
+            <Link
               key={exp.id}
-              className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+              href={`/experiments/${exp.id}`}
+              className="block rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -208,7 +210,7 @@ export default function ExperimentsPage() {
                   ))}
                 </div>
               )}
-            </div>
+            </Link>
           ))}
         </div>
       ) : (

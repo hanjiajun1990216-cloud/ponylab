@@ -11,6 +11,11 @@ enum ExperimentStatus {
   DRAFT = "DRAFT",
   IN_PROGRESS = "IN_PROGRESS",
   COMPLETED = "COMPLETED",
+  SUBMITTED = "SUBMITTED",
+  SIGNED = "SIGNED",
+  WITNESSED = "WITNESSED",
+  REJECTED = "REJECTED",
+  ARCHIVED = "ARCHIVED",
 }
 
 export class UpdateExperimentDto {
