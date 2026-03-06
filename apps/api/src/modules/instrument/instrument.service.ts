@@ -234,6 +234,27 @@ export class InstrumentService {
     });
   }
 
+  async getAllBookings(start: string, end: string) {
+    return this.prisma.booking.findMany({
+      where: {
+        startTime: { gte: new Date(start) },
+        endTime: { lte: new Date(end) },
+      },
+      include: {
+        instrument: { select: { id: true, name: true } },
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            userColor: true,
+          },
+        },
+      },
+      orderBy: { startTime: "asc" },
+    });
+  }
+
   async checkAvailability(
     instrumentId: string,
     startTime: string,

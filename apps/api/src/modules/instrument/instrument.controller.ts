@@ -48,6 +48,15 @@ export class InstrumentController {
     return this.instrumentService.getTodayBookings(start, end);
   }
 
+  @Get("all-bookings")
+  @ApiOperation({ summary: "Get all instrument bookings for timeline" })
+  async getAllBookings(
+    @Query("start") start: string,
+    @Query("end") end: string,
+  ) {
+    return this.instrumentService.getAllBookings(start, end);
+  }
+
   @Get(":id")
   @ApiOperation({ summary: "Get instrument with bookings and maintenance" })
   async findById(@Param("id") id: string) {

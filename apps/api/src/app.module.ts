@@ -25,6 +25,8 @@ import { TaskModule } from "./modules/task/task.module";
 import { ExportModule } from "./modules/export/export.module";
 import { ExperimentTemplateModule } from "./modules/experiment-template/experiment-template.module";
 import { ProtocolExecutionModule } from "./modules/protocol-execution/protocol-execution.module";
+import { InventoryColumnModule } from "./modules/inventory-column/inventory-column.module";
+import { AIModule } from "./modules/ai/ai.module";
 
 @Module({
   imports: [
@@ -55,6 +57,8 @@ import { ProtocolExecutionModule } from "./modules/protocol-execution/protocol-e
     ExportModule,
     ExperimentTemplateModule,
     ProtocolExecutionModule,
+    InventoryColumnModule,
+    AIModule,
   ],
 })
 export class AppModule {}
