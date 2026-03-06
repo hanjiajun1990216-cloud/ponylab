@@ -10,15 +10,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { User, Lock, Bell, Check } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 
-const NOTIFICATION_TYPE_META: Record<string, { label: string; desc: string }> = {
-  TASK_ASSIGNED: { label: "任务分配通知", desc: "当有任务分配给我时通知" },
-  TASK_DUE: { label: "任务截止提醒", desc: "任务即将截止前提醒我" },
-  BOOKING_CONFIRMED: { label: "仪器预约确认", desc: "预约成功或取消时通知" },
-  TEAM_MESSAGE: { label: "团队消息通知", desc: "收到新留言或 @提及时通知" },
-  LOW_STOCK: { label: "库存预警通知", desc: "库存低于警戒线时通知" },
-  EXPERIMENT_STATUS: { label: "实验状态变更", desc: "实验状态发生变化时通知" },
-  BOOKING_REMINDER: { label: "预约提醒", desc: "仪器预约开始前提醒" },
-};
+const NOTIFICATION_TYPE_META: Record<string, { label: string; desc: string }> =
+  {
+    TASK_ASSIGNED: { label: "任务分配通知", desc: "当有任务分配给我时通知" },
+    TASK_DUE: { label: "任务截止提醒", desc: "任务即将截止前提醒我" },
+    BOOKING_CONFIRMED: { label: "仪器预约确认", desc: "预约成功或取消时通知" },
+    TEAM_MESSAGE: { label: "团队消息通知", desc: "收到新留言或 @提及时通知" },
+    LOW_STOCK: { label: "库存预警通知", desc: "库存低于警戒线时通知" },
+    EXPERIMENT_STATUS: {
+      label: "实验状态变更",
+      desc: "实验状态发生变化时通知",
+    },
+    BOOKING_REMINDER: { label: "预约提醒", desc: "仪器预约开始前提醒" },
+  };
 
 function NotificationsSection() {
   const queryClient = useQueryClient();
@@ -88,7 +92,10 @@ function NotificationsSection() {
                         onChange={(e) =>
                           updatePref.mutate({
                             type: pref.type,
-                            data: { email: e.target.checked, inApp: pref.inApp },
+                            data: {
+                              email: e.target.checked,
+                              inApp: pref.inApp,
+                            },
                           })
                         }
                         className="sr-only peer"
@@ -105,7 +112,10 @@ function NotificationsSection() {
                         onChange={(e) =>
                           updatePref.mutate({
                             type: pref.type,
-                            data: { email: pref.email, inApp: e.target.checked },
+                            data: {
+                              email: pref.email,
+                              inApp: e.target.checked,
+                            },
                           })
                         }
                         className="sr-only peer"
@@ -398,9 +408,7 @@ export default function SettingsPage() {
           )}
 
           {/* Notifications Section */}
-          {activeSection === "notifications" && (
-            <NotificationsSection />
-          )}
+          {activeSection === "notifications" && <NotificationsSection />}
         </div>
       </div>
     </div>

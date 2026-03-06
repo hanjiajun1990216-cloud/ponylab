@@ -100,7 +100,9 @@ export class InstrumentService {
   }
 
   async approveBooking(bookingId: string) {
-    const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } });
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
     if (!booking) throw new NotFoundException("Booking not found");
     if (booking.status !== "PENDING") {
       throw new BadRequestException("Only PENDING bookings can be approved");
@@ -116,7 +118,9 @@ export class InstrumentService {
   }
 
   async rejectBooking(bookingId: string) {
-    const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } });
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
     if (!booking) throw new NotFoundException("Booking not found");
     if (booking.status !== "PENDING") {
       throw new BadRequestException("Only PENDING bookings can be rejected");

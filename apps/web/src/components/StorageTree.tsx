@@ -52,7 +52,9 @@ function StorageTreeNode({
     <div>
       <div
         className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-gray-100 ${
-          isSelected ? "bg-primary-50 font-medium text-primary-700" : "text-gray-700"
+          isSelected
+            ? "bg-primary-50 font-medium text-primary-700"
+            : "text-gray-700"
         }`}
         style={{ paddingLeft: `${8 + level * 16}px` }}
         onClick={handleClick}

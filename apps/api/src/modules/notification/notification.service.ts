@@ -90,11 +90,20 @@ export class NotificationService {
     }));
   }
 
-  async updatePreference(userId: string, type: string, data: { email?: boolean; inApp?: boolean }) {
+  async updatePreference(
+    userId: string,
+    type: string,
+    data: { email?: boolean; inApp?: boolean },
+  ) {
     return this.prisma.notificationPreference.upsert({
       where: { userId_type: { userId, type } },
       update: { email: data.email, inApp: data.inApp },
-      create: { userId, type, email: data.email ?? true, inApp: data.inApp ?? true },
+      create: {
+        userId,
+        type,
+        email: data.email ?? true,
+        inApp: data.inApp ?? true,
+      },
     });
   }
 }

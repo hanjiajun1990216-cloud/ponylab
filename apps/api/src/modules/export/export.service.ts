@@ -173,7 +173,10 @@ export class ExportService {
       typeof experiment.content === "string"
         ? experiment.content
         : JSON.stringify(experiment.content ?? {});
-    const contentLines = doc.splitTextToSize(contentText.substring(0, 3000), 180);
+    const contentLines = doc.splitTextToSize(
+      contentText.substring(0, 3000),
+      180,
+    );
     doc.text(contentLines, 14, y);
     y += contentLines.length * 4 + 10;
 
@@ -248,8 +251,7 @@ export class ExportService {
         },
       },
     });
-    if (!project)
-      throw new NotFoundException(`Project ${projectId} not found`);
+    if (!project) throw new NotFoundException(`Project ${projectId} not found`);
 
     // Use dynamic import for jspdf (it's ESM)
     const { jsPDF } = await import("jspdf");
@@ -277,7 +279,11 @@ export class ExportService {
     }
     doc.text(`Status: ${project.status}`, 14, y);
     y += 5;
-    doc.text(`Created: ${project.createdAt.toISOString().split("T")[0]}`, 14, y);
+    doc.text(
+      `Created: ${project.createdAt.toISOString().split("T")[0]}`,
+      14,
+      y,
+    );
     y += 5;
     if (project.startDate) {
       doc.text(

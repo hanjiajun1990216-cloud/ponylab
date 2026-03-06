@@ -568,7 +568,10 @@ class ApiClient {
     return this.fetch<any[]>("/notifications/preferences");
   }
 
-  updateNotificationPreference(type: string, data: { email?: boolean; inApp?: boolean }) {
+  updateNotificationPreference(
+    type: string,
+    data: { email?: boolean; inApp?: boolean },
+  ) {
     return this.fetch<any>(`/notifications/preferences/${type}`, {
       method: "PATCH",
       body: JSON.stringify(data),
@@ -577,11 +580,15 @@ class ApiClient {
 
   // Booking Approval
   approveBooking(bookingId: string) {
-    return this.fetch<any>(`/instruments/bookings/${bookingId}/approve`, { method: "POST" });
+    return this.fetch<any>(`/instruments/bookings/${bookingId}/approve`, {
+      method: "POST",
+    });
   }
 
   rejectBooking(bookingId: string) {
-    return this.fetch<any>(`/instruments/bookings/${bookingId}/reject`, { method: "POST" });
+    return this.fetch<any>(`/instruments/bookings/${bookingId}/reject`, {
+      method: "POST",
+    });
   }
 
   // Audit
