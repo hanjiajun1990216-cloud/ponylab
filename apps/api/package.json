@@ -19,6 +19,7 @@
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/schedule": "^6.1.1",
     "@nestjs/swagger": "^11.0.0",
     "@ponylab/database": "workspace:*",
     "@ponylab/shared": "workspace:*",
