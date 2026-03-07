@@ -143,7 +143,9 @@ export class InstrumentService {
 
     if (!booking) throw new NotFoundException("Booking not found");
     if (booking.instrumentId !== instrumentId) {
-      throw new BadRequestException("Booking does not belong to this instrument");
+      throw new BadRequestException(
+        "Booking does not belong to this instrument",
+      );
     }
     if (booking.status === "CANCELLED") {
       throw new BadRequestException("Booking is already cancelled");
@@ -165,7 +167,10 @@ export class InstrumentService {
         entityType: "Booking",
         entityId: bookingId,
         oldValue: { status: booking.status },
-        newValue: { status: "CANCELLED", instrumentName: booking.instrument.name },
+        newValue: {
+          status: "CANCELLED",
+          instrumentName: booking.instrument.name,
+        },
       },
     });
 

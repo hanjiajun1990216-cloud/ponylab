@@ -70,6 +70,9 @@ import { IpWhitelistMiddleware } from "./common/middleware/ip-whitelist.middlewa
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(IpWhitelistMiddleware).exclude("health{/*path}").forRoutes("*");
+    consumer
+      .apply(IpWhitelistMiddleware)
+      .exclude("health{/*path}")
+      .forRoutes("*");
   }
 }

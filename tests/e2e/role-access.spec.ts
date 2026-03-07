@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { loginAsAdmin, loginAsPI, loginAsResearcher, loginAsTech } from "./helpers";
+import {
+  loginAsAdmin,
+  loginAsPI,
+  loginAsResearcher,
+  loginAsTech,
+} from "./helpers";
 
 test.describe("RBAC — PI Role Access", () => {
   test.beforeEach(async ({ page }) => {
@@ -14,7 +19,9 @@ test.describe("RBAC — PI Role Access", () => {
 
   test("PI can access experiments", async ({ page }) => {
     await page.goto("/experiments");
-    await expect(page.getByRole("heading", { name: "实验记录", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "实验记录", exact: true }),
+    ).toBeVisible();
   });
 
   test("PI can see projects on dashboard", async ({ page }) => {
@@ -60,7 +67,9 @@ test.describe("RBAC — Researcher Role Access", () => {
 
   test("Researcher can access experiments", async ({ page }) => {
     await page.goto("/experiments");
-    await expect(page.getByRole("heading", { name: "实验记录", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "实验记录", exact: true }),
+    ).toBeVisible();
   });
 
   test("Researcher can access samples", async ({ page }) => {
@@ -76,7 +85,7 @@ test.describe("RBAC — Researcher Role Access", () => {
   test("Researcher can access their settings", async ({ page }) => {
     await page.goto("/settings");
     await expect(page.getByRole("heading", { name: "设置" })).toBeVisible();
-    await expect(page.locator('input').first()).toHaveValue("Alex");
+    await expect(page.locator("input").first()).toHaveValue("Alex");
   });
 
   test("Researcher can access audit log", async ({ page }) => {
@@ -112,12 +121,14 @@ test.describe("RBAC — Technician Role Access", () => {
 
   test("Technician can access experiments", async ({ page }) => {
     await page.goto("/experiments");
-    await expect(page.getByRole("heading", { name: "实验记录", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "实验记录", exact: true }),
+    ).toBeVisible();
   });
 
   test("Technician settings show correct user info", async ({ page }) => {
     await page.goto("/settings");
-    await expect(page.locator('input').first()).toHaveValue("Mike");
+    await expect(page.locator("input").first()).toHaveValue("Mike");
   });
 });
 

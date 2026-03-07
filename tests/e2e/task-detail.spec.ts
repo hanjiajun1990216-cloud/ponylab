@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { loginAsAdmin, loginAsResearcher, loginAsTech, navigateToProject } from "./helpers";
+import {
+  loginAsAdmin,
+  loginAsResearcher,
+  loginAsTech,
+  navigateToProject,
+} from "./helpers";
 
 // Helper: navigate to project and switch to list view for reliable task link access
 async function goToProjectListView(page: import("@playwright/test").Page) {
@@ -40,15 +45,21 @@ test.describe("Task Detail — Tabs", () => {
   });
 
   test("has 3 tabs: 详情, 方案执行, 步骤", async ({ page }) => {
-    await expect(page.getByRole("button", { name: "详情", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "详情", exact: true }),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "方案执行" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "步骤", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "步骤", exact: true }),
+    ).toBeVisible();
   });
 
   test("steps tab shows seed task steps", async ({ page }) => {
     await page.getByRole("button", { name: "步骤", exact: true }).click();
     // Step names are rendered as <span>{step.name}</span>
-    await expect(page.getByText("Prepare IPTG dilutions")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("Prepare IPTG dilutions")).toBeVisible({
+      timeout: 5000,
+    });
     await expect(page.getByText("Induce cultures at OD600")).toBeVisible();
     await expect(page.getByText("Incubate 4h at 37°C")).toBeVisible();
     await expect(page.getByText("Measure fluorescence")).toBeVisible();
@@ -108,7 +119,9 @@ test.describe("Task Detail — Comments", () => {
   });
 
   test("comment input and send button are visible", async ({ page }) => {
-    await expect(page.getByRole("button", { name: "发送", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "发送", exact: true }),
+    ).toBeVisible();
   });
 
   test("can post a new comment", async ({ page }) => {
@@ -138,22 +151,36 @@ test.describe("Task Detail — Protocol Execution", () => {
     await page.getByRole("button", { name: "方案执行" }).click();
   });
 
-  test("protocol execution tab shows empty state or execution", async ({ page }) => {
-    const hasExecution = await page.getByText("进行中").isVisible().catch(() => false);
+  test("protocol execution tab shows empty state or execution", async ({
+    page,
+  }) => {
+    const hasExecution = await page
+      .getByText("进行中")
+      .isVisible()
+      .catch(() => false);
     if (!hasExecution) {
       await expect(page.getByText("尚未启动方案执行")).toBeVisible();
-      await expect(page.getByRole("button", { name: "启动方案执行" })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "启动方案执行" }),
+      ).toBeVisible();
     }
   });
 
   test("start execution modal opens", async ({ page }) => {
-    const hasExecution = await page.getByText("进行中").isVisible().catch(() => false);
+    const hasExecution = await page
+      .getByText("进行中")
+      .isVisible()
+      .catch(() => false);
     if (!hasExecution) {
       // "启动方案执行" matches multiple elements — use button role
       await page.getByRole("button", { name: "启动方案执行" }).click();
       await page.waitForTimeout(500);
-      await expect(page.getByPlaceholder("输入 Protocol ID")).toBeVisible({ timeout: 5000 });
-      await expect(page.getByPlaceholder("输入 Protocol Version ID")).toBeVisible();
+      await expect(page.getByPlaceholder("输入 Protocol ID")).toBeVisible({
+        timeout: 5000,
+      });
+      await expect(
+        page.getByPlaceholder("输入 Protocol Version ID"),
+      ).toBeVisible();
     }
   });
 });

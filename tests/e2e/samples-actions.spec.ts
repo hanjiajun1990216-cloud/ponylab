@@ -10,7 +10,9 @@ test.describe("Sample Detail — Navigation & Layout", () => {
   });
 
   test("shows sample name heading", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "pET-28a-GFP plasmid" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "pET-28a-GFP plasmid" }),
+    ).toBeVisible();
   });
 
   test("shows sample status badge", async ({ page }) => {
@@ -29,7 +31,9 @@ test.describe("Sample Detail — Navigation & Layout", () => {
 
   test("QR codes are rendered", async ({ page }) => {
     // QR code may be canvas, SVG, or img — check any visual element
-    const qrElements = page.locator("canvas, svg, img[alt*='QR'], img[alt*='barcode']");
+    const qrElements = page.locator(
+      "canvas, svg, img[alt*='QR'], img[alt*='barcode']",
+    );
     const count = await qrElements.count();
     if (count > 0) {
       await expect(qrElements.first()).toBeVisible();
@@ -50,12 +54,19 @@ test.describe("Sample Detail — Events Tab", () => {
   test("events tab shows events or empty state", async ({ page }) => {
     await page.getByRole("button", { name: "Events" }).click();
     // Events may include Created, Note, Check Out, etc. from prior test runs
-    const hasEmpty = await page.getByText("No events recorded yet").isVisible().catch(() => false);
+    const hasEmpty = await page
+      .getByText("No events recorded yet")
+      .isVisible()
+      .catch(() => false);
     if (hasEmpty) {
       await expect(page.getByText("No events recorded yet")).toBeVisible();
     } else {
       // Some events exist — verify at least one event type is displayed
-      const hasAnyEvent = await page.getByText(/Note|Created|Check/).first().isVisible().catch(() => false);
+      const hasAnyEvent = await page
+        .getByText(/Note|Created|Check/)
+        .first()
+        .isVisible()
+        .catch(() => false);
       expect(hasAnyEvent).toBeTruthy();
     }
   });
@@ -67,7 +78,10 @@ test.describe("Sample Detail — Metadata Tab", () => {
     await page.goto("/samples");
     await page.getByRole("link", { name: /pET-28a-GFP plasmid/ }).click();
     await page.getByRole("button", { name: "Metadata" }).click();
-    const hasMetadata = await page.getByText("Key").isVisible().catch(() => false);
+    const hasMetadata = await page
+      .getByText("Key")
+      .isVisible()
+      .catch(() => false);
     if (!hasMetadata) {
       await expect(page.getByText("No metadata available")).toBeVisible();
     }
@@ -85,7 +99,9 @@ test.describe("Sample Detail — Actions Tab", () => {
   test("shows all action buttons for available sample", async ({ page }) => {
     await expect(page.getByRole("button", { name: "Check Out" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Check In" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Mark Consumed" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Mark Consumed" }),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "Dispose" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Add Note" })).toBeVisible();
   });
@@ -100,7 +116,9 @@ test.describe("Sample Detail — Actions Tab", () => {
   test("add note modal opens", async ({ page }) => {
     await page.getByRole("button", { name: "Add Note" }).click();
     // Check modal by unique content (button + modal heading both say "Add Note")
-    await expect(page.getByPlaceholder("Enter your note or observation...")).toBeVisible();
+    await expect(
+      page.getByPlaceholder("Enter your note or observation..."),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "Save Note" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Cancel" })).toBeVisible();
   });
@@ -108,7 +126,9 @@ test.describe("Sample Detail — Actions Tab", () => {
   test("can add a note to sample", async ({ page }) => {
     await page.getByRole("button", { name: "Add Note" }).click();
     const noteText = `E2E test note ${Date.now()}`;
-    await page.getByPlaceholder("Enter your note or observation...").fill(noteText);
+    await page
+      .getByPlaceholder("Enter your note or observation...")
+      .fill(noteText);
     await page.getByRole("button", { name: "Save Note" }).click();
     // After saving, the events tab should update
     await page.getByRole("button", { name: "Events" }).click();
@@ -143,14 +163,18 @@ test.describe("Sample — Multi-role Access", () => {
     await loginAsResearcher(page);
     await page.goto("/samples");
     await page.getByRole("link", { name: /pET-28a-GFP plasmid/ }).click();
-    await expect(page.getByRole("heading", { name: "pET-28a-GFP plasmid" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "pET-28a-GFP plasmid" }),
+    ).toBeVisible();
   });
 
   test("technician can view sample detail", async ({ page }) => {
     await loginAsTech(page);
     await page.goto("/samples");
     await page.getByRole("link", { name: /BL21.*glycerol stock/ }).click();
-    await expect(page.getByRole("heading", { name: /BL21.*glycerol stock/ })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /BL21.*glycerol stock/ }),
+    ).toBeVisible();
   });
 });
 

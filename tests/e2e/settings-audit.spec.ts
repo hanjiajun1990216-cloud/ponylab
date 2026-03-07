@@ -8,21 +8,35 @@ test.describe("Audit Log", () => {
   });
 
   test("page loads with heading", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: /Audit Log/i })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Audit Log/i }),
+    ).toBeVisible();
   });
 
   test("table has correct columns", async ({ page }) => {
-    await expect(page.getByRole("columnheader", { name: "Timestamp" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "User" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Action" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Entity" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Details" })).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "Timestamp" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "User" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "Action" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "Entity" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "Details" }),
+    ).toBeVisible();
   });
 
   test("displays audit entries", async ({ page }) => {
     // Should have at least seed audit logs
     await expect(page.getByRole("row").nth(1)).toBeVisible();
-    await expect(page.getByText(/CREATE|LOGIN|UPDATE|REGISTER/).first()).toBeVisible();
+    await expect(
+      page.getByText(/CREATE|LOGIN|UPDATE|REGISTER/).first(),
+    ).toBeVisible();
   });
 
   test("shows action emoji badges", async ({ page }) => {
@@ -39,7 +53,9 @@ test.describe("Settings - Profile", () => {
   });
 
   test("page loads with heading", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "设置", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "设置", exact: true }),
+    ).toBeVisible();
   });
 
   test("has 3 navigation tabs", async ({ page }) => {
@@ -85,7 +101,9 @@ test.describe("Settings - Password", () => {
   });
 
   test("has submit button", async ({ page }) => {
-    await expect(page.getByRole("button", { name: "修改密码" }).nth(1)).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "修改密码" }).nth(1),
+    ).toBeVisible();
   });
 });
 

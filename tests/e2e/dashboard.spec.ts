@@ -19,8 +19,12 @@ test.describe("Dashboard", () => {
   });
 
   test("shows activity blocks", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "待办 & 提醒" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "我的实验进度" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "待办 & 提醒" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "我的实验进度" }),
+    ).toBeVisible();
     await expect(page.getByRole("heading", { name: /仪器预约/ })).toBeVisible();
     await expect(page.getByRole("heading", { name: "库存预警" })).toBeVisible();
   });
@@ -34,7 +38,9 @@ test.describe("Dashboard", () => {
 
   test("sidebar navigation links are present", async ({ page }) => {
     const sidebar = page.getByRole("complementary");
-    await expect(sidebar.getByRole("link", { name: "Dashboard" })).toBeVisible();
+    await expect(
+      sidebar.getByRole("link", { name: "Dashboard" }),
+    ).toBeVisible();
     await expect(sidebar.getByRole("link", { name: "研究方向" })).toBeVisible();
     await expect(sidebar.getByRole("link", { name: "实验记录" })).toBeVisible();
     await expect(sidebar.getByRole("link", { name: "样品" })).toBeVisible();
@@ -48,7 +54,9 @@ test.describe("Dashboard", () => {
 
   test("notification bell link exists", async ({ page }) => {
     // Notification link is in sidebar, has /notifications URL
-    await expect(page.locator('a[href="/notifications"]').first()).toBeVisible();
+    await expect(
+      page.locator('a[href="/notifications"]').first(),
+    ).toBeVisible();
   });
 
   test("logout button exists", async ({ page }) => {
@@ -56,7 +64,9 @@ test.describe("Dashboard", () => {
   });
 
   test("AI inventory prediction card shown", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "库存消耗预测" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "库存消耗预测" }),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "即将推出" })).toBeDisabled();
   });
 });

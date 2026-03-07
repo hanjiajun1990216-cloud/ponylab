@@ -781,7 +781,10 @@ async function main() {
             {
               type: "paragraph",
               content: [
-                { type: "text", text: "[Describe the target protein and expected results]" },
+                {
+                  type: "text",
+                  text: "[Describe the target protein and expected results]",
+                },
               ],
             },
             {
@@ -819,7 +822,9 @@ async function main() {
             },
             {
               type: "paragraph",
-              content: [{ type: "text", text: "[Cell line name and passage number]" }],
+              content: [
+                { type: "text", text: "[Cell line name and passage number]" },
+              ],
             },
             {
               type: "heading",

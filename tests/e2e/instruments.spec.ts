@@ -17,7 +17,9 @@ test.describe("Instruments List", () => {
 
   test("view toggle buttons visible", async ({ page }) => {
     await expect(page.getByRole("button", { name: "列表视图" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "时间线视图" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "时间线视图" }),
+    ).toBeVisible();
   });
 
   test("displays 3 seed instruments", async ({ page }) => {
@@ -33,8 +35,12 @@ test.describe("Instruments List", () => {
   });
 
   test("instrument cards have action links", async ({ page }) => {
-    await expect(page.getByRole("link", { name: "查看详情" }).first()).toBeVisible();
-    await expect(page.getByRole("link", { name: "预约" }).first()).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "查看详情" }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "预约" }).first(),
+    ).toBeVisible();
   });
 
   test("timeline view renders calendar", async ({ page }) => {
@@ -71,9 +77,15 @@ test.describe("Instrument Detail", () => {
 
   test("calendar tab shows week view", async ({ page }) => {
     await expect(page.getByRole("button", { name: "今天" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "周", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "月", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "日", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "周", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "月", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "日", exact: true }),
+    ).toBeVisible();
   });
 
   test("message board tab has input form", async ({ page }) => {
@@ -81,7 +93,9 @@ test.describe("Instrument Detail", () => {
     await expect(page.getByRole("button", { name: "通用" })).toBeVisible();
     await expect(page.getByRole("button", { name: "问题" })).toBeVisible();
     await expect(page.getByRole("button", { name: "建议" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "维护", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "维护", exact: true }),
+    ).toBeVisible();
     await expect(page.getByPlaceholder("发表留言")).toBeVisible();
   });
 

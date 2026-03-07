@@ -64,20 +64,28 @@ test.describe("Inventory — Adjust Stock", () => {
   });
 
   test("adjust stock button exists per row", async ({ page }) => {
-    await expect(page.getByRole("button", { name: "调整库存" }).first()).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "调整库存" }).first(),
+    ).toBeVisible();
   });
 
   test("adjust modal opens with item info", async ({ page }) => {
     await page.getByRole("button", { name: "调整库存" }).first().click();
     // "调整库存" matches both button text and modal title — check unique modal element
     await expect(page.getByText("当前库存")).toBeVisible();
-    await expect(page.getByRole("button", { name: "入库", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "入库", exact: true }),
+    ).toBeVisible();
   });
 
   test("adjust modal has in/out toggle", async ({ page }) => {
     await page.getByRole("button", { name: "调整库存" }).first().click();
-    await expect(page.getByRole("button", { name: "入库", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "出库", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "入库", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "出库", exact: true }),
+    ).toBeVisible();
   });
 
   test("adjust modal has quantity input and reason", async ({ page }) => {
@@ -89,13 +97,17 @@ test.describe("Inventory — Adjust Stock", () => {
   test("in-stock action shows confirm button", async ({ page }) => {
     await page.getByRole("button", { name: "调整库存" }).first().click();
     await page.getByRole("button", { name: "入库", exact: true }).click();
-    await expect(page.getByRole("button", { name: "确认入库", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "确认入库", exact: true }),
+    ).toBeVisible();
   });
 
   test("out-stock action shows confirm button", async ({ page }) => {
     await page.getByRole("button", { name: "调整库存" }).first().click();
     await page.getByRole("button", { name: "出库", exact: true }).click();
-    await expect(page.getByRole("button", { name: "确认出库", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "确认出库", exact: true }),
+    ).toBeVisible();
   });
 
   test("can perform stock adjustment", async ({ page }) => {
@@ -128,7 +140,9 @@ test.describe("Inventory — Custom Columns", () => {
 
   test("add column form fields are present", async ({ page }) => {
     await page.getByRole("button", { name: "管理列" }).click();
-    await expect(page.getByPlaceholder("例如：批号、存放位置...")).toBeVisible();
+    await expect(
+      page.getByPlaceholder("例如：批号、存放位置..."),
+    ).toBeVisible();
   });
 
   test("column type dropdown has options", async ({ page }) => {
@@ -151,7 +165,9 @@ test.describe("Inventory — Custom Columns", () => {
     // Wait for API call and React Query refetch
     await page.waitForTimeout(2000);
     // Column name appears in both table header and modal list — use first()
-    await expect(page.getByText(colName).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(colName).first()).toBeVisible({
+      timeout: 10000,
+    });
   });
 });
 

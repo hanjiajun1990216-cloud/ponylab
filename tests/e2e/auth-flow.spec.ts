@@ -78,32 +78,50 @@ test.describe("Dashboard Navigation", () => {
   });
 
   test("navigate to experiments page", async ({ page }) => {
-    await page.getByRole("complementary").getByRole("link", { name: "实验记录" }).click();
+    await page
+      .getByRole("complementary")
+      .getByRole("link", { name: "实验记录" })
+      .click();
     await expect(page).toHaveURL(/experiments/);
   });
 
   test("navigate to samples page", async ({ page }) => {
-    await page.getByRole("complementary").getByRole("link", { name: "样品" }).click();
+    await page
+      .getByRole("complementary")
+      .getByRole("link", { name: "样品" })
+      .click();
     await expect(page).toHaveURL(/samples/);
   });
 
   test("navigate to inventory page", async ({ page }) => {
-    await page.getByRole("complementary").getByRole("link", { name: "库存" }).click();
+    await page
+      .getByRole("complementary")
+      .getByRole("link", { name: "库存" })
+      .click();
     await expect(page).toHaveURL(/inventory/);
   });
 
   test("navigate to protocols page", async ({ page }) => {
-    await page.getByRole("complementary").getByRole("link", { name: "协议" }).click();
+    await page
+      .getByRole("complementary")
+      .getByRole("link", { name: "协议" })
+      .click();
     await expect(page).toHaveURL(/protocols/);
   });
 
   test("navigate to instruments page", async ({ page }) => {
-    await page.getByRole("complementary").getByRole("link", { name: "仪器" }).click();
+    await page
+      .getByRole("complementary")
+      .getByRole("link", { name: "仪器" })
+      .click();
     await expect(page).toHaveURL(/instruments/);
   });
 
   test("navigate to audit page", async ({ page }) => {
-    await page.getByRole("complementary").getByRole("link", { name: "审计日志" }).click();
+    await page
+      .getByRole("complementary")
+      .getByRole("link", { name: "审计日志" })
+      .click();
     await expect(page).toHaveURL(/audit/);
   });
 });

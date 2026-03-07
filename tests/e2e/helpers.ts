@@ -16,7 +16,10 @@ async function loginWithRetry(
       await expect(page).toHaveURL(/dashboard/, { timeout: 15000 });
       return; // success
     } catch {
-      if (attempt === maxRetries) throw new Error(`Login failed for ${email} after ${maxRetries + 1} attempts`);
+      if (attempt === maxRetries)
+        throw new Error(
+          `Login failed for ${email} after ${maxRetries + 1} attempts`,
+        );
       // Wait before retry
       await page.waitForTimeout(1000);
     }

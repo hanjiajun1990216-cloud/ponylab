@@ -10,14 +10,24 @@ test.describe("Project Detail", () => {
   });
 
   test("shows project title and progress", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: /Protein Expression/ })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Protein Expression/ }),
+    ).toBeVisible();
   });
 
   test("has 4 view modes", async ({ page }) => {
-    await expect(page.getByRole("button", { name: /画布|canvas/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /列表|list/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /看板|kanban/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: /甘特|gantt/i })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /画布|canvas/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /列表|list/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /看板|kanban/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /甘特|gantt/i }),
+    ).toBeVisible();
   });
 
   test("kanban view shows columns", async ({ page }) => {

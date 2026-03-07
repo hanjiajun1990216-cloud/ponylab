@@ -8,7 +8,9 @@ test.describe("Instrument Detail — Layout", () => {
   });
 
   test("shows instrument name and status", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "UV-Vis Spectrophotometer" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "UV-Vis Spectrophotometer" }),
+    ).toBeVisible();
   });
 
   test("shows serial number and location", async ({ page }) => {
@@ -19,7 +21,9 @@ test.describe("Instrument Detail — Layout", () => {
   test("has 4 tabs", async ({ page }) => {
     await expect(page.getByRole("button", { name: "预约日历" })).toBeVisible();
     await expect(page.getByRole("button", { name: "留言板" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "维护记录", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "维护记录", exact: true }),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "使用统计" })).toBeVisible();
   });
 
@@ -40,9 +44,15 @@ test.describe("Instrument Detail — Calendar Tab", () => {
   });
 
   test("calendar view mode buttons", async ({ page }) => {
-    await expect(page.getByRole("button", { name: "周", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "月", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "日", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "周", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "月", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "日", exact: true }),
+    ).toBeVisible();
   });
 
   test("calendar navigation buttons work", async ({ page }) => {
@@ -53,9 +63,11 @@ test.describe("Instrument Detail — Calendar Tab", () => {
 
   test("seed bookings appear on calendar", async ({ page }) => {
     // Bookings are for tomorrow+ so they should be visible on calendar
-    await expect(page.getByText(/OD600 measurements/).first()).toBeVisible({ timeout: 10000 }).catch(() => {
-      // Bookings might not be visible if calendar isn't showing the right date range
-    });
+    await expect(page.getByText(/OD600 measurements/).first())
+      .toBeVisible({ timeout: 10000 })
+      .catch(() => {
+        // Bookings might not be visible if calendar isn't showing the right date range
+      });
   });
 });
 
@@ -76,14 +88,22 @@ test.describe("Instrument Detail — Comments Tab", () => {
   });
 
   test("comment tag buttons are visible", async ({ page }) => {
-    await expect(page.getByRole("button", { name: "通用", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "问题", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "建议", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "通用", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "问题", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "建议", exact: true }),
+    ).toBeVisible();
   });
 
   test("comment input and send button", async ({ page }) => {
     await expect(page.getByPlaceholder("发表留言...")).toBeVisible();
-    await expect(page.getByRole("button", { name: "发送", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "发送", exact: true }),
+    ).toBeVisible();
   });
 
   test("can post a new instrument comment", async ({ page }) => {
@@ -117,8 +137,12 @@ test.describe("Instrument Detail — Maintenance Tab", () => {
     await page.getByRole("button", { name: "添加记录" }).click();
     await expect(page.getByText("添加维护记录")).toBeVisible();
     await expect(page.getByPlaceholder("描述维护内容...")).toBeVisible();
-    await expect(page.getByRole("button", { name: "保存", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "取消", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "保存", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "取消", exact: true }),
+    ).toBeVisible();
   });
 
   test("maintenance type select options", async ({ page }) => {
@@ -142,7 +166,10 @@ test.describe("Instrument Detail — Stats Tab", () => {
   test("shows stat cards or empty state", async ({ page }) => {
     // Stats charts load asynchronously — wait for content
     await page.waitForTimeout(2000);
-    const hasStats = await page.getByText("近30天预约次数").isVisible().catch(() => false);
+    const hasStats = await page
+      .getByText("近30天预约次数")
+      .isVisible()
+      .catch(() => false);
     if (hasStats) {
       await expect(page.getByText("近30天使用小时")).toBeVisible();
     } else {
@@ -152,7 +179,10 @@ test.describe("Instrument Detail — Stats Tab", () => {
 
   test("shows chart titles or empty state", async ({ page }) => {
     await page.waitForTimeout(2000);
-    const hasStats = await page.getByText("近30天每日预约量").isVisible().catch(() => false);
+    const hasStats = await page
+      .getByText("近30天每日预约量")
+      .isVisible()
+      .catch(() => false);
     if (hasStats) {
       await expect(page.getByText("用户使用时长分布")).toBeVisible();
     } else {
@@ -168,7 +198,9 @@ test.describe("Instrument — Technician Access", () => {
     await expect(page.getByText("UV-Vis Spectrophotometer")).toBeVisible();
     // Instrument names are h3 text, not links; use "查看详情" link
     await page.getByRole("link", { name: "查看详情" }).last().click();
-    await expect(page.getByRole("heading", { name: "UV-Vis Spectrophotometer" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "UV-Vis Spectrophotometer" }),
+    ).toBeVisible();
   });
 
   test("technician can see all 4 tabs", async ({ page }) => {
@@ -176,7 +208,9 @@ test.describe("Instrument — Technician Access", () => {
     await navigateToInstrument(page);
     await expect(page.getByRole("button", { name: "预约日历" })).toBeVisible();
     await expect(page.getByRole("button", { name: "留言板" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "维护记录", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "维护记录", exact: true }),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "使用统计" })).toBeVisible();
   });
 });

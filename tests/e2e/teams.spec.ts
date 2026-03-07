@@ -33,13 +33,19 @@ test.describe("Team Detail", () => {
   });
 
   test("shows team header", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "Biochemistry Lab" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Biochemistry Lab" }),
+    ).toBeVisible();
     await expect(page.getByText("4 位成员")).toBeVisible();
   });
 
   test("has 4 tabs", async ({ page }) => {
-    await expect(page.getByRole("button", { name: "成员", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "邀请", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "成员", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "邀请", exact: true }),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "申请" })).toBeVisible();
     await expect(page.getByRole("button", { name: "设置" })).toBeVisible();
   });
@@ -48,7 +54,9 @@ test.describe("Team Detail", () => {
     await expect(page.getByText("Sarah Chen")).toBeVisible();
     await expect(page.getByText("Alex Kim")).toBeVisible();
     await expect(page.getByText("Mike Johnson")).toBeVisible();
-    await expect(page.getByRole("main").getByText("System Admin")).toBeVisible();
+    await expect(
+      page.getByRole("main").getByText("System Admin"),
+    ).toBeVisible();
   });
 
   test("members tab has invite button", async ({ page }) => {

@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { loginAsAdmin, loginAsPI, loginAsResearcher, navigateToProject } from "./helpers";
+import {
+  loginAsAdmin,
+  loginAsPI,
+  loginAsResearcher,
+  navigateToProject,
+} from "./helpers";
 
 test.describe("Project Detail — Layout & Navigation", () => {
   test.beforeEach(async ({ page }) => {
@@ -8,7 +13,9 @@ test.describe("Project Detail — Layout & Navigation", () => {
   });
 
   test("shows project heading", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "Protein Expression Optimization" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Protein Expression Optimization" }),
+    ).toBeVisible();
   });
 
   test("shows task count", async ({ page }) => {
@@ -21,7 +28,9 @@ test.describe("Project Detail — Layout & Navigation", () => {
   });
 
   test("breadcrumb shows direction name", async ({ page }) => {
-    await expect(page.getByText("Recombinant Protein Production")).toBeVisible();
+    await expect(
+      page.getByText("Recombinant Protein Production"),
+    ).toBeVisible();
   });
 });
 
@@ -90,7 +99,9 @@ test.describe("Project Detail — Create Task", () => {
   test("new task modal opens with form", async ({ page }) => {
     await page.getByRole("button", { name: "新建任务" }).click();
     await expect(page.getByPlaceholder("输入任务名称")).toBeVisible();
-    await expect(page.getByRole("button", { name: "创建", exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "创建", exact: true }),
+    ).toBeVisible();
   });
 
   test("can create a new task", async ({ page }) => {
@@ -135,7 +146,9 @@ test.describe("Project — Multi-role Access", () => {
   test("PI can view project and create tasks", async ({ page }) => {
     await loginAsPI(page);
     await navigateToProject(page);
-    await expect(page.getByRole("heading", { name: "Protein Expression Optimization" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Protein Expression Optimization" }),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "新建任务" })).toBeVisible();
   });
 

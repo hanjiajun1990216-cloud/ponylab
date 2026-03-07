@@ -9,7 +9,9 @@ test.describe("Samples List", () => {
 
   test("page loads with heading and new sample button", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "Samples" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "+ New Sample" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "+ New Sample" }),
+    ).toBeVisible();
   });
 
   test("displays seed samples in table", async ({ page }) => {
@@ -19,11 +21,21 @@ test.describe("Samples List", () => {
   });
 
   test("table has correct columns", async ({ page }) => {
-    await expect(page.getByRole("columnheader", { name: "Name" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Type" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Status" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Barcode" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Storage" })).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "Name" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "Type" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "Status" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "Barcode" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "Storage" }),
+    ).toBeVisible();
   });
 
   test("list/storage view toggle works", async ({ page }) => {
@@ -36,7 +48,9 @@ test.describe("Samples List", () => {
   test("new sample form opens and creates sample", async ({ page }) => {
     await page.getByRole("button", { name: "+ New Sample" }).click();
     await expect(page.getByPlaceholder("Sample name...")).toBeVisible();
-    await expect(page.getByPlaceholder("Type (e.g., DNA, Protein)")).toBeVisible();
+    await expect(
+      page.getByPlaceholder("Type (e.g., DNA, Protein)"),
+    ).toBeVisible();
     // Fill and create
     const uniqueName = `PW-Test-${Date.now()}`;
     await page.getByPlaceholder("Sample name...").fill(uniqueName);
@@ -60,7 +74,9 @@ test.describe("Sample Detail", () => {
   });
 
   test("shows sample info and QR code", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "pET-28a-GFP plasmid" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "pET-28a-GFP plasmid" }),
+    ).toBeVisible();
     await expect(page.getByText("Available")).toBeVisible();
     await expect(page.getByText("Plasmid", { exact: true })).toBeVisible();
     // QR code rendered as SVG or canvas

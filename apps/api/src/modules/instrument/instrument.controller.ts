@@ -102,7 +102,11 @@ export class InstrumentController {
     @Param("bookingId") bookingId: string,
     @CurrentUser("id") userId: string,
   ) {
-    return this.instrumentService.cancelBooking(instrumentId, bookingId, userId);
+    return this.instrumentService.cancelBooking(
+      instrumentId,
+      bookingId,
+      userId,
+    );
   }
 
   @Post(":id/maintenance")

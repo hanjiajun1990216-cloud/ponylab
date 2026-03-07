@@ -22,7 +22,7 @@ test.describe("Settings — Profile Section", () => {
 
   test("profile form shows current user data", async ({ page }) => {
     // Admin user: firstName=System, lastName=Admin
-    const firstNameInput = page.locator('input').nth(0);
+    const firstNameInput = page.locator("input").nth(0);
     await expect(firstNameInput).toHaveValue("System");
   });
 
@@ -35,7 +35,7 @@ test.describe("Settings — Profile Section", () => {
   });
 
   test("can update first name", async ({ page }) => {
-    const firstNameInput = page.locator('input').nth(0);
+    const firstNameInput = page.locator("input").nth(0);
     await firstNameInput.clear();
     await firstNameInput.fill("SystemUpdated");
     await page.getByRole("button", { name: "保存更改" }).click();
@@ -47,7 +47,7 @@ test.describe("Settings — Profile Section", () => {
   });
 
   test("profile validates empty first name", async ({ page }) => {
-    const firstNameInput = page.locator('input').nth(0);
+    const firstNameInput = page.locator("input").nth(0);
     await firstNameInput.clear();
     await page.getByRole("button", { name: "保存更改" }).click();
     await expect(page.getByText("请输入名字")).toBeVisible();
@@ -58,7 +58,10 @@ test.describe("Settings — Password Section", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/settings");
-    await page.locator("main nav").getByRole("button", { name: "修改密码" }).click();
+    await page
+      .locator("main nav")
+      .getByRole("button", { name: "修改密码" })
+      .click();
   });
 
   test("password form shows all fields", async ({ page }) => {
@@ -69,13 +72,18 @@ test.describe("Settings — Password Section", () => {
 
   test("change password submit button is visible", async ({ page }) => {
     // There are 2 "修改密码" buttons: nav tab + submit; submit is outside nav
-    const submitBtn = page.locator("main button, section button").filter({ hasText: "修改密码" });
+    const submitBtn = page
+      .locator("main button, section button")
+      .filter({ hasText: "修改密码" });
     await expect(submitBtn.first()).toBeVisible();
   });
 
   test("validates empty current password", async ({ page }) => {
     // Click the submit button (not the nav button) — find by proximity to form fields
-    const submitBtn = page.locator("button").filter({ hasText: "修改密码" }).last();
+    const submitBtn = page
+      .locator("button")
+      .filter({ hasText: "修改密码" })
+      .last();
     await submitBtn.click();
     await expect(page.getByText("请输入当前密码")).toBeVisible();
   });
@@ -83,7 +91,10 @@ test.describe("Settings — Password Section", () => {
   test("validates short new password", async ({ page }) => {
     await page.getByPlaceholder("输入当前密码").fill("admin123!");
     await page.getByPlaceholder("至少 6 位").fill("12345");
-    const submitBtn = page.locator("button").filter({ hasText: "修改密码" }).last();
+    const submitBtn = page
+      .locator("button")
+      .filter({ hasText: "修改密码" })
+      .last();
     await submitBtn.click();
     await expect(page.getByText("新密码至少 6 位")).toBeVisible();
   });
@@ -92,7 +103,10 @@ test.describe("Settings — Password Section", () => {
     await page.getByPlaceholder("输入当前密码").fill("admin123!");
     await page.getByPlaceholder("至少 6 位").fill("newpass123");
     await page.getByPlaceholder("再次输入新密码").fill("different123");
-    const submitBtn = page.locator("button").filter({ hasText: "修改密码" }).last();
+    const submitBtn = page
+      .locator("button")
+      .filter({ hasText: "修改密码" })
+      .last();
     await submitBtn.click();
     await expect(page.getByText("两次密码不一致")).toBeVisible();
   });
@@ -102,7 +116,10 @@ test.describe("Settings — Notification Preferences", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/settings");
-    await page.locator("main nav").getByRole("button", { name: "通知设置" }).click();
+    await page
+      .locator("main nav")
+      .getByRole("button", { name: "通知设置" })
+      .click();
   });
 
   test("shows notification preferences heading", async ({ page }) => {
@@ -140,14 +157,14 @@ test.describe("Settings — Multi-role Profile", () => {
   test("researcher sees their profile info", async ({ page }) => {
     await loginAsResearcher(page);
     await page.goto("/settings");
-    const firstNameInput = page.locator('input').nth(0);
+    const firstNameInput = page.locator("input").nth(0);
     await expect(firstNameInput).toHaveValue("Alex");
   });
 
   test("technician sees their profile info", async ({ page }) => {
     await loginAsTech(page);
     await page.goto("/settings");
-    const firstNameInput = page.locator('input').nth(0);
+    const firstNameInput = page.locator("input").nth(0);
     await expect(firstNameInput).toHaveValue("Mike");
   });
 });
