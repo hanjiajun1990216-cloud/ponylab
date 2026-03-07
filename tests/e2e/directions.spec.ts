@@ -8,12 +8,12 @@ test.describe("Directions", () => {
 
   test("directions page loads with heading", async ({ page }) => {
     await page.goto("/directions");
-    await expect(page.getByRole("heading", { name: "研究方向" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "研究方向", exact: true })).toBeVisible();
   });
 
   test("shows new direction button", async ({ page }) => {
     await page.goto("/directions");
-    await expect(page.getByRole("button", { name: "新建方向" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "新建方向" }).first()).toBeVisible();
   });
 
   test("displays seed direction card", async ({ page }) => {
@@ -25,7 +25,7 @@ test.describe("Directions", () => {
 
   test("direction card links to detail page", async ({ page }) => {
     await page.goto("/directions");
-    await page.getByRole("link", { name: /Recombinant Protein/ }).click();
+    await page.locator("a").filter({ hasText: /Recombinant Protein/ }).first().click();
     await expect(page).toHaveURL(/directions\//);
   });
 });
