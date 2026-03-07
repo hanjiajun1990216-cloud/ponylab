@@ -124,12 +124,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: .
-
-      - name: Verify build artifacts
-        run: |
-          echo "=== API dist ===" && ls apps/api/dist/ 2>/dev/null || echo "API dist NOT FOUND"
-          echo "=== Web .next ===" && ls apps/web/.next/ 2>/dev/null | head -5 || echo "Web .next NOT FOUND"
+          path: apps
 
       - name: Push DB schema & seed
         run: |
