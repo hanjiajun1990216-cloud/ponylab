@@ -31,7 +31,9 @@ test.describe("RBAC — PI Role Access", () => {
 
   test("PI can access directions", async ({ page }) => {
     await page.goto("/directions");
-    await expect(page.getByRole("heading", { name: "研究方向" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "研究方向", exact: true }),
+    ).toBeVisible();
   });
 
   test("PI can access teams", async ({ page }) => {

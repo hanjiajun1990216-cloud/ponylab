@@ -5,7 +5,11 @@ test.describe("Sample Detail — Navigation & Layout", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/samples");
-    await page.getByRole("link", { name: /pET-28a-GFP plasmid/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /pET-28a-GFP plasmid/ })
+      .first()
+      .click();
     await expect(page).toHaveURL(/samples\//);
   });
 
@@ -48,7 +52,11 @@ test.describe("Sample Detail — Events Tab", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/samples");
-    await page.getByRole("link", { name: /pET-28a-GFP plasmid/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /pET-28a-GFP plasmid/ })
+      .first()
+      .click();
   });
 
   test("events tab shows events or empty state", async ({ page }) => {
@@ -76,7 +84,11 @@ test.describe("Sample Detail — Metadata Tab", () => {
   test("metadata tab shows table or empty state", async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/samples");
-    await page.getByRole("link", { name: /pET-28a-GFP plasmid/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /pET-28a-GFP plasmid/ })
+      .first()
+      .click();
     await page.getByRole("button", { name: "Metadata" }).click();
     const hasMetadata = await page
       .getByText("Key")
@@ -92,7 +104,11 @@ test.describe("Sample Detail — Actions Tab", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/samples");
-    await page.getByRole("link", { name: /pET-28a-GFP plasmid/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /pET-28a-GFP plasmid/ })
+      .first()
+      .click();
     await page.getByRole("button", { name: "Actions" }).click();
   });
 
@@ -140,7 +156,11 @@ test.describe("Sample Detail — In-Use Sample", () => {
   test("in-use sample shows correct status", async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/samples");
-    await page.getByRole("link", { name: /GFP lysate/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /GFP lysate/ })
+      .first()
+      .click();
     await expect(page.getByText("In Use")).toBeVisible();
   });
 });
@@ -150,7 +170,11 @@ test.describe("Sample List — Lifecycle", () => {
     await loginAsAdmin(page);
     await page.goto("/samples");
     // Use the plasmid sample which is AVAILABLE
-    await page.getByRole("link", { name: /BL21.*glycerol stock/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /BL21.*glycerol stock/ })
+      .first()
+      .click();
     await page.getByRole("button", { name: "Actions" }).click();
     await page.getByRole("button", { name: "Check Out" }).click();
     // Verify action was performed — status should change or event recorded
@@ -162,7 +186,11 @@ test.describe("Sample — Multi-role Access", () => {
   test("researcher can view sample detail", async ({ page }) => {
     await loginAsResearcher(page);
     await page.goto("/samples");
-    await page.getByRole("link", { name: /pET-28a-GFP plasmid/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /pET-28a-GFP plasmid/ })
+      .first()
+      .click();
     await expect(
       page.getByRole("heading", { name: "pET-28a-GFP plasmid" }),
     ).toBeVisible();
@@ -171,7 +199,11 @@ test.describe("Sample — Multi-role Access", () => {
   test("technician can view sample detail", async ({ page }) => {
     await loginAsTech(page);
     await page.goto("/samples");
-    await page.getByRole("link", { name: /BL21.*glycerol stock/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /BL21.*glycerol stock/ })
+      .first()
+      .click();
     await expect(
       page.getByRole("heading", { name: /BL21.*glycerol stock/ }),
     ).toBeVisible();

@@ -49,14 +49,22 @@ export async function loginAsTech(page: Page) {
 /** Navigate to the first project detail page (via dashboard — no /projects list page exists) */
 export async function navigateToProject(page: Page) {
   await page.goto("/dashboard");
-  await page.getByRole("link", { name: /Protein Expression/ }).click();
+  await page
+    .locator("a")
+    .filter({ hasText: /Protein Expression/ })
+    .first()
+    .click();
   await expect(page).toHaveURL(/projects\//);
 }
 
 /** Navigate to the first experiment detail page */
 export async function navigateToExperiment(page: Page) {
   await page.goto("/experiments");
-  await page.getByRole("link", { name: /GFP Expression/ }).click();
+  await page
+    .locator("a")
+    .filter({ hasText: /GFP Expression/ })
+    .first()
+    .click();
   await expect(page).toHaveURL(/experiments\//);
 }
 

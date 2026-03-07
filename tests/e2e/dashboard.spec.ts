@@ -30,7 +30,10 @@ test.describe("Dashboard", () => {
   });
 
   test("project progress link navigates to project", async ({ page }) => {
-    const projectLink = page.getByRole("link", { name: /Protein Expression/ });
+    const projectLink = page
+      .locator("a")
+      .filter({ hasText: /Protein Expression/ })
+      .first();
     await expect(projectLink).toBeVisible();
     await projectLink.click();
     await expect(page).toHaveURL(/projects\//);

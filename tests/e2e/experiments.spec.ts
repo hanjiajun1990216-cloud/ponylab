@@ -42,7 +42,11 @@ test.describe("Experiments List", () => {
   });
 
   test("clicking experiment navigates to detail", async ({ page }) => {
-    await page.getByRole("link", { name: /GFP Expression/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /GFP Expression/ })
+      .first()
+      .click();
     await expect(page).toHaveURL(/experiments\//);
   });
 });
@@ -51,7 +55,11 @@ test.describe("Experiment Detail", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/experiments");
-    await page.getByRole("link", { name: /GFP Expression/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /GFP Expression/ })
+      .first()
+      .click();
     await expect(page).toHaveURL(/experiments\//);
   });
 

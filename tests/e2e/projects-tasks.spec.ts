@@ -5,7 +5,11 @@ test.describe("Project Detail", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     // Navigate via dashboard project link
-    await page.getByRole("link", { name: /Protein Expression/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /Protein Expression/ })
+      .first()
+      .click();
     await expect(page).toHaveURL(/projects\//);
   });
 

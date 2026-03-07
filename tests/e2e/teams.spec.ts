@@ -19,7 +19,11 @@ test.describe("Teams List", () => {
   });
 
   test("team card links to detail", async ({ page }) => {
-    await page.getByRole("link", { name: /Biochemistry Lab/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /Biochemistry Lab/ })
+      .first()
+      .click();
     await expect(page).toHaveURL(/teams\//);
   });
 });
@@ -28,7 +32,11 @@ test.describe("Team Detail", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/teams");
-    await page.getByRole("link", { name: /Biochemistry Lab/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /Biochemistry Lab/ })
+      .first()
+      .click();
     await expect(page).toHaveURL(/teams\//);
   });
 

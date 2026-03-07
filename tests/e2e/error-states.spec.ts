@@ -165,7 +165,11 @@ test.describe("Navigation Edge Cases", () => {
     await loginAsAdmin(page);
     await page.goto("/experiments");
     await page.waitForTimeout(1000);
-    await page.getByRole("link", { name: /GFP Expression/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /GFP Expression/ })
+      .first()
+      .click();
     await expect(page).toHaveURL(/experiments\//, { timeout: 10000 });
     await page.goBack();
     await expect(page).toHaveURL(/experiments/, { timeout: 10000 });

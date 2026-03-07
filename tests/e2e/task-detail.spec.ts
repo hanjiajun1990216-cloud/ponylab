@@ -21,13 +21,21 @@ test.describe("Task Detail — Navigation & Layout", () => {
   });
 
   test("clicking task navigates to detail page", async ({ page }) => {
-    await page.getByRole("link", { name: /Prepare LB media/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /Prepare LB media/ })
+      .first()
+      .click();
     await expect(page).toHaveURL(/tasks\//);
     await expect(page.getByText("Prepare LB media")).toBeVisible();
   });
 
   test("task detail shows status selector", async ({ page }) => {
-    await page.getByRole("link", { name: /IPTG induction/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /IPTG induction/ })
+      .first()
+      .click();
     await expect(page).toHaveURL(/tasks\//);
     // Status is rendered as a <select> dropdown, not a text badge
     const statusSelect = page.locator("select");
@@ -40,7 +48,11 @@ test.describe("Task Detail — Tabs", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await goToProjectListView(page);
-    await page.getByRole("link", { name: /IPTG induction/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /IPTG induction/ })
+      .first()
+      .click();
     await expect(page).toHaveURL(/tasks\//);
   });
 
@@ -76,7 +88,11 @@ test.describe("Task Detail — Step CRUD", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await goToProjectListView(page);
-    await page.getByRole("link", { name: /IPTG induction/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /IPTG induction/ })
+      .first()
+      .click();
     await page.getByRole("button", { name: "步骤", exact: true }).click();
   });
 
@@ -110,7 +126,11 @@ test.describe("Task Detail — Comments", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await goToProjectListView(page);
-    await page.getByRole("link", { name: /IPTG induction/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /IPTG induction/ })
+      .first()
+      .click();
   });
 
   test("shows comment section with seed comments", async ({ page }) => {
@@ -137,7 +157,11 @@ test.describe("Task Detail — Status Change", () => {
   test("status dropdown is visible", async ({ page }) => {
     await loginAsAdmin(page);
     await goToProjectListView(page);
-    await page.getByRole("link", { name: /IPTG induction/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /IPTG induction/ })
+      .first()
+      .click();
     const statusSelect = page.locator("select");
     await expect(statusSelect.first()).toBeVisible();
   });
@@ -147,7 +171,11 @@ test.describe("Task Detail — Protocol Execution", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await goToProjectListView(page);
-    await page.getByRole("link", { name: /IPTG induction/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /IPTG induction/ })
+      .first()
+      .click();
     await page.getByRole("button", { name: "方案执行" }).click();
   });
 
@@ -189,19 +217,35 @@ test.describe("Task Detail — Multi-role", () => {
   test("technician can view assigned task", async ({ page }) => {
     await loginAsTech(page);
     // Navigate via dashboard → project → list view → task
-    await page.getByRole("link", { name: /Protein Expression/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /Protein Expression/ })
+      .first()
+      .click();
     await page.getByRole("button", { name: "列表" }).click();
     await page.waitForTimeout(500);
-    await page.getByRole("link", { name: /Prepare LB media/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /Prepare LB media/ })
+      .first()
+      .click();
     await expect(page.getByText("Prepare LB media")).toBeVisible();
   });
 
   test("researcher can view their task steps", async ({ page }) => {
     await loginAsResearcher(page);
-    await page.getByRole("link", { name: /Protein Expression/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /Protein Expression/ })
+      .first()
+      .click();
     await page.getByRole("button", { name: "列表" }).click();
     await page.waitForTimeout(500);
-    await page.getByRole("link", { name: /IPTG induction/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /IPTG induction/ })
+      .first()
+      .click();
     await page.getByRole("button", { name: "步骤", exact: true }).click();
     await expect(page.getByText("Prepare IPTG dilutions")).toBeVisible();
   });

@@ -102,12 +102,15 @@ export default function DashboardLayout({
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="flex items-center gap-2 px-4 py-4 border-b border-slate-700">
+      <Link
+        href="/dashboard"
+        className="flex items-center gap-2 px-4 py-4 border-b border-slate-700 hover:bg-slate-800 transition-colors"
+      >
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
           <Microscope className="h-5 w-5 text-white" />
         </div>
-        <span className="text-lg font-bold text-white">Ponylab</span>
-      </div>
+        <span className="text-lg font-bold text-white">PonyLab</span>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-3 space-y-4">

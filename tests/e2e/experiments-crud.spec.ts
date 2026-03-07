@@ -37,7 +37,11 @@ test.describe("Experiment Detail — Edit Title", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/experiments");
-    await page.getByRole("link", { name: /GFP Expression/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /GFP Expression/ })
+      .first()
+      .click();
   });
 
   test("clicking title makes it editable", async ({ page }) => {
@@ -65,7 +69,11 @@ test.describe("Experiment Detail — Tabs Deep", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/experiments");
-    await page.getByRole("link", { name: /GFP Expression/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /GFP Expression/ })
+      .first()
+      .click();
   });
 
   test("tasks tab shows linked tasks with statuses", async ({ page }) => {
@@ -102,7 +110,11 @@ test.describe("Experiment Detail — AI Assistant", () => {
   test("AI panel opens and shows action buttons", async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/experiments");
-    await page.getByRole("link", { name: /GFP Expression/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /GFP Expression/ })
+      .first()
+      .click();
     await page.getByRole("button", { name: "打开 AI 实验助手" }).click();
     const aiPanel = page
       .locator('[class*="fixed"]')
@@ -121,7 +133,11 @@ test.describe("Experiment Detail — CSV Export", () => {
   test("CSV export triggers download", async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto("/experiments");
-    await page.getByRole("link", { name: /GFP Expression/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /GFP Expression/ })
+      .first()
+      .click();
     const downloadPromise = page.waitForEvent("download");
     await page.getByRole("button", { name: "导出 CSV" }).click();
     const download = await downloadPromise;
@@ -153,16 +169,16 @@ test.describe("Experiment Templates — CRUD", () => {
   });
 
   test("seed templates are visible or empty state shown", async ({ page }) => {
-    // Card titles may be truncated with ellipsis — use partial match
+    // Wait for either templates or empty state to appear (page loads async via teams)
+    await expect(
+      page.getByText(/Western Blot/).or(page.getByText("暂无实验模板")),
+    ).toBeVisible({ timeout: 10000 });
     const hasTemplates = await page
       .getByText(/Western Blot/)
       .isVisible()
       .catch(() => false);
     if (hasTemplates) {
       await expect(page.getByText(/Cell Culture Passage/)).toBeVisible();
-    } else {
-      // Team not loaded or templates not seeded — empty state
-      await expect(page.getByText("暂无实验模板")).toBeVisible();
     }
   });
 
@@ -220,7 +236,11 @@ test.describe("Experiment — Researcher Access", () => {
   test("researcher can view experiment detail", async ({ page }) => {
     await loginAsResearcher(page);
     await page.goto("/experiments");
-    await page.getByRole("link", { name: /GFP Expression/ }).click();
+    await page
+      .locator("a")
+      .filter({ hasText: /GFP Expression/ })
+      .first()
+      .click();
     await expect(
       page.getByRole("heading", { name: "GFP Expression in E. coli BL21" }),
     ).toBeVisible();
