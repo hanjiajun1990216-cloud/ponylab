@@ -127,7 +127,7 @@ jobs:
       - name: Push DB schema & seed
         run: |
           pnpm exec prisma db push --schema=packages/database/prisma/schema.prisma --skip-generate
-          pnpm --filter @ponylab/database db:seed
+          cd packages/database && pnpm exec tsx prisma/seed.ts
 
       - name: Install Playwright Chromium
         run: npx playwright install chromium --with-deps
