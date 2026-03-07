@@ -76,6 +76,7 @@ jobs:
             apps/api/dist/
             apps/web/.next/
           retention-days: 1
+          include-hidden-files: true
 
   e2e:
     name: E2E Tests
