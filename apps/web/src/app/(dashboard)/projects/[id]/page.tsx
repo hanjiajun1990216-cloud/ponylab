@@ -33,8 +33,13 @@ import ReactFlow, {
   Node,
   Edge,
   NodeTypes,
+  Connection,
   useNodesState,
   useEdgesState,
+  addEdge,
+  Handle,
+  Position,
+  MarkerType,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -42,17 +47,20 @@ import "reactflow/dist/style.css";
 import {
   DndContext,
   DragEndEvent,
+  DragOverEvent,
+  DragStartEvent,
+  DragOverlay,
   PointerSensor,
   useSensor,
   useSensors,
-  closestCenter,
+  closestCorners,
+  useDroppable,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
 type ViewMode = "canvas" | "list" | "board" | "gantt";
 
@@ -80,6 +88,11 @@ function TaskNode({ data }: { data: any }) {
             : "border-gray-200"
       }`}
     >
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="!w-3 !h-3 !bg-slate-400 hover:!bg-blue-500 !border-2 !border-white"
+      />
       <div className="flex items-start justify-between gap-2 mb-2">
         <Link
           href={`/tasks/${data.id}`}
@@ -131,6 +144,11 @@ function TaskNode({ data }: { data: any }) {
           </span>
         )}
       </div>
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="!w-3 !h-3 !bg-slate-400 hover:!bg-blue-500 !border-2 !border-white"
+      />
     </div>
   );
 }
@@ -139,29 +157,16 @@ const nodeTypes: NodeTypes = { taskNode: TaskNode };
 
 // ─── Kanban Column ────────────────────────────────────────────────────────────
 
-function KanbanCard({ task }: { task: any }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
+function KanbanCard({
+  task,
+  isDragging,
+}: {
+  task: any;
+  isDragging?: boolean;
+}) {
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm cursor-grab active:cursor-grabbing"
+      className={`rounded-lg border border-gray-200 bg-white p-3 shadow-sm ${isDragging ? "opacity-50 shadow-lg ring-2 ring-blue-400" : ""}`}
     >
       <Link
         href={`/tasks/${task.id}`}
@@ -192,53 +197,56 @@ function KanbanCard({ task }: { task: any }) {
   );
 }
 
+function DraggableKanbanCard({ task }: { task: any }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useSortable({
+    id: task.id,
+    data: { status: task.status, task },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className="cursor-grab active:cursor-grabbing"
+    >
+      <KanbanCard task={task} isDragging={isDragging} />
+    </div>
+  );
+}
+
 function KanbanColumn({
   title,
   status,
   tasks,
-  onStatusChange,
 }: {
   title: string;
   status: string;
   tasks: any[];
-  onStatusChange: (taskId: string, newStatus: string) => void;
 }) {
-  const sensors = useSensors(useSensor(PointerSensor));
-
-  const handleDragEnd = useCallback(
-    (event: DragEndEvent) => {
-      const { active } = event;
-      if (active) {
-        onStatusChange(active.id as string, status);
-      }
-    },
-    [status, onStatusChange],
-  );
+  const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
-    <div className="flex flex-col rounded-xl bg-gray-100 p-3 min-h-48">
+    <div
+      ref={setNodeRef}
+      className={`flex flex-col rounded-xl p-3 min-h-48 transition-colors ${isOver ? "bg-blue-50 ring-2 ring-blue-300" : "bg-gray-100"}`}
+    >
       <div className="mb-3 flex items-center justify-between">
         <span className="text-sm font-semibold text-gray-700">{title}</span>
         <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-600">
           {tasks.length}
         </span>
       </div>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
+      <SortableContext
+        items={tasks.map((t) => t.id)}
+        strategy={verticalListSortingStrategy}
       >
-        <SortableContext
-          items={tasks.map((t) => t.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <div className="space-y-2 flex-1">
-            {tasks.map((task) => (
-              <KanbanCard key={task.id} task={task} />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+        <div className="space-y-2 flex-1">
+          {tasks.map((task) => (
+            <DraggableKanbanCard key={task.id} task={task} />
+          ))}
+        </div>
+      </SortableContext>
     </div>
   );
 }
@@ -323,9 +331,11 @@ export default function ProjectDetailPage() {
   const id = params.id as string;
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<ViewMode>("canvas");
+  const [editMode, setEditMode] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [newTaskName, setNewTaskName] = useState("");
+  const [activeKanbanTask, setActiveKanbanTask] = useState<any>(null);
 
   const { data: project, isLoading: loadingProject } = useQuery({
     queryKey: ["project", id],
@@ -347,9 +357,9 @@ export default function ProjectDetailPage() {
       id: task.id,
       type: "taskNode",
       position:
-        task.positionX != null
-          ? { x: task.positionX, y: task.positionY }
-          : { x: (i % 4) * 240 + 40, y: Math.floor(i / 4) * 160 + 40 },
+        task.posX != null
+          ? { x: task.posX, y: task.posY }
+          : { x: (i % 4) * 280 + 40, y: Math.floor(i / 4) * 180 + 40 },
       data: {
         id: task.id,
         label: task.title,
@@ -362,13 +372,14 @@ export default function ProjectDetailPage() {
 
     const edges: Edge[] = [];
     tasks.forEach((task: any) => {
-      task.dependencies?.forEach((dep: any) => {
+      task.dependsOn?.forEach((dep: any) => {
         edges.push({
-          id: `${dep.id}-${task.id}`,
-          source: dep.id,
+          id: `dep-${dep.upstreamTaskId}-${task.id}`,
+          source: dep.upstreamTaskId,
           target: task.id,
           animated: false,
-          style: { stroke: "#94a3b8" },
+          style: { stroke: "#94a3b8", strokeWidth: 2 },
+          markerEnd: { type: MarkerType.ArrowClosed, color: "#94a3b8" },
         });
       });
     });
@@ -401,9 +412,51 @@ export default function ProjectDetailPage() {
     });
   }, []);
 
-  const handleKanbanStatusChange = useCallback(
-    (taskId: string, newStatus: string) => {
-      updateTaskStatus.mutate({ taskId, status: newStatus });
+  const onConnect = useCallback(
+    async (connection: Connection) => {
+      if (!connection.source || !connection.target) return;
+      setRfEdges((eds) =>
+        addEdge(
+          {
+            ...connection,
+            animated: false,
+            style: { stroke: "#94a3b8", strokeWidth: 2 },
+            markerEnd: { type: MarkerType.ArrowClosed, color: "#94a3b8" },
+          },
+          eds,
+        ),
+      );
+      await api.addTaskDependency(connection.target, connection.source);
+      queryClient.invalidateQueries({ queryKey: ["tasks-project", id] });
+    },
+    [id, queryClient, setRfEdges],
+  );
+
+  const kanbanSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+  );
+
+  const handleKanbanDragStart = useCallback((event: DragStartEvent) => {
+    const task = event.active.data.current?.task;
+    setActiveKanbanTask(task || null);
+  }, []);
+
+  const handleKanbanDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setActiveKanbanTask(null);
+      const { active, over } = event;
+      if (!over) return;
+      const overId = over.id as string;
+      const oldStatus = active.data.current?.status;
+      const newStatus = ["TODO", "IN_PROGRESS", "DONE"].includes(overId)
+        ? overId
+        : over.data.current?.status;
+      if (newStatus && oldStatus !== newStatus) {
+        updateTaskStatus.mutate({
+          taskId: active.id as string,
+          status: newStatus,
+        });
+      }
     },
     [updateTaskStatus],
   );
@@ -533,14 +586,31 @@ export default function ProjectDetailPage() {
         {loadingTasks ? (
           <LoadingSpinner fullPage />
         ) : viewMode === "canvas" ? (
-          <div className="h-96 rounded-xl border border-gray-200 bg-white overflow-hidden">
+          <div className="h-96 rounded-xl border border-gray-200 bg-white overflow-hidden relative">
+            {/* Edit mode toggle */}
+            <div className="absolute top-3 right-3 z-10">
+              <button
+                onClick={() => setEditMode(!editMode)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  editMode
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-white text-gray-600 border border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                {editMode ? "完成编辑" : "编辑工作流"}
+              </button>
+            </div>
             <ReactFlow
               nodes={rfNodes}
               edges={rfEdges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onNodeDragStop={onNodeDragStop}
+              onNodesChange={editMode ? onNodesChange : undefined}
+              onEdgesChange={editMode ? onEdgesChange : undefined}
+              onNodeDragStop={editMode ? onNodeDragStop : undefined}
+              onConnect={editMode ? onConnect : undefined}
               nodeTypes={nodeTypes}
+              nodesDraggable={editMode}
+              nodesConnectable={editMode}
+              elementsSelectable={editMode}
               fitView
               fitViewOptions={{ padding: 0.2 }}
             >
@@ -550,26 +620,27 @@ export default function ProjectDetailPage() {
             </ReactFlow>
           </div>
         ) : viewMode === "board" ? (
-          <div className="grid grid-cols-3 gap-4">
-            <KanbanColumn
-              title="待办"
-              status="TODO"
-              tasks={todoTasks}
-              onStatusChange={handleKanbanStatusChange}
-            />
-            <KanbanColumn
-              title="进行中"
-              status="IN_PROGRESS"
-              tasks={inProgressTasks}
-              onStatusChange={handleKanbanStatusChange}
-            />
-            <KanbanColumn
-              title="已完成"
-              status="DONE"
-              tasks={doneTasks}
-              onStatusChange={handleKanbanStatusChange}
-            />
-          </div>
+          <DndContext
+            sensors={kanbanSensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleKanbanDragStart}
+            onDragEnd={handleKanbanDragEnd}
+          >
+            <div className="grid grid-cols-3 gap-4">
+              <KanbanColumn title="待办" status="TODO" tasks={todoTasks} />
+              <KanbanColumn
+                title="进行中"
+                status="IN_PROGRESS"
+                tasks={inProgressTasks}
+              />
+              <KanbanColumn title="已完成" status="DONE" tasks={doneTasks} />
+            </div>
+            <DragOverlay>
+              {activeKanbanTask ? (
+                <KanbanCard task={activeKanbanTask} />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         ) : viewMode === "gantt" ? (
           <GanttView
             tasks={tasks || []}

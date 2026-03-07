@@ -275,6 +275,19 @@ class ApiClient {
     });
   }
 
+  addTaskDependency(taskId: string, upstreamTaskId: string) {
+    return this.fetch<any>(`/tasks/${taskId}/dependencies`, {
+      method: "POST",
+      body: JSON.stringify({ upstreamTaskId }),
+    });
+  }
+
+  removeTaskDependency(taskId: string, dependencyId: string) {
+    return this.fetch<any>(`/tasks/${taskId}/dependencies/${dependencyId}`, {
+      method: "DELETE",
+    });
+  }
+
   // Task Steps
   getTaskSteps(taskId: string) {
     return this.fetch<any[]>(`/tasks/${taskId}/steps`);
