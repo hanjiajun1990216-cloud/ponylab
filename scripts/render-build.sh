@@ -30,7 +30,7 @@ echo "Prisma client generated."
 
 # 4. Push schema to database (idempotent, applies any new model changes)
 echo "--- Step 4: Push Prisma schema to DB ---"
-npx prisma db push --schema=packages/database/prisma/schema.prisma --skip-generate --accept-data-loss
+npx prisma db push --schema=packages/database/prisma/schema.prisma --skip-generate --force-reset
 echo "Schema pushed."
 
 # 5. Seed database (idempotent — cleans and re-seeds)
